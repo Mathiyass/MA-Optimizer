@@ -111,7 +111,7 @@ irm https://raw.githubusercontent.com/Mathiya-Tech/MA-Optimizer/main/install.ps1
    Right-click the zip file → "Extract All"
 
 3. **Run**:  
-   Right-click `MA_Optimizer.py` → "Run with Python" (Admin privileges required)
+   Right-click `MA_Optimizer.EXE` → "Run with Python" (Admin privileges required)
 
 > [!IMPORTANT]  
 > Always download from the official [GitHub releases](https://github.com/Mathiya-Tech/MA-Optimizer/releases) to ensure authenticity and security.
