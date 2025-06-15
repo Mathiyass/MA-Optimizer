@@ -96,7 +96,7 @@ bar
 
 ## Installation
 
-### Automated Installation (Recommended)
+### Automated Installation (NOT Working)
 ```powershell
 # Run in PowerShell as Administrator
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
