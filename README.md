@@ -1,15 +1,15 @@
+
 # 🚀 MA Optimizer - QUANTUM ULTRA v6.0
 
 <div align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExd3g0eG5rZ3Z6aGJ4b2YxM3l0ZzI0Y3Z0dXJ1cHlmd3p5bGc0eW5sbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/UTj1dXcOZgvDd8FQ5b/giphy.gif" width="100%">
+  
+  > **"In the quantum realm, every optimization creates a new reality"**  
+  > - Mathiya, 2024
 </div>
-
-> **"In the quantum realm, every optimization creates a new reality"**  
-> - Mathiya, 2024
 
 ## 🌌 Quantum-Powered Performance Evolution
 
-```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#0f0e1d', 'edgeLabelBackground':'#1a1b2e', 'tertiaryColor': '#ff00ff'}}}%%
 gantt
     title Quantum Optimization Timeline
@@ -25,7 +25,6 @@ gantt
     Quantum Activation        :c1, after b2, 20s
     System Reboot             :c2, after c1, 10s
     Cybernetic Enhancement    :c3, after c2, 60s
-```
 
 ## 🔥 Features That Warp Reality
 
@@ -63,7 +62,6 @@ gantt
 
 ## ⚡ Performance Metrics That Defy Physics
 
-```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#0f0e1d', 'edgeLabelBackground':'#1a1b2e', 'tertiaryColor': '#ff00ff'}}}%%
 bar
     title Performance Gains (%)
@@ -72,7 +70,6 @@ bar
     Gaming Performance     : 55
     Network Latency        : -65
     Boot Time              : -75
-```
 
 | Optimization Type      | Pre-Optimization | Post-Optimization | Improvement |
 |------------------------|------------------|-------------------|-------------|
@@ -84,7 +81,6 @@ bar
 
 ## 🛠️ Installation - Enter the Quantum Realm
 
-```bash
 # Clone the quantum repository
 git clone https://github.com/Mathiya-Tech/MA-Optimizer.git
 
@@ -96,7 +92,7 @@ pip install -r requirements.txt
 
 # Initiate quantum sequence (admin required)
 python MA_Optimizer.py
-```
+
 
 <div align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjM0b3l1dmIxM3Z2cXh1a2ZnaDd3Z2FrdGJ6d2V3a3UxY2Q0cGZ4bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8VrtCswiLDNnO8Hr5c/giphy.gif" width="80%">
@@ -104,14 +100,12 @@ python MA_Optimizer.py
 
 ## 🧪 Optimization Process - The Quantum Dance
 
-```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#0f0e1d', 'edgeLabelBackground':'#1a1b2e', 'tertiaryColor': '#ff00ff'}}}%%
 sequenceDiagram
     participant User
     participant Optimizer
     participant System
     participant QuantumCore
-    
     User->>Optimizer: Execute Quantum Sequence
     Optimizer->>System: Full System Analysis
     System-->>Optimizer: Hardware/Software Profile
@@ -124,7 +118,6 @@ sequenceDiagram
     Optimizer->>User: Request System Reboot
     User->>System: Confirm Reboot
     System-->>User: Cybernetically Enhanced Performance
-```
 
 ## 🌐 Connect with the Architect
 
@@ -142,12 +135,12 @@ sequenceDiagram
 
 ## ⚠️ Quantum Optimization Protocol
 
-```
+
 + Always create a system restore point before optimization
 + Run as administrator for full quantum effects
 + System reboot required after optimization sequence
 - Not recommended for quantum-unstable systems
-```
+
 
 ## 📜 License - The Quantum Accord
 
@@ -157,9 +150,9 @@ Copyright © 2024 Mathiya Technologies. All rights reserved.
 > "The future belongs to those who optimize the present"  
 > - Mathiya Quantum Manifesto, Article 7
 
----
 
-```python
+
+
 # Quantum Finalization Sequence
 if performance_boost_achieved:
     celebrate_cybernetic_victory()
@@ -169,7 +162,7 @@ else:
     recalibrate_neural_network()
     apply_holographic_tuning()
     reinitiate_quantum_sequence()
-```
+
 
 <div align="center">
   <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeW8wM2JqN2VtMGZ4a2F4d3l0eHl4d2NkY2N2bGQzOHd6N2s1c3Z0eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6m4Jg0sKdVr5e5Mh4G/giphy.gif" width="80%">
