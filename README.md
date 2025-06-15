@@ -105,7 +105,7 @@ irm https://raw.githubusercontent.com/Mathiya-Tech/MA-Optimizer/main/install.ps1
 
 ### Manual Installation
 1. **Download**:  
-   [MA_Optimizer_v6.0.zip](https://github.com/Mathiya-Tech/MA-Optimizer/releases/latest/download/MA_Optimizer_v6.0.zip)
+   [MA_Optimizer_v6.0.zip](https://github.com/Mathiyass/MA-Optimizer/releases/download/V6.0/MA.Optimizer.zip)
 
 2. **Extract**:  
    Right-click the zip file → "Extract All"
