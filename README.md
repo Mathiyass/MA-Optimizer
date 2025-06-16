@@ -1,3 +1,6 @@
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,33,39,45&height=340&section=header&text=MATHIYA&fontSize=80&animation=fadeIn&fontAlignY=38&desc=" />
+</div>
 # 🚀 MA Optimimizer - QUANTUM ULTRA v6.0  
 **The Ultimate Cybernetic Performance Enhancement Suite**
 
