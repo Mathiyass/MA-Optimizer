@@ -62,3 +62,4 @@ htmlcov/
 temp/
 tmp/
 MATHIYA_BACKUP/
+.env
