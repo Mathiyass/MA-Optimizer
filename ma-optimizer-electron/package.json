@@ -1,0 +1,109 @@
+{
+  "name": "ma-optimizer",
+  "version": "1.0.0",
+  "description": "MA-Optimizer - Cross-platform metaheuristic optimization tool",
+  "main": "src/main/main.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "electron .",
+    "build": "vite build && electron-builder",
+    "build:vite": "vite build",
+    "build:electron": "electron-builder",
+    "test": "jest",
+    "lint": "eslint src",
+    "cli": "node src/cli/index.js"
+  },
+  "keywords": [
+    "optimization",
+    "metaheuristic",
+    "genetic-algorithm",
+    "simulated-annealing",
+    "particle-swarm",
+    "electron",
+    "react"
+  ],
+  "author": "MATHIYA Team",
+  "license": "MIT",
+  "homepage": "https://github.com/Mathiyass/MA-Optimizer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mathiyass/MA-Optimizer.git"
+  },
+  "build": {
+    "appId": "com.mathiya.optimizer",
+    "productName": "MA-Optimizer",
+    "files": [
+      "dist/**/*",
+      "src/main/**/*",
+      "src/common/**/*",
+      "src/algorithms/**/*",
+      "src/api/**/*",
+      "src/database/**/*"
+    ],
+    "directories": {
+      "buildResources": "public",
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "category": "Development"
+    }
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
+    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.21",
+    "better-sqlite3": "^12.2.0",
+    "bullmq": "^5.56.4",
+    "concurrently": "^9.2.0",
+    "cors": "^2.8.5",
+    "d3": "^7.9.0",
+    "dotenv": "^17.2.0",
+    "electron": "^37.2.1",
+    "electron-builder": "^26.0.12",
+    "express": "^5.1.0",
+    "headlessui": "^0.0.0",
+    "morgan": "^1.10.0",
+    "postcss": "^8.5.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.3",
+    "recharts": "^3.1.0",
+    "redux": "^5.0.1",
+    "sqlite3": "^5.1.7",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.4",
+    "winston": "^3.17.0",
+    "zustand": "^5.0.6"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "electron-devtools-installer": "^4.0.0",
+    "eslint": "^9.31.0",
+    "eslint-plugin-react": "^7.37.5",
+    "jest": "^30.0.4"
+  }
+}
