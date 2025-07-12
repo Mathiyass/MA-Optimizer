@@ -131,14 +131,24 @@ bar
 
 ## 🛠️ Installation
 
-### 🔧 Automated Installation
+### 🌐 Web Version (NEW!)
+
+Access MA Optimizer directly from your browser - no installation required!
+
+1. **Visit**  
+   [MA Optimizer Web](https://ma-optimizer.vercel.app)
+
+2. **Optimize**  
+   Experience the full power of quantum optimization from any device
+
+### 🔧 Automated Installation (Windows Desktop)
 
 # Run in PowerShell as Administrator
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 irm "https://raw.githubusercontent.com/Mathiya-Tech/MA-Optimizer/main/install.ps1" | iex
 
 
-### ⚙️ Manual Installation
+### ⚙️ Manual Installation (Windows Desktop)
 1. **Download**  
    [MA_Optimizer_v6.0.zip](https://github.com/Mathiyass/MA-Optimizer/releases/download/V6.0/MA.Optimizer.zip)  
    ![Download Badge](https://img.shields.io/badge/Size-85_MB-blue?style=flat-square)
