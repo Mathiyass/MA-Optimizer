@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #ff00ff;
+  --secondary: #00ffff;
+  --accent: #ff5500;
+  --background: #0f0e1d;
+  --background-light: #1a1b2e;
+  --background-dark: #080814;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: white;
+}
+
+code {
+  font-family: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* Neon text effect */
+.neon-text {
+  text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+}
+
+.neon-text-cyan {
+  text-shadow: 0 0 5px var(--secondary), 0 0 10px var(--secondary);
+}
+
+.neon-text-orange {
+  text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated border */
+.animated-border {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: linear-gradient(var(--background), var(--background)) padding-box,
+              linear-gradient(90deg, var(--primary), var(--secondary)) border-box;
+}
+
+/* Card styles */
+.quantum-card {
+  background: linear-gradient(145deg, var(--background), var(--background-light));
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.quantum-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Button styles */
+.quantum-button {
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  color: var(--background-dark);
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.quantum-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  opacity: 0.5;
+  filter: blur(15px);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+.quantum-button:hover {
+  transform: translateY(-2px);
+}
+
+.quantum-button:hover::before {
+  filter: blur(25px);
+  opacity: 0.7;
+}
+
+/* Progress bar */
+.quantum-progress {
+  height: 8px;
+  background: var(--background-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quantum-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Input styles */
+.quantum-input {
+  background: var(--background-dark);
+  border: 1px solid var(--background-light);
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.quantum-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255, 0, 255, 0.2);
+  outline: none;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary);
+  }
+  100% {
+    text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
