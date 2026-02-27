@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { escapePS } from './utils'
 import { execSync } from 'child_process'
 import { sendLog, sendError } from './logger'
 
@@ -48,14 +49,30 @@ ipcMain.handle('services:list', async () => {
     }
 })
 
+let restorePointCreated = false
+async function ensureRestorePoint() {
+    if (restorePointCreated) return
+    try {
+        const ps = `Checkpoint-Computer -Description "MA-Optimizer Auto-Backup (Services)" -RestorePointType "MODIFY_SETTINGS"`
+        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
+            encoding: 'utf-8', timeout: 120000, windowsHide: true,
+        })
+        restorePointCreated = true
+        sendLog('[Backup] Automatic restore point created before service modification')
+    } catch (e) {
+        sendLog('[Backup] Skipping restore point (missing privileges or disabled)')
+    }
+}
+
 ipcMain.handle('services:setStartup', async (_, name: string, mode: string) => {
     try {
+        await ensureRestorePoint()
         const modeMap: Record<string, string> = {
             disabled: 'Disabled',
             manual: 'Manual',
             automatic: 'Automatic',
         }
-        const ps = `Set-Service -Name '${name}' -StartupType ${modeMap[mode] || mode}`
+        const ps = `Set-Service -Name '${escapePS(name)}' -StartupType ${modeMap[mode] || escapePS(mode)}`
         execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
             encoding: 'utf-8', timeout: 10000, windowsHide: true,
         })
@@ -69,7 +86,7 @@ ipcMain.handle('services:setStartup', async (_, name: string, mode: string) => {
 
 ipcMain.handle('services:start', async (_, name: string) => {
     try {
-        execSync(`powershell -NonInteractive -NoProfile -Command "Start-Service -Name '${name}'"`, {
+        execSync(`powershell -NonInteractive -NoProfile -Command "Start-Service -Name '${escapePS(name)}'"`, {
             encoding: 'utf-8', timeout: 15000, windowsHide: true,
         })
         sendLog(`[Services] Started ${name}`)
@@ -82,7 +99,7 @@ ipcMain.handle('services:start', async (_, name: string) => {
 
 ipcMain.handle('services:stop', async (_, name: string) => {
     try {
-        execSync(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${name}' -Force"`, {
+        execSync(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${escapePS(name)}' -Force"`, {
             encoding: 'utf-8', timeout: 15000, windowsHide: true,
         })
         sendLog(`[Services] Stopped ${name}`)

@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { execSync } from 'child_process'
+import { execSync, spawn } from 'child_process'
 import { sendLog, sendError } from './logger'
 
 let si: any = null
@@ -32,9 +32,47 @@ ipcMain.handle('system:ramUsage', async () => {
     } catch { return { total: 0, used: 0, free: 0, usedPercent: 0, swapTotal: 0, swapUsed: 0 } }
 })
 
-// Use fsStats for reliable byte-rate data on Windows (disksIO often returns 0)
+let diskIOMetrics = { readBytesPerSec: 0, writeBytesPerSec: 0 }
+
+function startTypeperfDiskIO() {
+    if (process.platform !== 'win32') return
+    const tp = spawn('typeperf', ['\\PhysicalDisk(_Total)\\Disk Read Bytes/sec', '\\PhysicalDisk(_Total)\\Disk Write Bytes/sec', '-si', '1'], { windowsHide: true })
+
+    tp.stdout.on('data', (data) => {
+        const lines = data.toString().split('\n')
+        for (const line of lines) {
+            if (line.includes(',') && !line.includes('PDH-CSV') && !line.includes('Exiting')) {
+                const parts = line.split(',')
+                if (parts.length >= 3) {
+                    const read = parseFloat(parts[1].replace(/"/g, ''))
+                    const write = parseFloat(parts[2].replace(/"/g, ''))
+                    if (!isNaN(read) && !isNaN(write)) {
+                        diskIOMetrics.readBytesPerSec = read
+                        diskIOMetrics.writeBytesPerSec = write
+                    }
+                }
+            }
+        }
+    })
+
+    tp.on('error', () => { /* ignore */ })
+    tp.on('close', () => setTimeout(startTypeperfDiskIO, 5000))
+}
+
+startTypeperfDiskIO()
+
+// Use fsStats / Typeperf for reliable byte-rate data on Windows (disksIO often returns 0)
 ipcMain.handle('system:diskIO', async () => {
     try {
+        if (process.platform === 'win32') {
+            return {
+                readPerSec: 0,
+                writePerSec: 0,
+                readBytesPerSec: diskIOMetrics.readBytesPerSec,
+                writeBytesPerSec: diskIOMetrics.writeBytesPerSec,
+            }
+        }
+
         const fs = await getSi().fsStats()
         if (fs && (fs.rx_sec !== null || fs.wx_sec !== null)) {
             return {

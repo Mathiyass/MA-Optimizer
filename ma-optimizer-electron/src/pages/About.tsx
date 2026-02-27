@@ -32,7 +32,7 @@ export function About() {
                         MA
                     </motion.div>
                     <h1 className="text-3xl font-bold text-text-primary mb-1">MA-Optimizer</h1>
-                    <p className="text-accent-cyan text-sm font-medium mb-4">Version 7.0.0</p>
+                    <p className="text-accent-cyan text-sm font-medium mb-4">Version 7.1.0</p>
                     <p className="text-text-muted text-sm max-w-md mx-auto leading-relaxed">
                         The most comprehensive Windows optimization suite—exceeding the combined feature sets of WinUtil, Winhance, and SG TCP Optimizer.
                     </p>
@@ -102,7 +102,7 @@ export function About() {
                 <div className="space-y-3">
                     <div className="relative pl-4 border-l-2 border-accent-cyan/30">
                         <div className="absolute left-[-5px] top-0.5 w-2 h-2 bg-accent-cyan rounded-full" />
-                        <div className="text-text-primary text-sm font-medium">v7.0.0 <span className="text-accent-cyan text-xs ml-1">Latest</span></div>
+                        <div className="text-text-primary text-sm font-medium">v7.1.0 <span className="text-accent-cyan text-xs ml-1">Latest</span></div>
                         <ul className="text-text-muted text-xs space-y-0.5 mt-1">
                             <li>• Complete Electron rewrite with React 18 + TypeScript</li>
                             <li>• 110+ registry tweaks across 5 categories</li>

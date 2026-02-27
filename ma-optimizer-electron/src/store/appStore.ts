@@ -3,7 +3,7 @@ import { create } from 'zustand'
 export type PageId =
     | 'dashboard' | 'performance' | 'ma-power' | 'network' | 'privacy'
     | 'gaming' | 'cleaner' | 'startup' | 'apps' | 'tools'
-    | 'repair' | 'advanced' | 'benchmark' | 'about'
+    | 'repair' | 'advanced' | 'benchmark' | 'about' | 'drivers'
 
 interface Notification {
     id: string

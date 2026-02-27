@@ -1,4 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron'
+import { escapePS } from './utils'
 import { execSync, exec, spawn } from 'child_process'
 import { sendLog, sendError } from './logger'
 
@@ -22,7 +23,9 @@ ipcMain.handle('network:getTcpParams', async () => {
 
 ipcMain.handle('network:setTcpParam', async (_, name: string, val: any) => {
     try {
-        runCmd(`netsh int tcp set global ${name}=${val}`)
+        const safeName = escapePS(name)
+        const safeVal = escapePS(val)
+        runCmd(`netsh int tcp set global ${safeName}=${safeVal}`)
         sendLog(`[Network] Set TCP ${name} = ${val}`)
         return true
     } catch (e: any) {
@@ -32,7 +35,9 @@ ipcMain.handle('network:setTcpParam', async (_, name: string, val: any) => {
 })
 
 ipcMain.handle('network:netsh', async (_, args: string) => {
-    return runCmd(`netsh ${args}`)
+    // Basic argument scrubbing to defend against generic injection if someone manages to pass & or |
+    const safeArgs = args.replace(/[&|;'`"]/g, '')
+    return runCmd(`netsh ${safeArgs}`)
 })
 
 ipcMain.handle('network:flushDns', async () => {
@@ -55,9 +60,12 @@ ipcMain.handle('network:resetTcpIp', async () => {
 
 ipcMain.handle('network:setDns', async (_, adapter: string, primary: string, secondary: string) => {
     try {
-        runCmd(`netsh interface ip set dns name="${adapter}" static ${primary}`)
+        const safeAdapter = escapePS(adapter)
+        const safePrimary = escapePS(primary)
+        const safeSecondary = escapePS(secondary)
+        runCmd(`netsh interface ip set dns name="${safeAdapter}" static ${safePrimary}`)
         if (secondary) {
-            runCmd(`netsh interface ip add dns name="${adapter}" ${secondary} index=2`)
+            runCmd(`netsh interface ip add dns name="${safeAdapter}" ${safeSecondary} index=2`)
         }
         sendLog(`[Network] DNS set on ${adapter}: ${primary} / ${secondary}`)
         return true
@@ -80,7 +88,8 @@ ipcMain.handle('network:getAdapters', async () => {
 
 ipcMain.handle('network:ping', async (_, host: string) => {
     try {
-        const ps = `Test-Connection -ComputerName '${host}' -Count 4 -ErrorAction SilentlyContinue | Select-Object Address,ResponseTime,StatusCode | ConvertTo-Json`
+        const safeHost = escapePS(host)
+        const ps = `Test-Connection -ComputerName '${safeHost}' -Count 4 -ErrorAction SilentlyContinue | Select-Object Address,ResponseTime,StatusCode | ConvertTo-Json`
         const result = runCmd(`powershell -NonInteractive -NoProfile -Command "${ps}"`, 15000)
         const data = JSON.parse(result)
         const pings = Array.isArray(data) ? data : [data]
@@ -116,7 +125,8 @@ ipcMain.handle('network:detectMtu', async () => {
 
 ipcMain.handle('network:setMtu', async (_, adapter: string, size: number) => {
     try {
-        runCmd(`netsh interface ipv4 set subinterface "${adapter}" mtu=${size} store=persistent`)
+        const safeAdapter = escapePS(adapter)
+        runCmd(`netsh interface ipv4 set subinterface "${safeAdapter}" mtu=${size} store=persistent`)
         sendLog(`[Network] Set MTU on ${adapter} to ${size}`)
         return true
     } catch (e: any) {
@@ -137,9 +147,10 @@ ipcMain.handle('network:openPorts', async () => {
 })
 
 ipcMain.handle('network:tracert', async (_, host: string) => {
+    const safeHost = host.replace(/[&|;'`"<>]/g, '')
     const win = BrowserWindow.getAllWindows()[0]
     return new Promise((resolve) => {
-        const proc = spawn('tracert', ['-d', '-w', '3000', host], { windowsHide: true })
+        const proc = spawn('tracert', ['-d', '-w', '3000', safeHost], { windowsHide: true })
         let output = ''
         proc.stdout.on('data', (d: Buffer) => {
             const line = d.toString().trim()
@@ -158,5 +169,6 @@ ipcMain.handle('network:tracert', async (_, host: string) => {
 })
 
 ipcMain.handle('network:nslookup', async (_, host: string) => {
-    return runCmd(`nslookup ${host}`, 10000)
+    const safeHost = host.replace(/[&|;'`"<>]/g, '')
+    return runCmd(`nslookup ${safeHost}`, 10000)
 })

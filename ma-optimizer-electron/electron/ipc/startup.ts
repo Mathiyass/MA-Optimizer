@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { escapePS } from './utils'
 import { execSync } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -115,11 +116,11 @@ ipcMain.handle('startup:toggle', async (_, id: string, enabled: boolean) => {
     try {
         if (id.startsWith('hkcu_run_')) {
             const name = id.replace('hkcu_run_', '')
-            const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${name}' -Value ([byte[]]$bytes) -Type Binary`
+            const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${escapePS(name)}' -Value ([byte[]]$bytes) -Type Binary`
             runPS(ps)
         } else if (id.startsWith('hklm_run_')) {
             const name = id.replace('hklm_run_', '')
-            const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${name}' -Value ([byte[]]$bytes) -Type Binary`
+            const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${escapePS(name)}' -Value ([byte[]]$bytes) -Type Binary`
             runPS(ps)
         }
         sendLog(`[Startup] ${enabled ? 'Enabled' : 'Disabled'} ${id}`)
@@ -134,10 +135,10 @@ ipcMain.handle('startup:delete', async (_, id: string) => {
     try {
         if (id.startsWith('hkcu_run_')) {
             const name = id.replace('hkcu_run_', '')
-            runPS(`Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${name}' -Force -ErrorAction SilentlyContinue`)
+            runPS(`Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
         } else if (id.startsWith('hklm_run_')) {
             const name = id.replace('hklm_run_', '')
-            runPS(`Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${name}' -Force -ErrorAction SilentlyContinue`)
+            runPS(`Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
         } else if (id.startsWith('folder_')) {
             const item = getStartupItems().find(i => i.id === id)
             if (item && fs.existsSync(item.path)) {
@@ -154,7 +155,7 @@ ipcMain.handle('startup:delete', async (_, id: string) => {
 
 ipcMain.handle('startup:add', async (_, name: string, exePath: string) => {
     try {
-        runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${name}' -Value '"${exePath}"'`)
+        runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Value '"${escapePS(exePath)}"'`)
         sendLog(`[Startup] Added ${name}: ${exePath}`)
         return true
     } catch (e: any) {

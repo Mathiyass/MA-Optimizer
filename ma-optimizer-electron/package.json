@@ -1,38 +1,42 @@
 {
   "name": "ma-optimizer",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "MA-Optimizer — The Ultimate Windows System Optimizer",
   "author": "Mathisha Angirasa",
   "homepage": "https://mathiyass.github.io/MAportfolio/",
   "license": "MIT",
   "main": "electron/dist/main.js",
   "scripts": {
+    "start": "npm run dev",
     "dev": "npm run build:electron && concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
     "build:renderer": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build": "npm run build:renderer && npm run build:electron",
+    "build:win": "npm run dist:installer",
+    "build:portable": "npm run dist:portable",
     "dist:portable": "npm run build && electron-builder --win portable",
     "dist:installer": "npm run build && electron-builder --win nsis",
     "dist:all": "npm run build && electron-builder --win",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "lint": "eslint src electron --ext .ts,.tsx",
     "electron:dev": "npm run dev",
-    "electron:build": "npm run dist:portable"
+    "electron:build": "npm run dist:installer"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
     "systeminformation": "^5.22.0",
-    "execa": "^8.0.1",
-    "winston": "^3.11.0",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "electron": "^30.1.0",
+    "electron": "^33.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/node": "^20.14.0",
+    "@types/winston": "^2.4.4",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
     "@vitejs/plugin-react": "^4.3.1",

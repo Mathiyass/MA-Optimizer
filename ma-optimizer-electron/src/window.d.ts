@@ -85,6 +85,7 @@ export interface WindowApi {
         install: (id: string) => Promise<boolean>
         uninstall: (id: string) => Promise<boolean>
         upgradeAll: () => Promise<boolean>
+        search: (query: string) => Promise<any[]>
         checkUpdate: (id: string) => Promise<boolean>
     }
     repair: {
@@ -135,6 +136,12 @@ export interface WindowApi {
         checkForUpdates: () => Promise<any>
         downloadUpdate: () => void
         installUpdate: () => void
+    }
+    drivers: {
+        getInstalled: () => Promise<any[]>
+        scanUpdates: () => Promise<any[]>
+        installUpdate: (title: string) => Promise<boolean>
+        backup: (folderPath: string) => Promise<boolean>
     }
     onLogLine: (cb: (line: string) => void) => void
     offLogLine: () => void

@@ -4,6 +4,26 @@ import { sendLog, sendError } from './logger'
 import * as path from 'path'
 import * as fs from 'fs'
 import { app } from 'electron'
+import { escapePS } from './utils'
+import { ipcRenderer } from 'electron' // wait, this is main process, use ipcMain
+
+let restorePointCreated = false
+async function ensureRestorePoint() {
+    if (restorePointCreated) return
+    try {
+        const { ipcMain } = require('electron')
+        // We can't easily trigger another IPC handler from here without emit or similar
+        // Let's just run the powershell directly
+        const ps = `Checkpoint-Computer -Description "MA-Optimizer Auto-Backup" -RestorePointType "MODIFY_SETTINGS"`
+        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
+            encoding: 'utf-8', timeout: 120000, windowsHide: true,
+        })
+        restorePointCreated = true
+        sendLog('[Backup] Automatic restore point created before modification')
+    } catch (e) {
+        sendLog('[Backup] Skipping restore point (missing privileges or disabled)')
+    }
+}
 
 const backupPath = path.join(app.getPath('userData'), 'backups', 'registry_backup.json')
 
@@ -49,8 +69,8 @@ function backupOriginalValue(hive: string, regPath: string, name: string, curren
 // Registry GET via PowerShell
 ipcMain.handle('registry:get', async (_, hive: string, regPath: string, name: string) => {
     try {
-        const fullPath = `${hive}:\\${regPath}`
-        const ps = `(Get-ItemProperty -Path '${fullPath}' -Name '${name}' -ErrorAction SilentlyContinue).'${name}'`
+        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+        const ps = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
         const result = execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
             encoding: 'utf-8',
             timeout: 10000,
@@ -72,10 +92,10 @@ ipcMain.handle('registry:get', async (_, hive: string, regPath: string, name: st
 ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: string, value: any, type: string) => {
     try {
         // Read current value first for backup
-        const fullPath = `${hive}:\\${regPath}`
+        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
         let currentValue: any = null
         try {
-            const psGet = `(Get-ItemProperty -Path '${fullPath}' -Name '${name}' -ErrorAction SilentlyContinue).'${name}'`
+            const psGet = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
             currentValue = execSync(`powershell -NonInteractive -NoProfile -Command "${psGet}"`, {
                 encoding: 'utf-8', timeout: 10000, windowsHide: true,
             }).trim()
@@ -95,14 +115,16 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
         }
         const psType = typeMap[type] || 'DWord'
 
-        // Ensure the registry path exists
+        // Ensure path and restore point
+        await ensureRestorePoint()
         const psEnsure = `if(!(Test-Path '${fullPath}')){New-Item -Path '${fullPath}' -Force | Out-Null}`
         execSync(`powershell -NonInteractive -NoProfile -Command "${psEnsure}"`, {
             encoding: 'utf-8', timeout: 10000, windowsHide: true,
         })
 
         // Set value
-        const psSet = `Set-ItemProperty -Path '${fullPath}' -Name '${name}' -Value ${typeof value === 'string' ? `'${value}'` : value} -Type ${psType} -Force`
+        const valEscaped = typeof value === 'string' ? `'${escapePS(value)}'` : value
+        const psSet = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Type ${psType} -Force`
         execSync(`powershell -NonInteractive -NoProfile -Command "${psSet}"`, {
             encoding: 'utf-8', timeout: 10000, windowsHide: true,
         })
@@ -118,8 +140,8 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
 // Registry DELETE
 ipcMain.handle('registry:delete', async (_, hive: string, regPath: string, name: string) => {
     try {
-        const fullPath = `${hive}:\\${regPath}`
-        const ps = `Remove-ItemProperty -Path '${fullPath}' -Name '${name}' -Force -ErrorAction SilentlyContinue`
+        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+        const ps = `Remove-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`
         execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
             encoding: 'utf-8', timeout: 10000, windowsHide: true,
         })
@@ -144,8 +166,9 @@ ipcMain.handle('registry:restoreAll', async () => {
         try {
             const { hive, path: regPath, name, originalValue } = entry as any
             if (originalValue !== null && originalValue !== undefined) {
-                const fullPath = `${hive}:\\${regPath}`
-                const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${name}' -Value ${typeof originalValue === 'string' ? `'${originalValue}'` : originalValue} -Force`
+                const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+                const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
+                const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
                 execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
                     encoding: 'utf-8', timeout: 10000, windowsHide: true,
                 })
@@ -174,8 +197,9 @@ ipcMain.handle('registry:restoreLast', async () => {
 
     try {
         if (originalValue !== null && originalValue !== undefined) {
-            const fullPath = `${hive}:\\${regPath}`
-            const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${name}' -Value ${typeof originalValue === 'string' ? `'${originalValue}'` : originalValue} -Force`
+            const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+            const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
+            const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
             execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
                 encoding: 'utf-8', timeout: 10000, windowsHide: true,
             })

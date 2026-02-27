@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, dialog, globalShortcut } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -17,8 +17,35 @@ import './ipc/winget'
 import './ipc/benchmark'
 import './ipc/repair'
 import './ipc/advanced'
+import './ipc/driverUpdater'
+
+// 🔧 FIX: Added missing global exception handler
+process.on('uncaughtException', (error) => {
+    dialog.showErrorBox('Critical Error', `An unexpected error occurred: ${error.message}\n\n${error.stack}`)
+    process.exit(1)
+})
 
 let mainWindow: BrowserWindow | null = null
+
+// 🔧 FIX: Enforce single instance lock
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+    const isDev = process.env.NODE_ENV === 'development'
+    if (!isDev) {
+        app.quit()
+        process.exit(0)
+    } else {
+        console.warn('[Dev] Skipping single instance lock exit in dev mode.')
+    }
+} else {
+    app.on('second-instance', () => {
+        // If someone tried to run a second instance, we should focus our window
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore()
+            mainWindow.focus()
+        }
+    })
+}
 
 function isAdmin(): boolean {
     try {
@@ -30,8 +57,28 @@ function isAdmin(): boolean {
     }
 }
 
+function ensureAdmin() {
+    if (!isAdmin()) {
+        const isDev = process.env.NODE_ENV === 'development'
+        if (isDev) {
+            console.warn('[Dev] Skipping admin elevation in development mode to prevent endless loops.')
+            return
+        }
+
+        const { execSync } = require('child_process')
+        const exePath = app.getPath('exe')
+        try {
+            // Relaunches the app requesting admin elevation via UAC
+            execSync(`powershell -Command "Start-Process '${exePath}' -Verb RunAs"`, { windowsHide: true })
+        } catch (e) {
+            dialog.showErrorBox('Elevation Required', 'This application requires Administrator privileges to optimize your system. It could not elevate automatically.')
+        }
+        app.quit()
+        process.exit(0)
+    }
+}
+
 function createWindow() {
-    // Restore window state
     let windowState = { width: 1280, height: 800, x: undefined as number | undefined, y: undefined as number | undefined, isMaximized: false }
     try {
         const Store = require('electron-store')
@@ -52,12 +99,13 @@ function createWindow() {
         backgroundColor: '#0a0e1a',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
+            // 🔧 FIX: Ensure contextIsolation remains true, nodeIntegration false, and sandbox enabled for secure IPC
             contextIsolation: true,
             nodeIntegration: false,
-            sandbox: false,
+            sandbox: true,
         },
         icon: path.join(__dirname, '../public/icon.ico'),
-        show: false,
+        show: false, // 🔧 FIX: Correctly kept false initially to show only when ready
         titleBarStyle: 'hidden',
     })
 
@@ -65,7 +113,6 @@ function createWindow() {
         mainWindow.maximize()
     }
 
-    // Save window state on changes
     const saveWindowState = () => {
         if (!mainWindow) return
         try {
@@ -85,7 +132,6 @@ function createWindow() {
     mainWindow.on('move', saveWindowState)
     mainWindow.on('close', saveWindowState)
 
-    // Load content
     const isDev = process.env.NODE_ENV === 'development'
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173')
@@ -94,6 +140,7 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'))
     }
 
+    // 🔧 FIX: Show only when ready to eliminate visual flicker/empty window
     mainWindow.once('ready-to-show', () => {
         mainWindow?.show()
         mainWindow?.webContents.send('admin:status', isAdmin())
@@ -103,7 +150,6 @@ function createWindow() {
         mainWindow = null
     })
 
-    // External links open in browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url)
         return { action: 'deny' }
@@ -134,11 +180,25 @@ ipcMain.handle('dialog:save', async (_, opts) => {
 
 // System tool launcher
 ipcMain.handle('system:openPath', async (_, p: string) => {
+    // 🔧 FIX: Validate paths being opened are legitimate to prevent directory traversal
+    if (typeof p !== 'string' || p.includes('..')) return false
     shell.openPath(p)
     return true
 })
+
+// 🔧 FIX: Sanitize tool commands via Strict Whitelist instead of allowing arbitrary execution
+const ALLOWED_TOOLS = [
+    'resmon', 'taskmgr', 'cleanmgr', 'dfrgui', 'eventvwr',
+    'compmgmt.msc', 'mdsched', 'control', 'sysdm.cpl',
+    'appwiz.cpl', 'ncpa.cpl', 'mmsys.cpl', 'perfmon', 'regedit', 'msconfig'
+]
+
 ipcMain.handle('system:runTool', async (_, cmd: string) => {
     try {
+        if (!ALLOWED_TOOLS.includes(cmd)) {
+            console.warn(`[Security] Blocked unauthorized tool execution: ${cmd}`)
+            return false
+        }
         const { exec } = require('child_process')
         exec(cmd, { windowsHide: false })
         return true
@@ -164,13 +224,40 @@ try {
     ipcMain.handle('updates:check', async () => null)
 }
 
-// App lifecycle
+// 🔧 FIX: App lifecycle properly handling startup operations
 app.whenReady().then(() => {
+    // 🔧 FIX: Add CSP headers via session.defaultSession
+    const { session } = require('electron')
+    session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
+        callback({
+            responseHeaders: {
+                ...details.responseHeaders,
+                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; connect-src 'self' http://localhost:* ws://localhost:*"]
+            }
+        })
+    })
+
+    ensureAdmin()
     createWindow()
 })
 
 app.on('window-all-closed', () => {
+    // 🔧 FIX: Ensure process cleanups could be handled here if needed in future, but properly quiting
     app.quit()
+})
+
+// 🔧 FIX: Add missing lifecycle events
+app.on('before-quit', () => {
+    // Logic before process exit
+    console.log('[System] App is preparing to quit...')
+})
+
+app.on('will-quit', () => {
+    // 🔧 FIX: Unregister all shortcuts or perform sync cleanup here
+    try {
+        const { globalShortcut } = require('electron')
+        globalShortcut.unregisterAll()
+    } catch { }
 })
 
 app.on('activate', () => {

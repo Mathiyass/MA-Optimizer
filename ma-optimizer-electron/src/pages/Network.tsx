@@ -111,7 +111,7 @@ function DiagnosticsTab() {
         for (const host of hosts) {
             try {
                 const result = await window.api?.network.pingTest(host)
-                results[host] = { ms: result?.time ?? -1, status: result?.alive ? 'ok' : 'timeout' }
+                results[host] = { ms: result?.avg ?? -1, status: result?.loss === 0 ? 'ok' : 'timeout' }
             } catch {
                 results[host] = { ms: -1, status: 'error' }
             }

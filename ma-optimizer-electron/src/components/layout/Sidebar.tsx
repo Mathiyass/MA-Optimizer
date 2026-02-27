@@ -11,17 +11,18 @@ const navItems: Array<{
     id: PageId; icon: any; label: string; accent?: string; badge?: string
 }> = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { id: 'performance', icon: Zap, label: 'Performance' },
-        { id: 'ma-power', icon: Crown, label: 'MA Power Plan', accent: 'violet', badge: '★' },
-        { id: 'network', icon: Globe, label: 'Network / TCP' },
-        { id: 'privacy', icon: ShieldCheck, label: 'Privacy & Telemetry' },
+        { id: 'performance', icon: Zap, label: 'CPU & Memory' },
+        { id: 'ma-power', icon: Crown, label: 'Power Plan', accent: 'violet', badge: '★' },
+        { id: 'network', icon: Globe, label: 'Network' },
+        { id: 'privacy', icon: ShieldCheck, label: 'Privacy' },
         { id: 'gaming', icon: Gamepad2, label: 'Gaming Mode' },
-        { id: 'cleaner', icon: Trash2, label: 'Cleaner' },
-        { id: 'startup', icon: Rocket, label: 'Startup Manager' },
+        { id: 'cleaner', icon: Trash2, label: 'System Cleaner' },
+        { id: 'startup', icon: Rocket, label: 'Boot / Startup' },
         { id: 'apps', icon: Package, label: 'App Installer' },
+        { id: 'drivers', icon: Package, label: 'Drivers' },
         { id: 'tools', icon: Wrench, label: 'System Tools' },
         { id: 'repair', icon: HeartPulse, label: 'Repair & Fix' },
-        { id: 'advanced', icon: SlidersHorizontal, label: 'Advanced Tweaks' },
+        { id: 'advanced', icon: SlidersHorizontal, label: 'Advanced' },
         { id: 'benchmark', icon: BarChart3, label: 'Benchmark' },
         { id: 'about', icon: Info, label: 'About' },
     ]
@@ -39,7 +40,7 @@ export function Sidebar() {
                 </div>
                 <div>
                     <h1 className="text-text-primary font-bold text-base tracking-tight leading-none">MA-Optimizer</h1>
-                    <span className="text-text-dim text-[10px] tracking-wider uppercase">v7.0</span>
+                    <span className="text-text-dim text-[10px] tracking-wider uppercase">v7.1</span>
                 </div>
             </div>
 

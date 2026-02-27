@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ShieldCheck } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ShieldCheck, Loader2 } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -27,16 +28,30 @@ export function Privacy() {
     const items = getTweaksByCategoryAndTab('privacy', tab)
     const addNotification = useAppStore(s => s.addNotification)
 
+    const [optimizing, setOptimizing] = useState(false)
+    const [optProgress, setOptProgress] = useState(0)
+    const [optCurrent, setOptCurrent] = useState('')
+
     const applyAllSafe = async () => {
         const safeTweaks = getSafeTweaks().filter(t => t.category === 'privacy')
+        if (!safeTweaks.length) return
+        setOptimizing(true)
+        setOptProgress(0)
         let count = 0
-        for (const tweak of safeTweaks) {
+        for (let i = 0; i < safeTweaks.length; i++) {
+            const tweak = safeTweaks[i]
+            setOptCurrent(tweak.name)
             try {
                 await window.api?.registry.set(tweak.hive, tweak.path, tweak.key, tweak.applyValue, tweak.regType)
                 count++
             } catch { }
+            setOptProgress(Math.round(((i + 1) / safeTweaks.length) * 100))
+            await new Promise(r => setTimeout(r, 150)) // Animation delay
         }
-        addNotification('success', `Applied ${count} safe privacy tweaks`)
+        setTimeout(() => {
+            setOptimizing(false)
+            addNotification('success', `Applied ${count} safe privacy tweaks`)
+        }, 500)
     }
 
     return (
@@ -62,6 +77,31 @@ export function Privacy() {
                 {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
                 {items.length === 0 && <div className="text-text-dim text-center py-8">No tweaks in this tab</div>}
             </div>
+
+            {optimizing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-card-bg border border-accent-cyan/30 rounded-2xl p-6 w-[400px] shadow-2xl shadow-accent-cyan/10"
+                    >
+                        <div className="flex items-center gap-3 mb-4">
+                            <Loader2 className="w-6 h-6 text-accent-cyan animate-spin" />
+                            <h3 className="text-lg font-bold text-text-primary">Optimizing Privacy...</h3>
+                        </div>
+                        <p className="text-text-muted text-sm mb-4 truncate">Applying: {optCurrent}</p>
+                        <div className="w-full h-2 bg-app-bg rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-accent-cyan"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${optProgress}%` }}
+                                transition={{ duration: 0.2 }}
+                            />
+                        </div>
+                        <div className="text-right text-text-dim text-xs mt-2">{optProgress}%</div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     )
 }

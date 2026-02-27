@@ -27,6 +27,7 @@ import { Repair } from './pages/Repair'
 import { Advanced } from './pages/Advanced'
 import { Benchmark } from './pages/Benchmark'
 import { About } from './pages/About'
+import { DriverUpdater } from './pages/DriverUpdater'
 
 const pages: Record<string, React.ComponentType> = {
     dashboard: Dashboard,
@@ -38,6 +39,7 @@ const pages: Record<string, React.ComponentType> = {
     cleaner: Cleaner,
     startup: Startup,
     apps: AppInstaller,
+    drivers: DriverUpdater,
     tools: Tools,
     repair: Repair,
     advanced: Advanced,
@@ -86,8 +88,8 @@ export default function App() {
     const notifications = useAppStore((s) => s.notifications)
     const removeNotification = useAppStore((s) => s.removeNotification)
 
-    // System monitor — polls every 1 second
-    useSystemMonitor(true, 1000)
+    // System monitor — polls every 2 seconds as requested for balance
+    useSystemMonitor(true, 2000)
 
     // Listen for IPC events
     useEffect(() => {

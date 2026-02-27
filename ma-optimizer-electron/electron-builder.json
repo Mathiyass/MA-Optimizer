@@ -46,11 +46,13 @@
     "nsis": {
         "oneClick": false,
         "allowToChangeInstallationDirectory": true,
+        "perMachine": true,
         "createDesktopShortcut": true,
         "createStartMenuShortcut": true,
         "shortcutName": "MA-Optimizer",
-        "artifactName": "MA-Optimizer-v${version}-setup.exe",
-        "deleteAppDataOnUninstall": false
+        "artifactName": "MA-Optimizer-Setup.exe",
+        "deleteAppDataOnUninstall": false,
+        "runAfterFinish": true
     },
     "publish": {
         "provider": "github",
