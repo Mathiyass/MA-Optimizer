@@ -1,0 +1,434 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   MA-Optimizer — Premium Design System
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  --accent-cyan: #00FFDE;
+  --accent-violet: #FF003C;
+  --accent-green: #00ff88;
+  --bg-dark: #0a0e1a;
+  --card-bg: #161b22;
+  --card-border: #21262d;
+}
+
+/* ─── Global Overrides ─── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #21262d #0a0e1a;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0e1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #21262d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #30363d;
+}
+
+/* ─── Focus Styles ─── */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 1px solid var(--accent-cyan);
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: rgba(0, 255, 222, 0.2);
+  color: #e6edf3;
+}
+
+/* ─── Inputs ─── */
+input,
+select,
+textarea {
+  background: #161b22;
+  border: 1px solid #21262d;
+  color: #e6edf3;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 255, 222, 0.08), 0 0 12px rgba(0, 255, 222, 0.06);
+}
+
+input::placeholder {
+  color: #484f58;
+}
+
+/* ─── Selection Prevention ─── */
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ═══════════════════════════
+   Premium Animations
+   ═══════════════════════════ */
+
+/* Shimmer — loading/skeleton effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 222, 0.05) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Float — subtle vertical hover */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Glow — accent glow pulse */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(0, 255, 222, 0.2), 0 0 8px rgba(0, 255, 222, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 222, 0.4), 0 0 24px rgba(0, 255, 222, 0.15);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Gradient Shift — animated background gradient */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Card Shine — sweep highlight across card */
+@keyframes card-shine {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+/* Spin Slow */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* Count Up — for number animations */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-up {
+  animation: count-up 0.5s ease-out forwards;
+}
+
+/* Fade Scale In */
+@keyframes fade-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-scale-in {
+  animation: fade-scale-in 0.3s ease-out forwards;
+}
+
+/* ═══════════════════════════
+   Glassmorphism Utilities
+   ═══════════════════════════ */
+
+.glass {
+  background: rgba(22, 27, 34, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-light {
+  background: rgba(22, 27, 34, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ═══════════════════════════
+   Gradient Borders
+   ═══════════════════════════ */
+
+.gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 255, 222, 0.3), rgba(255, 0, 60, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Animated gradient border */
+.gradient-border-animated::before {
+  background: linear-gradient(var(--gradient-angle, 135deg), rgba(0, 255, 222, 0.4), rgba(255, 0, 60, 0.4), rgba(0, 255, 136, 0.3), rgba(0, 255, 222, 0.4));
+  background-size: 300% 300%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ═══════════════════════════
+   Text Gradient Utilities
+   ═══════════════════════════ */
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00FFDE, #00C4B0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-violet {
+  background: linear-gradient(135deg, #FF003C, #CC0030);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-mixed {
+  background: linear-gradient(135deg, #00FFDE, #FF003C);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ═══════════════════════════
+   Card Utilities
+   ═══════════════════════════ */
+
+/* Premium card with hover shine effect */
+.card-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 30px;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  transform: rotate(25deg);
+  transition: none;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.card-premium:hover::after {
+  animation: card-shine 0.6s ease-out forwards;
+  opacity: 1;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 255, 222, 0.1);
+}
+
+/* ═══════════════════════════
+   Glow Effects
+   ═══════════════════════════ */
+
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 255, 222, 0.15), 0 0 30px rgba(0, 255, 222, 0.05);
+}
+
+.glow-violet {
+  box-shadow: 0 0 15px rgba(255, 0, 60, 0.15), 0 0 30px rgba(255, 0, 60, 0.05);
+}
+
+.glow-success {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.15), 0 0 30px rgba(0, 255, 136, 0.05);
+}
+
+.glow-danger {
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.15), 0 0 30px rgba(255, 68, 68, 0.05);
+}
+
+/* ═══════════════════════════
+   Utility Helpers
+   ═══════════════════════════ */
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Staggered animation helper */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: count-up 0.4s ease-out forwards;
+}
+
+.stagger-item:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.stagger-item:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.stagger-item:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.stagger-item:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.stagger-item:nth-child(5) {
+  animation-delay: 0.2s;
+}
+
+.stagger-item:nth-child(6) {
+  animation-delay: 0.25s;
+}
+
+.stagger-item:nth-child(7) {
+  animation-delay: 0.3s;
+}
+
+.stagger-item:nth-child(8) {
+  animation-delay: 0.35s;
+}
+
+.stagger-item:nth-child(9) {
+  animation-delay: 0.4s;
+}
+
+.stagger-item:nth-child(10) {
+  animation-delay: 0.45s;
+}
+
+/* Mini progress bar */
+.mini-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease, background-color 0.3s ease;
+}

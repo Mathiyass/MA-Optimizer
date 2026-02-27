@@ -7,15 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies
 node_modules
-.pnp
-.pnp.js
-
-# Build output
 dist
 dist-ssr
-release
 *.local
 
 # Editor directories and files
@@ -29,18 +23,20 @@ release
 *.sln
 *.sw?
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Electron
+release/
+out/
+dist/
+electron/dist/
+build/
+*.exe
+*.AppImage
+*.dmg
+*.deb
+*.rpm
+*.7z
+*.zip
+*.tar.gz
 
-# User data
-.ma-optimizer
-*.db
-*.sqlite
-*.sqlite3
-
-# Test coverage
-coverage
+# Vite
+.vite/
