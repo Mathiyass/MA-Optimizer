@@ -7,7 +7,7 @@ export default defineConfig({
     base: './',
     root: '.',
     build: {
-        outDir: 'dist',
+        outDir: 'dist-vite',
         emptyOutDir: true,
         sourcemap: true,
     },
