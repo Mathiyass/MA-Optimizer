@@ -3,7 +3,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&color=timeGradient&customColorList=14,20,33,39,45&height=300&section=header&text=MA%20Optimizer&fontSize=80&animation=twinkling&fontAlignY=38&desc=The%20Ultimate%20Windows%20Performance%20Suite&descAlignY=58&descSize=22" alt="MA Optimizer Header" width="100%"/>
 
 <a href="https://github.com/Mathiyass/MA-Optimizer">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00FFFF&center=true&vCenter=true&width=600&lines=Optimize+Your+PC+Instantly;Unleash+Maximum+FPS+%26+Performance;Deep+System+Cleaning;Advanced+Privacy+and+Security;Built+with+❤️+by+Mathiya" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00FFFF&center=true&vCenter=true&width=600&lines=Optimize+Your+PC+Instantly;Unleash+Maximum+FPS+and+Performance;Deep+System+Cleaning;Advanced+Privacy+and+Security;Built+with+Love+by+Mathiya" alt="Typing SVG" />
 </a>
 
 <br />
