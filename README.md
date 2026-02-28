@@ -16,7 +16,7 @@
   <a href="https://github.com/Mathiyass/MA-Optimizer/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=00ffcc&labelColor=0f0e1d&logo=opensourceinitiative" alt="License"></a>
 </div>
 
-<div style="margin: 15px 0;">
+<div style="margin: 15px 0; display: flex; justify-content: center; gap: 10px;">
   <img src="https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white" alt="Electron">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
@@ -32,7 +32,7 @@
 <div align="center">
   <h2>🌌 Seamless Design. Unlimited Power.</h2>
   <p>
-    <strong>MA Optimizer</strong> bridges the gap between raw system power and user accessibility, wrapping hundreds of deep-level registry tweaks, PowerShell scripts, and system utilities into a beautiful, buttery-smooth glassmorphic interface powered by Framer Motion.
+    <strong>MA Optimizer</strong> bridges the gap between raw system power and user accessibility, wrapping hundreds of deep-level registry tweaks, PowerShell scripts, and system utilities into a beautiful, buttery-smooth glassmorphic interface powered by Framer Motion. Unleash the true potential of your hardware with minimal effort.
   </p>
 </div>
 
@@ -52,47 +52,47 @@
 
 ## ✨ Key Features
 
-MA Optimizer consists of 12+ meticulously engineered modules to bring out the absolute best in your Windows machine.
+MA Optimizer is packed with 12+ meticulously engineered modules to bring out the absolute best in your Windows machine, whether you are a gamer, power user, or casual consumer.
 
 <table>
   <tr>
     <td width="50%">
       <h3>📊 Smart Dashboard</h3>
-      <p>Real-time monitoring of CPU, RAM, Disk, and Network with beautiful telemetry charts via Recharts and fluid page transitions.</p>
+      <p>Monitor your PC's vital stats in real-time. View stunning telemetry charts covering CPU, RAM, Disk, and Network usage, all wrapped in a sleek, animated glassmorphism UI.</p>
     </td>
     <td width="50%">
       <h3>⚡ Performance Tuning</h3>
-      <p>One-click optimizations for CPU parking, RAM management, process priorities, and visual effects.</p>
+      <p>Unleash maximum performance. Instantly apply one-click optimizations for CPU core parking, RAM management, process scheduling priorities, and Windows visual effects.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3>🎮 Gaming Pro</h3>
-      <p>Reduce input latency, disable background distractions, optimize GPU settings, and activate dedicated gaming presets.</p>
+      <h3>🎮 Gaming Pro Mode</h3>
+      <p>Gain the competitive edge. Reduce input latency, block background distractions, apply optimal GPU settings, and activate dedicated eSports gaming presets for higher FPS.</p>
     </td>
     <td width="50%">
       <h3>🛡️ Privacy Guard</h3>
-      <p>Control intrusive Windows telemetry, disable tracking services, and lock down your personal data with a click.</p>
+      <p>Reclaim your data. Disable intrusive Windows telemetry, put a stop to tracking services, and lock down your personal information with uncompromising privacy controls.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <h3>🧹 Deep Cleaner</h3>
-      <p>Reclaim gigabytes of space by purging temporary files, stale Windows update caches, and log residuals.</p>
+      <p>Free up precious disk space. Automatically purge gigabytes of temporary files, stale Windows Update caches, browser residuals, and system logs safely and quickly.</p>
     </td>
     <td width="50%">
       <h3>🛠️ System Repair</h3>
-      <p>Automated integration of native Windows SFC, DISM, and Network repair tools to fix common and complex corruptions.</p>
+      <p>Fix common errors effortlessly. Automated integration of powerful native Windows tools like SFC, DISM, and Network resets to resolve complex system corruptions.</p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <h3>📥 App Center & Installer</h3>
-      <p>Batch install essential software directly from the interface via high-speed Winget integration.</p>
+      <p>Set up a new PC in minutes. Browse and batch-install essential software directly from the app via lightning-fast Microsoft Winget integration.</p>
     </td>
     <td width="50%">
       <h3>🏎️ MA Power Plan</h3>
-      <p>Install and activate an exclusive, community-tested custom power plan engineered for peak performance.</p>
+      <p>No more compromises. Install and activate our exclusive, community-tested custom power plan engineered specifically for sustained peak performance.</p>
     </td>
   </tr>
 </table>
@@ -102,23 +102,76 @@ MA Optimizer consists of 12+ meticulously engineered modules to bring out the ab
 ## 📸 Visual Tour
 
 <div align="center">
-  <p><em>Experience a modern interface designed for the next generation of Windows tools.</em></p>
-  
-  <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/dashboard-preview.png" onerror="this.src='https://via.placeholder.com/800x450/0f0e1d/00ffff?text=+Dashboard+Overview'" alt="Dashboard Preview" width="100%" style="border-radius: 12px; border: 2px solid #00ffff; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0, 255, 222, 0.4);" />
-  
-  <p float="left">
-    <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/gaming-preview.png" onerror="this.src='https://via.placeholder.com/400x225/1a1c29/ff00ff?text=+Gaming+Mode'" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
-    <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/cleaner-preview.png" onerror="this.src='https://via.placeholder.com/400x225/1a1c29/ff5500?text=+Deep+Cleaner'" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
-  </p>
-  
-  <sub>*(If you haven't uploaded images to `public/` yet, placeholder images will be shown above!)*</sub>
+  <p><em>Experience a modern interface designed for the next generation of Windows tools. Here's a glimpse into the beautiful design of MA Optimizer.</em></p>
 </div>
+
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(1).png" alt="Dashboard" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(2).png" alt="Performance" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(3).png" alt="Gaming" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(4).png" alt="Privacy Guard" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(5).png" alt="Deep Cleaner" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(6).png" alt="System Repair" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(7).png" alt="App Center" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(8).png" alt="Power Plan" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(9).png" alt="Tour 9" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(10).png" alt="Tour 10" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(11).png" alt="Tour 11" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(12).png" alt="Tour 12" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(13).png" alt="Tour 13" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(14).png" alt="Tour 14" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+    <td width="33%" align="center">
+      <img src="Visual%20Tour%20img/1%20(15).png" alt="Tour 15" width="100%" style="border-radius: 8px; border: 1px solid #333;" />
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## 🏗️ System Architecture
 
 MA Optimizer utilizes a strict separation of concerns, ensuring an ultra-smooth React frontend while heavy system modifications are handled safely by the Electron backend.
+
+<details>
+<summary><b>Click to expand Advanced Architecture Details</b></summary>
+<br>
 
 ```mermaid
 graph TD
@@ -160,6 +213,8 @@ graph TD
     class IPC,TS,L electron;
     class PS,Reg,WMI,WinGet os;
 ```
+
+</details>
 
 ---
 
@@ -220,16 +275,19 @@ We believe in **"No Snake Oil"** optimization. Here's our promise:
 - **100% Open Source:** Every script and registry change is fully inspectable in the `electron/ipc` directory.
 - **Validated Tweaks:** Only officially documented Windows tuning mechanisms are used.
 - **Safety First:** Built-in backup engines through standard Windows tools.
+- **Ultimate Control:** You see everything we do and you can easily revert settings.
 
 ---
 
 ## 💬 Connect with Us
 
-Have suggestions or need support? Connect with the growing community!
+Have suggestions, want to contribute, or need support? Connect with our growing community!
 
-- [**Discord Community**](https://discord.gg/QERP5JJM8k) — Chat with other optimizers and get real-time help.
-- [**Instagram**](https://www.instagram.com/mathi_ya_/) — Follow for sneak peaks and progress updates.
-- [**Facebook**](https://www.facebook.com/mathisha.angirasa/) — Join the official community page.
+<div style="display: flex; gap: 15px; margin-top: 15px; align-items: center;">
+  <a href="https://discord.gg/QERP5JJM8k"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://www.instagram.com/mathi_ya_/"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram"></a>
+  <a href="https://www.facebook.com/mathisha.angirasa/"><img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Facebook"></a>
+</div>
 
 ---
 
