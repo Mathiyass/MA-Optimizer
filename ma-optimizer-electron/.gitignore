@@ -40,3 +40,6 @@ build/
 
 # Vite
 .vite/
+
+# Build logs
+build_output*.txt

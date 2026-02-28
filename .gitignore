@@ -156,3 +156,4 @@ ma-optimizer-electron/build/
 
 # App specific
 asar-content.txt
+build_output*.txt

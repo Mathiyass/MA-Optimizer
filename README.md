@@ -1,26 +1,30 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=14,20,33,39,45&height=300&section=header&text=MA%20Optimizer&fontSize=80&animation=fadeIn&fontAlignY=35&desc=The%20Ultimate%20Windows%20Performance%20Suite&descAlignY=55&descSize=22" alt="MA Optimizer Header" width="100%"/>
 
-  <a href="https://github.com/Mathiyass/MA-Optimizer">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00FFFF&center=true&vCenter=true&width=600&lines=Optimize+Your+PC;Unleash+Maximum+Performance;Deep+System+Cleaning;Privacy+and+Security;Developed+by+Mathiya" alt="Typing SVG" />
-  </a>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=timeGradient&customColorList=14,20,33,39,45&height=300&section=header&text=MA%20Optimizer&fontSize=80&animation=twinkling&fontAlignY=38&desc=The%20Ultimate%20Windows%20Performance%20Suite&descAlignY=58&descSize=22" alt="MA Optimizer Header" width="100%"/>
 
-  <br />
+<a href="https://github.com/Mathiyass/MA-Optimizer">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=00FFFF&center=true&vCenter=true&width=600&lines=Optimize+Your+PC+Instantly;Unleash+Maximum+FPS+%26+Performance;Deep+System+Cleaning;Advanced+Privacy+and+Security;Built+with+❤️+by+Mathiya" alt="Typing SVG" />
+</a>
 
-  <div style="margin-top: 10px; margin-bottom: 20px;">
-    <a href="https://github.com/Mathiyass/MA-Optimizer/releases"><img src="https://img.shields.io/github/downloads/Mathiyass/MA-Optimizer/total?style=for-the-badge&color=00ffff&labelColor=0f0e1d&label=DOWNLOADS&logo=github" alt="Downloads"></a>
-    <a href="https://github.com/Mathiyass/MA-Optimizer/releases"><img src="https://img.shields.io/github/v/release/Mathiyass/MA-Optimizer?style=for-the-badge&color=ff00ff&labelColor=0f0e1d&label=VERSION" alt="Version"></a>
-    <a href="https://github.com/Mathiyass/MA-Optimizer/stargazers"><img src="https://img.shields.io/github/stars/Mathiyass/MA-Optimizer?style=for-the-badge&color=ffff00&labelColor=0f0e1d&label=STARS" alt="Stars"></a>
-    <a href="https://github.com/Mathiyass/MA-Optimizer/issues"><img src="https://img.shields.io/github/issues-raw/Mathiyass/MA-Optimizer?style=for-the-badge&color=ff5500&labelColor=0f0e1d&label=ISSUES" alt="Issues"></a>
-  </div>
+<br />
 
-  <div style="margin: 10px 0;">
-    <img src="https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white" alt="Electron">
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
-    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-    <img src="https://img.shields.io/badge/Vite-B73CE4?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite">
-    <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
-  </div>
+<div style="margin-top: 15px; margin-bottom: 25px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+  <a href="https://github.com/Mathiyass/MA-Optimizer/releases"><img src="https://img.shields.io/github/downloads/Mathiyass/MA-Optimizer/total?style=for-the-badge&color=00ffff&labelColor=0f0e1d&label=DOWNLOADS&logo=github" alt="Downloads"></a>
+  <a href="https://github.com/Mathiyass/MA-Optimizer/releases"><img src="https://img.shields.io/github/v/release/Mathiyass/MA-Optimizer?style=for-the-badge&color=ff00ff&labelColor=0f0e1d&label=VERSION" alt="Version"></a>
+  <a href="https://github.com/Mathiyass/MA-Optimizer/stargazers"><img src="https://img.shields.io/github/stars/Mathiyass/MA-Optimizer?style=for-the-badge&color=ffff00&labelColor=0f0e1d&logo=starship&label=STARS" alt="Stars"></a>
+  <a href="https://github.com/Mathiyass/MA-Optimizer/issues"><img src="https://img.shields.io/github/issues-raw/Mathiyass/MA-Optimizer?style=for-the-badge&color=ff5500&labelColor=0f0e1d&logo=gitbook&label=ISSUES" alt="Issues"></a>
+  <a href="https://github.com/Mathiyass/MA-Optimizer/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=00ffcc&labelColor=0f0e1d&logo=opensourceinitiative" alt="License"></a>
+</div>
+
+<div style="margin: 15px 0;">
+  <img src="https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white" alt="Electron">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion">
+  <img src="https://img.shields.io/badge/Vite-B73CE4?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite">
+  <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
+</div>
+
 </div>
 
 ---
@@ -28,7 +32,7 @@
 <div align="center">
   <h2>🌌 Seamless Design. Unlimited Power.</h2>
   <p>
-    <strong>MA Optimizer</strong> bridges the gap between raw system power and user accessibility, wrapping hundreds of deep-level registry tweaks, PowerShell scripts, and system utilities into a fluid, glassmorphic interface.
+    <strong>MA Optimizer</strong> bridges the gap between raw system power and user accessibility, wrapping hundreds of deep-level registry tweaks, PowerShell scripts, and system utilities into a beautiful, buttery-smooth glassmorphic interface powered by Framer Motion.
   </p>
 </div>
 
@@ -54,7 +58,7 @@ MA Optimizer consists of 12+ meticulously engineered modules to bring out the ab
   <tr>
     <td width="50%">
       <h3>📊 Smart Dashboard</h3>
-      <p>Real-time monitoring of CPU, RAM, Disk, and Network with beautiful telemetry charts via Recharts.</p>
+      <p>Real-time monitoring of CPU, RAM, Disk, and Network with beautiful telemetry charts via Recharts and fluid page transitions.</p>
     </td>
     <td width="50%">
       <h3>⚡ Performance Tuning</h3>
@@ -100,14 +104,14 @@ MA Optimizer consists of 12+ meticulously engineered modules to bring out the ab
 <div align="center">
   <p><em>Experience a modern interface designed for the next generation of Windows tools.</em></p>
   
-  <img src="https://via.placeholder.com/800x450/0f0e1d/00ffff?text=+Dashboard+Overview" alt="Dashboard Preview" width="100%" style="border-radius: 12px; border: 2px solid #00ffff; margin-bottom: 20px;" />
+  <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/dashboard-preview.png" onerror="this.src='https://via.placeholder.com/800x450/0f0e1d/00ffff?text=+Dashboard+Overview'" alt="Dashboard Preview" width="100%" style="border-radius: 12px; border: 2px solid #00ffff; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0, 255, 222, 0.4);" />
   
   <p float="left">
-    <img src="https://via.placeholder.com/400x225/1a1c29/ff00ff?text=+Gaming+Mode" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
-    <img src="https://via.placeholder.com/400x225/1a1c29/ff5500?text=+Deep+Cleaner" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
+    <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/gaming-preview.png" onerror="this.src='https://via.placeholder.com/400x225/1a1c29/ff00ff?text=+Gaming+Mode'" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
+    <img src="https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/public/cleaner-preview.png" onerror="this.src='https://via.placeholder.com/400x225/1a1c29/ff5500?text=+Deep+Cleaner'" width="49%" style="border-radius: 8px; border: 1px solid #333;" />
   </p>
   
-  <sub>*(Add your actual screenshots directly into the repository and update the paths above!)*</sub>
+  <sub>*(If you haven't uploaded images to `public/` yet, placeholder images will be shown above!)*</sub>
 </div>
 
 ---
@@ -232,7 +236,7 @@ Have suggestions or need support? Connect with the growing community!
 <div align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=14,20,33,39,45&height=100&section=footer" width="100%"/>
   <br />
-  <p>Copyright © 2024 Mathiya. Licensed under the <a href="LICENSE">MIT License</a>.</p>
+  <p>Copyright © 2024 Mathiya. Licensed under the <a href="LICENSE" style="color: #00ffff; font-weight: bold;">MIT License</a>.</p>
   <p>
     <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="25" />
     <img src="https://forthebadge.com/images/badges/made-with-typescript.svg" height="25" />

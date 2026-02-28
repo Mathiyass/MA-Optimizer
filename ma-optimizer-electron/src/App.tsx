@@ -156,11 +156,22 @@ export default function App() {
                     <MemoizedHeader />
 
                     <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-card-border">
-                        <div key={currentPage} className="p-6">
+                        <div className="p-6 h-full">
                             <ErrorBoundary resetKey={currentPage}>
-                                <Suspense fallback={<LoadingFallback />}>
-                                    <PageComponent />
-                                </Suspense>
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={currentPage}
+                                        initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+                                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                        exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+                                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                                        className="h-full"
+                                    >
+                                        <Suspense fallback={<LoadingFallback />}>
+                                            <PageComponent />
+                                        </Suspense>
+                                    </motion.div>
+                                </AnimatePresence>
                             </ErrorBoundary>
                         </div>
                     </main>

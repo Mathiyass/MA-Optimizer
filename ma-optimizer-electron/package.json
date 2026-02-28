@@ -77,7 +77,7 @@
       "warningsAsErrors": false
     },
     "portable": {
-      "requestExecutionLevel": "requireAdministrator"
+      "requestExecutionLevel": "admin"
     }
   }
 }

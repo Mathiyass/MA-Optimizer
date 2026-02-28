@@ -66,8 +66,8 @@ ipcMain.handle('system:diskIO', async () => {
     try {
         if (process.platform === 'win32') {
             return {
-                readPerSec: 0,
-                writePerSec: 0,
+                readPerSec: diskIOMetrics.readBytesPerSec,
+                writePerSec: diskIOMetrics.writeBytesPerSec,
                 readBytesPerSec: diskIOMetrics.readBytesPerSec,
                 writeBytesPerSec: diskIOMetrics.writeBytesPerSec,
             }
@@ -271,7 +271,7 @@ export function startSystemStatsPolling() {
             let diskData = { readPerSec: 0, writePerSec: 0, readBytesPerSec: 0, writeBytesPerSec: 0 }
             if (process.platform === 'win32') {
                 diskData = {
-                    readPerSec: 0, writePerSec: 0,
+                    readPerSec: diskIOMetrics.readBytesPerSec, writePerSec: diskIOMetrics.writeBytesPerSec,
                     readBytesPerSec: diskIOMetrics.readBytesPerSec,
                     writeBytesPerSec: diskIOMetrics.writeBytesPerSec,
                 }
