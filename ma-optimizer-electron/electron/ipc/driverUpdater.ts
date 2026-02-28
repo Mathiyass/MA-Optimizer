@@ -1,9 +1,26 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { mkdir } from 'fs/promises'
+import { mkdir, writeFile, unlink } from 'fs/promises'
+import { join } from 'path'
+import { tmpdir } from 'os'
+import { checkIsAdmin } from './admin'
 
 const execAsync = promisify(exec)
+
+// 🔧 FIX: Shared PowerShell wrapper to handle escaping and execution
+async function runPowerShell(script: string) {
+    const tempFile = join(tmpdir(), `ma_opt_${Date.now()}.ps1`)
+    try {
+        await writeFile(tempFile, script, 'utf8')
+        return await execAsync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tempFile}"`, {
+            maxBuffer: 1024 * 1024 * 10
+        })
+    } finally {
+        try { await unlink(tempFile) } catch { }
+    }
+}
+
 // 1. Get installed drivers
 ipcMain.handle('drivers:getInstalled', async () => {
     try {
@@ -27,7 +44,7 @@ ipcMain.handle('drivers:getInstalled', async () => {
             };
             $results | ConvertTo-Json -Compress;
         `
-        const { stdout } = await execAsync(`powershell -NoProfile -Command "${script.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`, { maxBuffer: 1024 * 1024 * 10 })
+        const { stdout } = await runPowerShell(script)
         if (!stdout) return []
 
         const data = JSON.parse(stdout)
@@ -48,8 +65,9 @@ ipcMain.handle('drivers:scanUpdates', async () => {
             
             $updates = @();
             foreach ($update in $SearcherResult.Updates) {
+                $cleanTitle = ($update.Title -replace '\s+', ' ').Trim()
                 $updates += [PSCustomObject]@{
-                    Title = $update.Title;
+                    Title = $cleanTitle;
                     Description = $update.Description;
                     IsDownloaded = $update.IsDownloaded;
                     UpdateID = $update.Identity.UpdateID;
@@ -58,7 +76,7 @@ ipcMain.handle('drivers:scanUpdates', async () => {
             };
             $updates | ConvertTo-Json -Compress;
         `
-        const { stdout } = await execAsync(`powershell -NoProfile -Command "${script.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`, { maxBuffer: 1024 * 1024 * 10 })
+        const { stdout } = await runPowerShell(script)
         if (!stdout) return []
 
         const data = JSON.parse(stdout)
@@ -70,40 +88,263 @@ ipcMain.handle('drivers:scanUpdates', async () => {
 })
 
 // 3. Install a specific driver update
-ipcMain.handle('drivers:installUpdate', async (_, title: string) => {
+ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
     try {
+        const isAdmin = checkIsAdmin()
+
+        // If we are not admin, we need to elevate. We can't capture stdout directly from an elevated process,
+        // so we write output to a temporary file and read it back.
+        const logFile = join(tmpdir(), `ma_opt_driver_log_${Date.now()}.json`);
+
         const script = `
-            $UpdateSession = New-Object -ComObject Microsoft.Update.Session;
-            $UpdateSearcher = $UpdateSession.CreateUpdateSearcher();
-            $SearcherResult = $UpdateSearcher.Search("IsInstalled=0 and Type='Driver'");
+            $ErrorActionPreference = 'Stop'
+            $logFile = "${logFile}"
             
-            $targetUpdate = $null;
-            foreach ($update in $SearcherResult.Updates) {
-                if ($update.Title -eq '${title.replace(/'/g, "''")}') {
-                    $targetUpdate = $update;
-                    break;
-                };
-            };
+            function Write-Log {
+                param([string]$json)
+                Add-Content -Path $logFile -Value $json
+            }
             
-            if ($targetUpdate) {
-                $updateColl = New-Object -ComObject Microsoft.Update.UpdateColl;
-                $updateColl.Add($targetUpdate) | Out-Null;
+            try {
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "init"; message = "Creating Update Session..." } -Compress)
+                $UpdateSession = New-Object -ComObject Microsoft.Update.Session
+                $UpdateSearcher = $UpdateSession.CreateUpdateSearcher()
+                
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "search"; message = "Searching for driver UpdateID: ${updateId}" } -Compress)
+                $SearcherResult = $UpdateSearcher.Search("IsInstalled=0 and Type='Driver'")
+                
+                $targetUpdate = $null
+                foreach ($update in $SearcherResult.Updates) {
+                    if ($update.Identity.UpdateID -eq '${updateId}') {
+                        $targetUpdate = $update
+                        break
+                    }
+                }
+                
+                if ($null -eq $targetUpdate) {
+                    Write-Log (ConvertTo-Json @{ type = "result"; success = $false; error = "Update not found in current search results." } -Compress)
+                    exit
+                }
+
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "eula"; message = "Checking EULA..." } -Compress)
+                if (-not $targetUpdate.EulaAccepted) {
+                    $targetUpdate.AcceptEula()
+                }
+
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "collection"; message = "Adding to collection..." } -Compress)
+                $updateColl = New-Object -ComObject Microsoft.Update.UpdateColl
+                $updateColl.Add($targetUpdate) | Out-Null
                 
                 if (-not $targetUpdate.IsDownloaded) {
-                    $downloader = $UpdateSession.CreateUpdateDownloader();
-                    $downloader.Updates = $updateColl;
-                    $downloader.Download() | Out-Null;
-                };
+                    Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_init"; message = "Starting Download..." } -Compress)
+                    $downloader = $UpdateSession.CreateUpdateDownloader()
+                    $downloader.Updates = $updateColl
+                    $downloadJob = $null
+                    try {
+                        $downloadJob = $downloader.BeginDownload($null, $null)
+                    } catch {
+                        Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_init"; message = "BeginDownload failed: $($_.Exception.Message)" } -Compress)
+                    }
+
+                    if ($null -ne $downloadJob) {
+                        while (-not $downloadJob.IsCompleted) {
+                            try {
+                                $dlProgress = $downloader.GetProgress()
+                                if ($null -ne $dlProgress) {
+                                    Write-Log (ConvertTo-Json @{ 
+                                        type = "progress"; 
+                                        percent = [int]($dlProgress.CurrentUpdatePercentComplete); 
+                                        message = "Downloading Driver...";
+                                        stage = "download"
+                                    } -Compress)
+                                }
+                            } catch { }
+                            Start-Sleep -Milliseconds 1000
+                        }
+                        $downloader.EndDownload($downloadJob) | Out-Null
+                    } else {
+                        Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_sync"; message = "Falling back to synchronous Download()..." } -Compress)
+                        try {
+                            $downloader.Download() | Out-Null
+                        } catch {
+                            Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_error"; message = "Synchronous Download failed: $($_.Exception.Message | Out-String)" } -Compress)
+                            Write-Log (ConvertTo-Json @{ 
+                                type = "result";
+                                success = $false;
+                                error = "Synchronous Download failed: $($_.Exception.Message)"
+                            } -Compress)
+                            exit
+                        }
+                    }
+                }
                 
-                $installer = $UpdateSession.CreateUpdateInstaller();
-                $installer.Updates = $updateColl;
-                $result = $installer.Install();
-                return $result.ResultCode -eq 2; # 2 means success
-            };
-            return $false;
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "Starting Installation..." } -Compress)
+                $installer = $UpdateSession.CreateUpdateInstaller()
+                
+                $updateColl = New-Object -ComObject Microsoft.Update.UpdateColl
+                $updateColl.Add($targetUpdate) | Out-Null
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "Update collection count: $($updateColl.Count)" } -Compress)
+                
+                $installer.Updates = $updateColl
+                
+                $installJob = $null
+                try {
+                    $installJob = $installer.BeginInstall($null, $null)
+                } catch {
+                    Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "BeginInstall failed: $($_.Exception.Message)" } -Compress)
+                }
+
+                if ($null -ne $installJob) {
+                    while (-not $installJob.IsCompleted) {
+                        try {
+                            $instProgress = $installer.GetProgress()
+                            if ($null -ne $instProgress) {
+                                Write-Log (ConvertTo-Json @{ 
+                                    type = "progress"; 
+                                    percent = [int]($instProgress.CurrentUpdatePercentComplete); 
+                                    message = "Installing Driver...";
+                                    stage = "install"
+                                } -Compress)
+                            }
+                        } catch { }
+                        Start-Sleep -Milliseconds 1000
+                    }
+                    $result = $installer.EndInstall($installJob)
+                } else {
+                    Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "Falling back to synchronous Install()..." } -Compress)
+                    try {
+                        Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_sync"; message = "Executing Sync Install()..." } -Compress)
+                        $result = $installer.Install()
+                        Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_sync"; message = "Sync Install Finished. ResultCode: $($result.ResultCode)" } -Compress)
+                    } catch {
+                        Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_error"; message = "Synchronous Install failed: $($_.Exception.Message | Out-String)" } -Compress)
+                        Write-Log (ConvertTo-Json @{ 
+                            type = "result";
+                            success = $false;
+                            error = "Synchronous Install failed: $($_.Exception.Message)"
+                        } -Compress)
+                        exit
+                    }
+                }
+                
+                Write-Log (ConvertTo-Json @{ 
+                    type = "result";
+                    success = ($result.ResultCode -eq 2 -or $result.ResultCode -eq 3);
+                    resultCode = $result.ResultCode;
+                    rebootRequired = $result.RebootRequired
+                } -Compress)
+            } catch {
+                $errMsg = $_.Exception.Message
+                if ($null -ne $_.Exception.InnerException) {
+                    $errMsg += " Inner: " + $_.Exception.InnerException.Message
+                }
+                $errMsg += " [at line " + $_.InvocationInfo.ScriptLineNumber + "]"
+                Write-Log (ConvertTo-Json @{ type = "result"; success = $false; error = $errMsg } -Compress)
+            }
         `
-        const { stdout } = await execAsync(`powershell -NoProfile -Command "${script.replace(/"/g, '\\"').replace(/\n/g, ' ')}"`, { maxBuffer: 1024 * 1024 * 10 })
-        return stdout.trim().toLowerCase() === 'true'
+
+        const win = BrowserWindow.fromWebContents(event.sender)
+        let finalResult = false
+        let isDone = false
+
+        // Empty log file initially
+        await writeFile(logFile, '', 'utf8');
+
+        // Function to poll the log file
+        const { readFile } = require('fs/promises');
+        let linesRead = 0;
+
+        const pollLog = async () => {
+            try {
+                const content = await readFile(logFile, 'utf8');
+                const lines = content.split(/\r?\n/).filter((l: string) => l.trim());
+
+                for (let i = linesRead; i < lines.length; i++) {
+                    const line = lines[i];
+                    try {
+                        const data = JSON.parse(line)
+                        if (data.type === 'debug') {
+                            console.log(`[DriverUpdate Script Debug] ${data.step}: ${data.message}`)
+                        } else if (data.type === 'progress') {
+                            win?.webContents.send('log:progress', { percent: data.percent, message: data.message, stage: data.stage })
+                        } else if (data.type === 'result') {
+                            finalResult = data.success
+                            isDone = true
+                            if (!finalResult) {
+                                console.error('Driver install failed:', data.error || `Result code: ${data.resultCode}`)
+                            }
+                        }
+                    } catch (e) {
+                        // ignore malformed JSON line
+                    }
+                }
+                linesRead = lines.length;
+            } catch (err) { }
+        };
+
+        const tempScript = join(tmpdir(), `ma_opt_install_${Date.now()}.ps1`)
+        await writeFile(tempScript, script, 'utf8')
+
+        try {
+            if (isAdmin) {
+                // If already admin, just run it
+                const child = exec(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tempScript}"`)
+
+                // Keep polling while child runs
+                await new Promise((resolve) => {
+                    const timer = setInterval(() => {
+                        pollLog();
+                        if (isDone) {
+                            clearInterval(timer);
+                            resolve(null);
+                        }
+                    }, 500);
+
+                    child.on('exit', () => {
+                        clearInterval(timer);
+                        resolve(null);
+                    });
+                });
+
+                // One last poll
+                await pollLog();
+            } else {
+                // Elevate via Start-Process
+                console.log('Elevating driver installer...');
+                const command = `Start-Process powershell -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', '${tempScript}' -Verb RunAs -Wait`
+
+                // Create a wrapper script to run the elevated command and wait
+                const wrapperScript = join(tmpdir(), `ma_opt_wrapper_${Date.now()}.ps1`)
+                await writeFile(wrapperScript, command, 'utf8')
+
+                const child = exec(`powershell -NoProfile -ExecutionPolicy Bypass -File "${wrapperScript}"`)
+
+                // Poll logs while the elevated process runs
+                await new Promise((resolve) => {
+                    const timer = setInterval(() => {
+                        pollLog();
+                        if (isDone) {
+                            clearInterval(timer);
+                            resolve(null);
+                        }
+                    }, 500);
+
+                    child.on('exit', () => {
+                        clearInterval(timer);
+                        resolve(null);
+                    });
+                });
+
+                // One last poll
+                await pollLog();
+                try { await unlink(wrapperScript) } catch { }
+            }
+        } finally {
+            try { await unlink(tempScript) } catch { }
+            try { await unlink(logFile) } catch { }
+        }
+
+        return finalResult
     } catch (error) {
         console.error('Failed to install driver:', error)
         return false

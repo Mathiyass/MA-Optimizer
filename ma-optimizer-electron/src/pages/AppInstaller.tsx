@@ -109,6 +109,11 @@ export function AppInstaller() {
 
         const run = async () => {
             let success = false
+            const showProgress = useAppStore.getState().showProgress
+            const closeProgress = useAppStore.getState().closeProgress
+
+            showProgress(`${next.action === 'uninstall' ? 'Uninstalling' : 'Installing'} ${next.name}`, 'Initializing winget...')
+
             try {
                 if (next.action === 'install' || next.action === 'update') {
                     success = await window.api?.winget.install(next.id)
@@ -119,6 +124,7 @@ export function AppInstaller() {
                 success = false
             }
 
+            closeProgress()
             setQueue(prev => prev.map(q => q.id === next.id && q.status === 'running' ? { ...q, status: success ? 'done' : 'error' } : q))
             addLog(`[winget] ${next.action} ${next.name}: ${success ? 'success' : 'failed'}`)
             if (success) addNotification('success', `${next.action === 'uninstall' ? 'Uninstalled' : 'Installed'} ${next.name}`)
@@ -139,9 +145,13 @@ export function AppInstaller() {
         setSelected(new Set())
     }
 
-    const upgradeAll = () => {
-        window.api?.winget.upgradeAll()
-        addNotification('info', 'Upgrading all packages via winget...')
+    const upgradeAll = async () => {
+        const showProgress = useAppStore.getState().showProgress
+        const closeProgress = useAppStore.getState().closeProgress
+        showProgress('Upgrading Packages', 'Checking for updates...')
+        await window.api?.winget.upgradeAll()
+        closeProgress()
+        addNotification('info', 'Upgraded all packages via winget')
     }
 
     // Filter local apps
@@ -208,9 +218,9 @@ export function AppInstaller() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search winget packages..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-card-bg border border-card-border rounded-xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-accent-cyan/40 transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 bg-card-bg border border-card-border rounded-xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-[var(--accent-cyan)] focus:shadow-[var(--glow-cyan)] transition-all"
                 />
-                {searching && <Loader2 className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-accent-cyan" />}
+                {searching && <Loader2 className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[var(--accent-cyan)]" />}
                 {search && (
                     <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-primary">
                         <X className="w-4 h-4" />
@@ -348,9 +358,22 @@ export function AppInstaller() {
 
                     {/* Searching indicator */}
                     {isSearching && searching && (
-                        <div className="flex items-center justify-center gap-2 py-8 text-text-muted text-sm">
-                            <Loader2 className="w-5 h-5 animate-spin text-accent-cyan" />
-                            Searching winget repository...
+                        <div>
+                            <h3 className="text-xs font-semibold text-text-muted mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                                <Loader2 className="w-3 h-3 animate-spin text-[var(--accent-cyan)]" /> Fetching packages...
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="flex items-center gap-3 p-4 rounded-xl border border-card-border bg-card-bg animate-shimmer">
+                                        <div className="w-4 h-4 rounded bg-white/5 shrink-0"></div>
+                                        <div className="w-10 h-10 rounded-lg bg-white/5 shrink-0"></div>
+                                        <div className="flex-1 space-y-2">
+                                            <div className="h-4 bg-white/5 rounded w-1/3"></div>
+                                            <div className="h-3 bg-white/5 rounded w-1/2"></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -382,26 +405,97 @@ function AppCard({
     installed: boolean; inQueue: boolean; selected: boolean; isRemote?: boolean
     onToggle: () => void; onInstall: () => void; onUninstall: () => void; onUpdate: () => void
 }) {
+    const [imgSrc, setImgSrc] = useState<string | null>(null);
+    const [imgError, setImgError] = useState(false);
+
+    useEffect(() => {
+        if (!isRemote && (window as any).apps_cache_icon?.[id]) {
+            setImgSrc((window as any).apps_cache_icon[id]);
+            return;
+        }
+
+        const fetchNativeIcon = async () => {
+            try {
+                if (window.api?.winget?.getIcon) {
+                    const base64 = await window.api.winget.getIcon(name);
+                    if (base64) {
+                        setImgSrc(base64);
+                        return;
+                    }
+                }
+
+                // Fallback to domain logo if native extraction fails
+                const publisher = id.split('.')[0].toLowerCase();
+                const domainMap: Record<string, string> = {
+                    google: 'google.com', mozilla: 'mozilla.org', brave: 'brave.com', opera: 'opera.com', vivaldi: 'vivaldi.com',
+                    microsoft: 'microsoft.com', github: 'github.com', docker: 'docker.com', postman: 'postman.com',
+                    jetbrains: 'jetbrains.com', videolan: 'videolan.org', obsproject: 'obsproject.com',
+                    spotify: 'spotify.com', discord: 'discord.com', telegram: 'telegram.org',
+                    whatsapp: 'whatsapp.com', slacktechnologies: 'slack.com', zoom: 'zoom.us',
+                    bitwarden: 'bitwarden.com', epicgames: 'epicgames.com', valve: 'steampowered.com',
+                    gog: 'gog.com', "7zip": "7-zip.org", python: "python.org", openjs: "nodejs.org",
+                    oracle: "oracle.com", rustlang: "rust-lang.org", dbeaver: "dbeaver.io",
+                    handbrake: "handbrake.fr", audacity: "audacityteam.org", gimp: "gimp.org",
+                    kde: "kde.org", dotpdn: "getpaint.net", inkscape: "inkscape.org", qbittorrent: "qbittorrent.org",
+                    playnite: "playnite.link", autohotkey: "autohotkey.com", cpuid: "cpuid.com", realix: "hwinfo.com",
+                    voidtools: "voidtools.com", sharex: "getsharex.com", rufus: "rufus.ie", windirstat: "windirstat.net",
+                    thedocumentfoundation: "libreoffice.org", sumatrapdf: "sumatrapdfreader.org", obsidian: "obsidian.md",
+                    notion: "notion.so", keepassxcteam: "keepassxc.org", malwarebytes: "malwarebytes.com",
+                    protontechnologies: "protonvpn.com", eloston: "chromium.org", librewolf: "librewolf.net"
+                };
+                const domain = domainMap[publisher] || `${publisher}.com`;
+                setImgSrc(`https://logo.clearbit.com/${domain}`);
+            } catch {
+                setImgError(true);
+            }
+        };
+
+        fetchNativeIcon();
+    }, [id, name, isRemote]);
+
+    const handleImgError = () => {
+        if (imgSrc && imgSrc.includes('clearbit')) {
+            const domain = imgSrc.split('/').pop();
+            setImgSrc(`https://icons.duckduckgo.com/ip3/${domain}.ico`);
+        } else {
+            setImgError(true);
+        }
+    };
+
+    const confirmUninstall = () => {
+        if (confirm(`Are you sure you want to uninstall ${name}?`)) {
+            onUninstall();
+        }
+    };
+
     return (
         <motion.div
             initial={false}
             whileHover={{ y: -1 }}
             className={`flex items-center gap-3 p-4 rounded-xl border transition-all group ${selected
-                ? 'border-accent-cyan/30 bg-accent-cyan/5'
-                : 'border-card-border bg-card-bg hover:border-white/10'
+                ? 'border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/5 shadow-[var(--glow-cyan)]'
+                : 'border-card-border bg-card-bg hover:border-white/10 hover:shadow-lg'
                 }`}
         >
             <input
                 type="checkbox"
                 checked={selected}
                 onChange={onToggle}
-                className="accent-accent-cyan w-4 h-4 shrink-0 cursor-pointer"
+                className="accent-[var(--accent-cyan)] w-4 h-4 shrink-0 cursor-pointer"
             />
+            {/* 🔧 FIX: Display App Icon with robust fallback */}
+            <div className="w-10 h-10 rounded-xl bg-[var(--bg-deep)] border border-[var(--border)] flex flex-shrink-0 items-center justify-center p-2 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+                {imgSrc && !imgError ? (
+                    <img key={imgSrc} src={imgSrc} alt={name} onError={handleImgError} className="w-full h-full object-contain rounded drop-shadow-md" />
+                ) : (
+                    <Package className="w-6 h-6 text-[var(--accent-cyan)] opacity-70" />
+                )}
+            </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <span className="text-text-primary text-sm font-semibold">{name}</span>
+                    <span className="text-[var(--text-primary)] text-sm font-semibold">{name}</span>
                     {installed && (
-                        <span className="text-[10px] bg-success/15 text-success px-1.5 py-0.5 rounded font-medium">Installed</span>
+                        <span className="text-[10px] border border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] shadow-[var(--glow-cyan)] px-1.5 py-0.5 rounded font-medium">Installed</span>
                     )}
                     {isRemote && (
                         <span className="text-[10px] bg-purple-500/15 text-purple-400 px-1.5 py-0.5 rounded font-medium">winget</span>
@@ -409,29 +503,36 @@ function AppCard({
                 </div>
                 <div className="text-text-dim text-xs mt-0.5 flex items-center gap-2">
                     <span className="truncate">{desc}</span>
-                    {version && <span className="text-text-dim/60 shrink-0">v{version}</span>}
+                    {version && <span className="text-[var(--accent-cyan)] shrink-0 font-mono tracking-widest bg-black/20 rounded px-1">v{version}</span>}
                 </div>
             </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                 {inQueue ? (
-                    <span className="px-2 py-1 text-[10px] text-accent-cyan flex items-center gap-1">
+                    <span className="px-2 py-1 text-[10px] text-[var(--accent-cyan)] flex items-center gap-1 bg-[var(--accent-cyan)]/10 rounded-lg shadow-[var(--glow-cyan)]">
                         <Loader2 className="w-3 h-3 animate-spin" /> In queue
                     </span>
                 ) : installed ? (
                     <>
-                        <button onClick={onUpdate} title="Update"
-                            className="p-1.5 rounded-lg text-text-dim hover:text-accent-cyan hover:bg-accent-cyan/10 transition-all">
-                            <ArrowUpCircle className="w-4 h-4" />
+                        {/* 🔧 FIX: Enhanced semantic color styling for AppCard action buttons */}
+                        <button onClick={onUpdate} title="Update App"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
+                                       border border-[var(--accent-cyan)] text-[var(--accent-cyan)]
+                                       hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)] transition-all">
+                            <ArrowUpCircle className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Update</span>
                         </button>
-                        <button onClick={onUninstall} title="Uninstall"
-                            className="p-1.5 rounded-lg text-text-dim hover:text-danger hover:bg-danger/10 transition-all">
-                            <Trash2 className="w-4 h-4" />
+                        <button onClick={confirmUninstall} title="Uninstall App"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
+                                       border border-[var(--accent-red)] text-[var(--accent-red)]
+                                       hover:bg-[var(--accent-red)]/10 hover:shadow-[var(--glow-red)] transition-all">
+                            <Trash2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Uninstall</span>
                         </button>
                     </>
                 ) : (
-                    <button onClick={onInstall} title="Install"
-                        className="p-1.5 rounded-lg text-text-dim hover:text-accent-cyan hover:bg-accent-cyan/10 transition-all">
-                        <Download className="w-4 h-4" />
+                    <button onClick={onInstall} title="Install App"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
+                                   border border-[var(--accent-cyan)] text-[var(--accent-cyan)]
+                                   hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)] transition-all">
+                        <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Install</span>
                     </button>
                 )}
             </div>

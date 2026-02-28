@@ -153,9 +153,9 @@ contextBridge.exposeInMainWorld('api', {
             return ipcRenderer.invoke('cleaner:clean', categories)
         },
         scanBrowsers: () => ipcRenderer.invoke('cleaner:scanBrowsers'),
-        cleanBrowsers: (browsers: string[], types: string[]) => {
-            validate([browsers, types], ['array', 'array'])
-            return ipcRenderer.invoke('cleaner:cleanBrowsers', browsers, types)
+        cleanBrowsers: (selections: { id: string, types: string[] }[]) => {
+            validate([selections], ['array'])
+            return ipcRenderer.invoke('cleaner:cleanBrowsers', selections)
         },
         getLargeFiles: (path: string, minSize: number) => {
             validate([path, minSize], ['string', 'number'])
@@ -208,6 +208,10 @@ contextBridge.exposeInMainWorld('api', {
             validate([id], ['string'])
             return ipcRenderer.invoke('winget:checkUpdate', id)
         },
+        getIcon: (appName: string) => {
+            validate([appName], ['string'])
+            return ipcRenderer.invoke('winget:getIcon', appName)
+        },
     },
     repair: {
         runSfc: () => ipcRenderer.invoke('repair:sfc'),
@@ -215,7 +219,7 @@ contextBridge.exposeInMainWorld('api', {
             validate([action], ['string'])
             return ipcRenderer.invoke('repair:dism', action)
         },
-        createRestorePoint: (desc: string) => {
+        createSystemRestorePoint: (desc: string) => {
             validate([desc], ['string'])
             return ipcRenderer.invoke('repair:createRestorePoint', desc)
         },
@@ -232,6 +236,8 @@ contextBridge.exposeInMainWorld('api', {
         },
         runMemDiag: () => ipcRenderer.invoke('repair:memdiag'),
     },
+    // 🔧 FIX: Dedicated bridge method for creating a restore point via the header UI button.
+    createRestorePoint: () => ipcRenderer.invoke('create-restore-point'),
     advanced: {
         getInstalledApps: () => ipcRenderer.invoke('advanced:getApps'),
         removeApps: (names: string[]) => {
@@ -305,11 +311,21 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.on('log:line', listener)
         return () => ipcRenderer.removeListener('log:line', listener)
     },
+    onProgress: (cb: (data: { percent: number; message: string }) => void) => {
+        const listener = (_: any, data: { percent: number; message: string }) => cb(data)
+        ipcRenderer.on('log:progress', listener)
+        return () => ipcRenderer.removeListener('log:progress', listener)
+    },
     offLogLine: () => ipcRenderer.removeAllListeners('log:line'),
     onAdminStatus: (cb: (ok: boolean) => void) => {
         const listener = (_: any, ok: boolean) => cb(ok)
         ipcRenderer.on('admin:status', listener)
         return () => ipcRenderer.removeListener('admin:status', listener)
+    },
+    onSystemStats: (cb: (stats: any) => void) => {
+        const listener = (_: any, stats: any) => cb(stats)
+        ipcRenderer.on('system:stats', listener)
+        return () => ipcRenderer.removeListener('system:stats', listener)
     },
     openDialog: (opts: any) => {
         validate([opts], ['object'])

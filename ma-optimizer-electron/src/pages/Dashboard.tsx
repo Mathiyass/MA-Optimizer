@@ -57,10 +57,10 @@ function HealthGauge({ score }: { score: number }) {
     const center = size / 2
 
     const getColor = () => {
-        if (score >= 80) return { stroke: '#00ff88', label: 'Excellent', text: 'text-success' }
-        if (score >= 60) return { stroke: '#00FFDE', label: 'Good', text: 'text-accent-cyan' }
-        if (score >= 40) return { stroke: '#ffd700', label: 'Fair', text: 'text-warning' }
-        return { stroke: '#ff4444', label: 'Needs Work', text: 'text-danger' }
+        if (score >= 80) return { stroke: 'var(--accent-cyan)', label: 'Excellent', text: 'text-[var(--accent-cyan)]' }
+        if (score >= 50) return { stroke: 'rgba(0,255,222,0.6)', label: 'Good', text: 'text-[var(--accent-cyan)] opacity-90' }
+        if (score >= 30) return { stroke: 'rgba(255,0,60,0.6)', label: 'Fair', text: 'text-[var(--accent-red)] opacity-90' }
+        return { stroke: 'var(--accent-red)', label: 'Needs Work', text: 'text-[var(--accent-red)]' }
     }
     const color = getColor()
 
@@ -95,8 +95,8 @@ function HealthGauge({ score }: { score: number }) {
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={`text-3xl font-bold ${color.text}`}>{score}</span>
-                    <span className="text-text-dim text-[10px] mt-0.5">/ 100</span>
+                    <span className={`text-3xl font-bold ${color.text}`} style={{ textShadow: score >= 50 ? 'var(--glow-cyan)' : 'var(--glow-red)' }}>{score}</span>
+                    <span className="text-text-muted text-[10px] mt-0.5">/ 100</span>
                 </div>
             </div>
             <div className={`text-sm font-semibold mt-2 ${color.text}`}>{color.label}</div>
@@ -174,10 +174,10 @@ export function Dashboard() {
     }
 
     const quickCards = [
-        { icon: Crown, label: 'Power Plan', color: 'from-violet-600 to-purple-500', page: 'ma-power' as const, desc: 'Flagship performance' },
-        { icon: Zap, label: 'CPU & Memory', color: 'from-cyan-500 to-blue-500', page: 'performance' as const, desc: 'System tuning' },
-        { icon: Shield, label: 'Privacy', color: 'from-green-500 to-emerald-500', page: 'privacy' as const, desc: 'Telemetry control' },
-        { icon: Wifi, label: 'Network', color: 'from-orange-500 to-amber-500', page: 'network' as const, desc: 'TCP/IP optimization' },
+        { icon: Crown, label: 'Power Plan', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'ma-power' as const, desc: 'Flagship performance profile' },
+        { icon: Zap, label: 'CPU & Memory', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'performance' as const, desc: 'Process & resource tuning' },
+        { icon: Shield, label: 'Privacy', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'privacy' as const, desc: 'Advanced OS telemetry control' },
+        { icon: Wifi, label: 'Network', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'network' as const, desc: 'TCP/IP and adapter optimization' },
     ]
 
     const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -191,20 +191,20 @@ export function Dashboard() {
             animate="show"
         >
             {/* Hero */}
-            <motion.div variants={item} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card-bg via-[#0d1117] to-[#1e0a10] border border-white/5 p-10 shadow-2xl">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(0,255,222,0.1),transparent_60%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(255,0,60,0.08),transparent_60%)]" />
+            <motion.div variants={item} className="relative overflow-hidden rounded-3xl p-10 shadow-2xl glass hover-lift">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,255,222,0.08),transparent_50%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,60,0.05),transparent_50%)] pointer-events-none" />
                 <div className="relative z-10 flex items-center justify-between gap-12">
                     <div className="flex-1">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan text-[10px] font-bold uppercase tracking-widest mb-4"
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[rgba(0,255,222,0.05)] text-[var(--accent-cyan)] text-[10px] font-bold uppercase tracking-widest mb-4 shadow-[var(--glow-cyan)]"
                         >
                             <Activity className="w-3 h-3" /> System Ready
                         </motion.div>
-                        <h1 className="text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
-                            Optimize your <span className="bg-gradient-to-r from-accent-cyan via-accent-violet to-danger bg-clip-text text-transparent">Windows Experience</span>
+                        <h1 className="text-4xl font-extrabold text-[var(--text-primary)] mb-4 tracking-tight">
+                            Optimize your <span className="text-gradient-mixed">Windows Experience</span>
                         </h1>
                         <p className="text-text-muted text-base max-w-lg mb-8 leading-relaxed">MA-Optimizer is the definitive tool for power users. Enhance system speed, reduce latency, and reclaim your privacy with a single click.</p>
 
@@ -214,7 +214,7 @@ export function Dashboard() {
                                 whileTap={{ scale: 0.98 }}
                                 onClick={runOptimizeAll}
                                 disabled={isOptimizing}
-                                className="px-8 py-4 bg-gradient-to-r from-accent-cyan to-accent-violet rounded-2xl text-white font-bold text-base shadow-xl flex items-center gap-3 disabled:opacity-50"
+                                className="px-8 py-4 rounded-2xl font-bold text-base flex items-center gap-3 disabled:opacity-50 btn-primary bg-[var(--bg-surface)]"
                             >
                                 {isOptimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
                                 {isOptimizing ? 'Optimizing...' : 'One-Click Optimize'}
@@ -238,14 +238,14 @@ export function Dashboard() {
                         className="mt-8 pt-8 border-t border-white/5"
                     >
                         <div className="flex justify-between mb-2">
-                            <span className="text-accent-cyan text-sm font-bold flex items-center gap-2">
+                            <span className="text-[var(--accent-cyan)] text-sm font-bold flex items-center gap-2" style={{ textShadow: 'var(--glow-cyan)' }}>
                                 <RefreshCw className="w-4 h-4 animate-spin" /> {optSteps[optStep].label}
                             </span>
-                            <span className="text-text-dim text-sm font-mono">{optProgress}%</span>
+                            <span className="text-[var(--text-muted)] text-sm font-mono">{optProgress}%</span>
                         </div>
-                        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                        <div className="w-full h-3 bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden relative">
                             <motion.div
-                                className="h-full bg-gradient-to-r from-accent-cyan to-accent-violet"
+                                className="absolute inset-y-0 left-0 bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
                                 animate={{ width: `${optProgress}%` }}
                                 transition={{ type: 'spring', stiffness: 50 }}
                             />
@@ -256,12 +256,12 @@ export function Dashboard() {
 
             {/* Rest of the dashboard... */}
             <div className="grid grid-cols-5 gap-6">
-                <motion.div variants={item} className="col-span-2 bg-card-bg border border-card-border rounded-2xl p-6 hover:border-white/10 transition-colors">
+                <motion.div variants={item} className="col-span-2 card-premium rounded-2xl p-6 transition-colors">
                     <div className="flex items-center gap-3 mb-5">
-                        <div className="p-2 rounded-lg bg-accent-cyan/10">
-                            <Monitor className="w-4 h-4 text-accent-cyan" />
+                        <div className="p-2 rounded-lg bg-[rgba(0,255,222,0.05)] border border-[var(--border)] shadow-[var(--glow-cyan)]">
+                            <Monitor className="w-4 h-4 text-[var(--accent-cyan)]" />
                         </div>
-                        <span className="text-text-primary text-sm font-bold">System Specification</span>
+                        <span className="text-[var(--text-primary)] text-sm font-bold">System Specification</span>
                     </div>
                     <div className="space-y-3">
                         {[
@@ -271,85 +271,85 @@ export function Dashboard() {
                             { label: 'Architecture', value: osInfo?.arch || 'x64' },
                             { label: 'System Uptime', value: formatUptime(uptime), icon: Clock },
                         ].map((row, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs">
-                                <span className="text-text-dim">{row.label}</span>
-                                <span className={`text-text-primary font-semibold ${row.mono ? 'font-mono' : ''}`}>{row.value}</span>
+                            <div key={idx} className="flex justify-between items-center text-xs py-1 border-b border-[var(--border)] last:border-0">
+                                <span className="text-[var(--text-secondary)]">{row.label}</span>
+                                <span className={`text-[var(--text-primary)] font-semibold ${row.mono ? 'font-mono' : ''}`}>{row.value}</span>
                             </div>
                         ))}
                     </div>
                 </motion.div>
 
-                <motion.div variants={item} className="bg-card-bg border border-card-border rounded-2xl p-6 flex items-center justify-center group hover:border-accent-cyan/30 transition-colors">
+                <motion.div variants={item} className="card-premium rounded-2xl p-6 flex items-center justify-center group transition-colors">
                     <RingGauge value={cpu} label="CPU" sublabel={`${cpu.toFixed(0)}% Load`} size={120} />
                 </motion.div>
 
-                <motion.div variants={item} className="bg-card-bg border border-card-border rounded-2xl p-6 flex items-center justify-center group hover:border-accent-violet/30 transition-colors">
-                    <RingGauge value={ram.percent} label="RAM" sublabel={formatBytes(ram.used)} size={120} />
+                <motion.div variants={item} className="card-premium rounded-2xl p-6 flex items-center justify-center group transition-colors">
+                    <RingGauge value={ram.percent} label="RAM" sublabel={`${formatBytes(ram.used)} / ${formatBytes(ram.total)}`} size={120} />
                 </motion.div>
 
-                <motion.div variants={item} className="bg-card-bg border border-card-border rounded-2xl p-6 space-y-6">
+                <motion.div variants={item} className="card-premium rounded-2xl p-6 space-y-6">
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-accent-cyan/10">
-                                    <HardDrive className="w-3.5 h-3.5 text-accent-cyan" />
+                                <div className="p-1.5 rounded-lg border border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)]">
+                                    <HardDrive className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
                                 </div>
-                                <span className="text-[11px] text-text-dim uppercase font-bold tracking-wider">Disk Storage I/O</span>
+                                <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Disk Storage I/O</span>
                             </div>
                         </div>
                         <div className="space-y-3">
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-text-dim uppercase font-medium">Read</span>
-                                    <span className="text-sm font-mono text-text-primary font-bold">{formatBytes(disk.readPerSec)}/s</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Read</span>
+                                    <span className="text-sm font-mono text-[var(--accent-cyan)] font-bold" style={{ textShadow: 'var(--glow-cyan)' }}>{formatBytes(disk.readPerSec)}/s</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-text-dim uppercase font-medium">Write</span>
-                                    <span className="text-sm font-mono text-text-primary font-bold">{formatBytes(disk.writePerSec)}/s</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Write</span>
+                                    <span className="text-sm font-mono text-[var(--accent-cyan)] opacity-70 font-bold">{formatBytes(disk.writePerSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden flex">
+                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden flex">
                                 <motion.div
-                                    className="h-full bg-accent-cyan shadow-[0_0_8px_rgba(0,255,222,0.5)]"
+                                    className="h-full bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
                                     animate={{ width: `${Math.min((disk.readPerSec / (100 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                                 <motion.div
-                                    className="h-full bg-accent-violet shadow-[0_0_8px_rgba(139,92,246,0.5)]"
+                                    className="h-full bg-[var(--accent-cyan)] opacity-40"
                                     animate={{ width: `${Math.min((disk.writePerSec / (100 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <div className="h-px bg-[var(--border)] opacity-50" />
 
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-success/10">
-                                    <Wifi className="w-3.5 h-3.5 text-success" />
+                                <div className="p-1.5 rounded-lg border border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)]">
+                                    <Wifi className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
                                 </div>
-                                <span className="text-[11px] text-text-dim uppercase font-bold tracking-wider">Network Traffic</span>
+                                <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Network Traffic</span>
                             </div>
                         </div>
                         <div className="space-y-3">
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-success/70 uppercase font-medium">Download</span>
-                                    <span className="text-sm font-mono text-success font-bold">{formatBytes(net.rxSec)}/s</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Download</span>
+                                    <span className="text-sm font-mono text-[var(--accent-cyan)] font-bold" style={{ textShadow: 'var(--glow-cyan)' }}>{formatBytes(net.rxSec)}/s</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-accent-violet/70 uppercase font-medium">Upload</span>
-                                    <span className="text-sm font-mono text-accent-violet font-bold">{formatBytes(net.txSec)}/s</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Upload</span>
+                                    <span className="text-sm font-mono text-[var(--accent-cyan)] opacity-70 font-bold">{formatBytes(net.txSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden flex">
+                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden flex">
                                 <motion.div
-                                    className="h-full bg-success shadow-[0_0_8px_rgba(0,255,136,0.5)]"
+                                    className="h-full bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
                                     animate={{ width: `${Math.min((net.rxSec / (50 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                                 <motion.div
-                                    className="h-full bg-accent-violet shadow-[0_0_8px_rgba(139,92,246,0.5)]"
+                                    className="h-full bg-[var(--accent-cyan)] opacity-40"
                                     animate={{ width: `${Math.min((net.txSec / (50 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                             </div>
@@ -363,16 +363,16 @@ export function Dashboard() {
                     <motion.button
                         key={i}
                         onClick={() => setPage(c.page)}
-                        whileHover={{ y: -4, borderColor: 'rgba(255,255,255,0.1)' }}
-                        className="relative overflow-hidden rounded-2xl border border-card-border bg-card-bg p-6 text-left group transition-all"
+                        whileHover={{ y: -4 }}
+                        className={`relative overflow-hidden rounded-2xl p-6 text-left group transition-all hover-lift card-premium ${c.glow}`}
                     >
                         <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                            <c.icon className="w-6 h-6 text-white" />
+                            <c.icon className="w-6 h-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
                         </div>
-                        <div className="text-text-primary font-bold text-sm mb-1">{c.label}</div>
-                        <div className="text-text-dim text-xs leading-relaxed">{c.desc}</div>
+                        <div className="text-[var(--text-primary)] font-bold text-sm mb-1">{c.label}</div>
+                        <div className="text-[var(--text-secondary)] text-xs leading-relaxed">{c.desc}</div>
                         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ChevronRight className="w-4 h-4 text-text-dim" />
+                            <ChevronRight className="w-4 h-4 text-[var(--accent-cyan)]" />
                         </div>
                     </motion.button>
                 ))}

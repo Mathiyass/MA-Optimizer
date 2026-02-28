@@ -59,20 +59,27 @@ export function DriverUpdater() {
         setScanning(false)
     }
 
-    const installUpdate = async (title: string) => {
-        setInstalling(title)
+    const installUpdate = async (title: string, updateId: string) => {
+        setInstalling(updateId)
+        const showProgress = useAppStore.getState().showProgress
+        const closeProgress = useAppStore.getState().closeProgress
+
+        showProgress(`Installing Driver Update`, title)
+
         try {
-            const success = await window.api?.drivers.installUpdate(title)
+            const success = await window.api?.drivers.installUpdate(updateId)
             if (success) {
                 addNotification('success', `Successfully installed: ${title}`)
                 // Remove from list
-                setUpdates(prev => prev.filter(u => u.Title !== title))
+                setUpdates(prev => prev.filter(u => u.UpdateID !== updateId))
             } else {
                 addNotification('error', `Failed to install: ${title}`)
             }
         } catch (e) {
             addNotification('error', `Error installing: ${title}`)
         }
+
+        closeProgress()
         setInstalling(null)
     }
 
@@ -154,11 +161,11 @@ export function DriverUpdater() {
                                     {u.Description && <div className="text-xs text-text-muted mt-0.5 line-clamp-1">{u.Description}</div>}
                                 </div>
                                 <button
-                                    onClick={() => installUpdate(u.Title)}
+                                    onClick={() => installUpdate(u.Title, u.UpdateID)}
                                     disabled={installing !== null}
                                     className="px-4 py-1.5 bg-accent-cyan/20 text-accent-cyan rounded-lg text-xs font-semibold hover:bg-accent-cyan/30 transition-all flex items-center gap-2 disabled:opacity-50"
                                 >
-                                    {installing === u.Title ? (
+                                    {installing === u.UpdateID ? (
                                         <>
                                             <Loader2 className="w-3.5 h-3.5 animate-spin" /> Installing...
                                         </>

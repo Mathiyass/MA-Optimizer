@@ -1,6 +1,5 @@
 import { ipcMain } from 'electron'
-import { escapePS } from './utils'
-import { execSync } from 'child_process'
+import { escapePS, execPromise } from './utils'
 import { sendLog, sendError } from './logger'
 
 interface ServiceInfo {
@@ -30,10 +29,10 @@ const recommendedDisable = [
 ipcMain.handle('services:list', async () => {
     try {
         const ps = `Get-Service | Select-Object Name,DisplayName,Status,StartType | ConvertTo-Json -Depth 2`
-        const result = execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 30000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
+        const { stdout } = await execPromise(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
+            timeout: 30000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
         })
-        const services = JSON.parse(result)
+        const services = JSON.parse(stdout)
         return Array.isArray(services) ? services.map((s: any) => ({
             name: s.Name,
             displayName: s.DisplayName,
@@ -54,8 +53,8 @@ async function ensureRestorePoint() {
     if (restorePointCreated) return
     try {
         const ps = `Checkpoint-Computer -Description "MA-Optimizer Auto-Backup (Services)" -RestorePointType "MODIFY_SETTINGS"`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 120000, windowsHide: true,
+        await execPromise(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
+            timeout: 120000, windowsHide: true,
         })
         restorePointCreated = true
         sendLog('[Backup] Automatic restore point created before service modification')
@@ -73,8 +72,8 @@ ipcMain.handle('services:setStartup', async (_, name: string, mode: string) => {
             automatic: 'Automatic',
         }
         const ps = `Set-Service -Name '${escapePS(name)}' -StartupType ${modeMap[mode] || escapePS(mode)}`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 10000, windowsHide: true,
+        await execPromise(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
+            timeout: 10000, windowsHide: true,
         })
         sendLog(`[Services] Set ${name} startup type to ${mode}`)
         return true
@@ -86,8 +85,8 @@ ipcMain.handle('services:setStartup', async (_, name: string, mode: string) => {
 
 ipcMain.handle('services:start', async (_, name: string) => {
     try {
-        execSync(`powershell -NonInteractive -NoProfile -Command "Start-Service -Name '${escapePS(name)}'"`, {
-            encoding: 'utf-8', timeout: 15000, windowsHide: true,
+        await execPromise(`powershell -NonInteractive -NoProfile -Command "Start-Service -Name '${escapePS(name)}'"`, {
+            timeout: 15000, windowsHide: true,
         })
         sendLog(`[Services] Started ${name}`)
         return true
@@ -99,8 +98,8 @@ ipcMain.handle('services:start', async (_, name: string) => {
 
 ipcMain.handle('services:stop', async (_, name: string) => {
     try {
-        execSync(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${escapePS(name)}' -Force"`, {
-            encoding: 'utf-8', timeout: 15000, windowsHide: true,
+        await execPromise(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${escapePS(name)}' -Force"`, {
+            timeout: 15000, windowsHide: true,
         })
         sendLog(`[Services] Stopped ${name}`)
         return true
@@ -114,8 +113,8 @@ ipcMain.handle('services:applyRecommended', async () => {
     let applied = 0
     for (const svc of recommendedDisable) {
         try {
-            execSync(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${svc.name}' -Force -ErrorAction SilentlyContinue; Set-Service -Name '${svc.name}' -StartupType Disabled -ErrorAction SilentlyContinue"`, {
-                encoding: 'utf-8', timeout: 10000, windowsHide: true,
+            await execPromise(`powershell -NonInteractive -NoProfile -Command "Stop-Service -Name '${svc.name}' -Force -ErrorAction SilentlyContinue; Set-Service -Name '${svc.name}' -StartupType Disabled -ErrorAction SilentlyContinue"`, {
+                timeout: 10000, windowsHide: true,
             })
             applied++
             sendLog(`[Services] Disabled ${svc.name} — ${svc.reason}`)

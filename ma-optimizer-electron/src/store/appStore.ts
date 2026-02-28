@@ -26,7 +26,10 @@ interface ProgressState {
     open: boolean
     title: string
     message: string
-    progress: number // 0-100
+    progress: number // keep for compatibility
+    downloadProgress: number
+    installProgress: number
+    stage: 'download' | 'install' | 'idle'
 }
 
 interface AppStore {
@@ -56,7 +59,7 @@ interface AppStore {
     // Progress modal
     progress: ProgressState
     showProgress: (title: string, message: string) => void
-    updateProgress: (progress: number, message?: string) => void
+    updateProgress: (progress: number, message?: string, stage?: 'download' | 'install') => void
     closeProgress: () => void
 
     // Search overlay
@@ -138,13 +141,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
         set((s) => ({ confirm: { ...s.confirm, open: false } }))
     },
 
-    progress: { open: false, title: '', message: '', progress: 0 },
-    showProgress: (title, message) => set({ progress: { open: true, title, message, progress: 0 } }),
-    updateProgress: (progress, message) =>
-        set((s) => ({
-            progress: { ...s.progress, progress, ...(message ? { message } : {}) },
-        })),
-    closeProgress: () => set({ progress: { open: false, title: '', message: '', progress: 0 } }),
+    progress: { open: false, title: '', message: '', progress: 0, downloadProgress: 0, installProgress: 0, stage: 'idle' },
+    showProgress: (title, message) => set({ progress: { open: true, title, message, progress: 0, downloadProgress: 0, installProgress: 0, stage: 'idle' } }),
+    updateProgress: (progress, message, stage) =>
+        set((s) => {
+            const nextStage = stage || s.progress.stage || (message?.toLowerCase().includes('download') ? 'download' : message?.toLowerCase().includes('install') ? 'install' : 'idle')
+            return {
+                progress: {
+                    ...s.progress,
+                    progress,
+                    stage: nextStage as any,
+                    downloadProgress: nextStage === 'download' ? progress : s.progress.downloadProgress,
+                    installProgress: nextStage === 'install' ? progress : s.progress.installProgress,
+                    ...(message ? { message } : {}),
+                },
+            }
+        }),
+    closeProgress: () => set({ progress: { open: false, title: '', message: '', progress: 0, downloadProgress: 0, installProgress: 0, stage: 'idle' } }),
 
     searchOpen: false,
     setSearchOpen: (val) => set({ searchOpen: val }),

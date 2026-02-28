@@ -1,6 +1,5 @@
 import { ipcMain } from 'electron'
-import { escapePS } from './utils'
-import { execSync } from 'child_process'
+import { escapePS, execPromise } from './utils'
 import * as path from 'path'
 import * as fs from 'fs'
 import { sendLog, sendError } from './logger'
@@ -14,21 +13,22 @@ interface StartupItem {
     publisher?: string
 }
 
-function runPS(cmd: string): string {
+async function runPS(cmd: string): Promise<string> {
     try {
-        return execSync(`powershell -NonInteractive -NoProfile -Command "${cmd}"`, {
-            encoding: 'utf-8', timeout: 10000, windowsHide: true,
-        }).trim()
+        const { stdout } = await execPromise(`powershell -NonInteractive -NoProfile -Command "${cmd}"`, {
+            timeout: 10000, windowsHide: true,
+        })
+        return stdout.trim()
     } catch {
         return ''
     }
 }
 
-function parseRunKey(hive: 'HKCU' | 'HKLM', source: string): StartupItem[] {
+async function parseRunKey(hive: 'HKCU' | 'HKLM', source: string): Promise<StartupItem[]> {
     const items: StartupItem[] = []
     const regPath = `${hive}:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run`
     const ps = `$p = Get-ItemProperty -Path '${regPath}' -ErrorAction SilentlyContinue; if ($p) { $p | Get-Member -MemberType NoteProperty | Where-Object { $_.Name -notin @('PSPath','PSParentPath','PSChildName','PSDrive','PSProvider') } | ForEach-Object { [PSCustomObject]@{ Name=$_.Name; Value=$p."$($_.Name)" } } | ConvertTo-Json } else { '[]' }`
-    const result = runPS(ps)
+    const result = await runPS(ps)
     if (result && result !== '[]') {
         try {
             const parsed = JSON.parse(result)
@@ -49,14 +49,16 @@ function parseRunKey(hive: 'HKCU' | 'HKLM', source: string): StartupItem[] {
     return items
 }
 
-function getStartupItems(): StartupItem[] {
+async function getStartupItems(): Promise<StartupItem[]> {
     const items: StartupItem[] = []
 
     // HKCU Run
-    items.push(...parseRunKey('HKCU', 'HKCU Run'))
+    const hkcuItems = await parseRunKey('HKCU', 'HKCU Run')
+    items.push(...hkcuItems)
 
     // HKLM Run
-    items.push(...parseRunKey('HKLM', 'HKLM Run'))
+    const hklmItems = await parseRunKey('HKLM', 'HKLM Run')
+    items.push(...hklmItems)
 
     // Startup folders
     const startupFolders = [
@@ -67,7 +69,7 @@ function getStartupItems(): StartupItem[] {
     for (const folder of startupFolders) {
         try {
             if (fs.existsSync(folder.path)) {
-                const files = fs.readdirSync(folder.path)
+                const files = await fs.promises.readdir(folder.path)
                 for (const file of files) {
                     if (file !== 'desktop.ini') {
                         items.push({
@@ -86,7 +88,7 @@ function getStartupItems(): StartupItem[] {
     // Disabled items from StartupApproved
     const approvedPath = `HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run`
     const ps = `$p = Get-ItemProperty -Path '${approvedPath}' -ErrorAction SilentlyContinue; if ($p) { $p | Get-Member -MemberType NoteProperty | Where-Object { $_.Name -notin @('PSPath','PSParentPath','PSChildName','PSDrive','PSProvider') } | ForEach-Object { $val = $p."$($_.Name)"; $bytes = [byte[]]$val; $enabled = $bytes[0] -ne 3; [PSCustomObject]@{ Name=$_.Name; Enabled=$enabled } } | ConvertTo-Json } else { '[]' }`
-    const result = runPS(ps)
+    const result = await runPS(ps)
     if (result && result !== '[]') {
         try {
             const parsed = JSON.parse(result)
@@ -105,7 +107,7 @@ function getStartupItems(): StartupItem[] {
 
 ipcMain.handle('startup:list', async () => {
     try {
-        return getStartupItems()
+        return await getStartupItems()
     } catch (e: any) {
         sendError(`Failed to list startup items: ${e.message}`)
         return []
@@ -117,11 +119,11 @@ ipcMain.handle('startup:toggle', async (_, id: string, enabled: boolean) => {
         if (id.startsWith('hkcu_run_')) {
             const name = id.replace('hkcu_run_', '')
             const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${escapePS(name)}' -Value ([byte[]]$bytes) -Type Binary`
-            runPS(ps)
+            await runPS(ps)
         } else if (id.startsWith('hklm_run_')) {
             const name = id.replace('hklm_run_', '')
             const ps = `$bytes = @(${enabled ? '2' : '3'},0,0,0,0,0,0,0,0,0,0,0); Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run' -Name '${escapePS(name)}' -Value ([byte[]]$bytes) -Type Binary`
-            runPS(ps)
+            await runPS(ps)
         }
         sendLog(`[Startup] ${enabled ? 'Enabled' : 'Disabled'} ${id}`)
         return true
@@ -135,14 +137,15 @@ ipcMain.handle('startup:delete', async (_, id: string) => {
     try {
         if (id.startsWith('hkcu_run_')) {
             const name = id.replace('hkcu_run_', '')
-            runPS(`Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
+            await runPS(`Remove-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
         } else if (id.startsWith('hklm_run_')) {
             const name = id.replace('hklm_run_', '')
-            runPS(`Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
+            await runPS(`Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`)
         } else if (id.startsWith('folder_')) {
-            const item = getStartupItems().find(i => i.id === id)
+            const currentItems = await getStartupItems()
+            const item = currentItems.find(i => i.id === id)
             if (item && fs.existsSync(item.path)) {
-                fs.unlinkSync(item.path)
+                await fs.promises.unlink(item.path)
             }
         }
         sendLog(`[Startup] Deleted ${id}`)
@@ -155,7 +158,7 @@ ipcMain.handle('startup:delete', async (_, id: string) => {
 
 ipcMain.handle('startup:add', async (_, name: string, exePath: string) => {
     try {
-        runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Value '"${escapePS(exePath)}"'`)
+        await runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Value '"${escapePS(exePath)}"'`)
         sendLog(`[Startup] Added ${name}: ${exePath}`)
         return true
     } catch (e: any) {

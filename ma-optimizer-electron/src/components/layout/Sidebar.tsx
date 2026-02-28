@@ -6,6 +6,7 @@ import {
     Trash2, Rocket, Package, Wrench, HeartPulse, SlidersHorizontal,
     BarChart3, Info,
 } from 'lucide-react'
+import logoVideo from '../../../img/logo.mp4'
 
 const navItems: Array<{
     id: PageId; icon: any; label: string; accent?: string; badge?: string
@@ -32,15 +33,22 @@ export function Sidebar() {
     const setPage = useAppStore((s) => s.setPage)
 
     return (
-        <aside className="w-[240px] h-full bg-sidebar-bg border-r border-card-border flex flex-col overflow-hidden shrink-0">
+        <aside className="w-[240px] h-full glass-panel flex flex-col overflow-hidden shrink-0 z-20">
             {/* Logo */}
             <div className="flex items-center gap-3 px-5 py-5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-cyan to-accent-violet flex items-center justify-center text-white font-extrabold text-sm shadow-lg shadow-accent-cyan/20">
-                    MA
+                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-white/10 shrink-0 flex items-center justify-center bg-black/40 relative">
+                    <video
+                        src={logoVideo}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-[120%] h-[120%] object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    />
                 </div>
                 <div>
-                    <h1 className="text-text-primary font-bold text-base tracking-tight leading-none">MA-Optimizer</h1>
-                    <span className="text-text-dim text-[10px] tracking-wider uppercase">v7.1</span>
+                    <h1 className="text-text-primary font-bold text-base tracking-tight leading-none text-gradient-cyan">MA-Optimizer</h1>
+                    <span className="text-text-dim text-[10px] tracking-wider uppercase font-bold">v7.1</span>
                 </div>
             </div>
 
@@ -58,23 +66,14 @@ export function Sidebar() {
                             whileTap={{ scale: 0.98 }}
                             className={`
                 relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group
+                border-l-[3px]
                 ${active
-                                    ? isViolet
-                                        ? 'bg-accent-violet/15 text-accent-violet'
-                                        : 'bg-accent-cyan/10 text-accent-cyan'
-                                    : 'text-text-muted hover:bg-white/5 hover:text-text-primary'
+                                    ? 'bg-[var(--bg-elevated)] text-[var(--accent-cyan)] border-[var(--accent-cyan)] rounded-l-none'
+                                    : 'text-[var(--text-secondary)] border-transparent hover:bg-white/5 hover:text-[var(--text-primary)]'
                                 }
               `}
                         >
-                            {/* Active indicator bar */}
-                            {active && (
-                                <motion.div
-                                    layoutId="sidebar-active"
-                                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full ${isViolet ? 'bg-accent-violet shadow-[0_0_8px_rgba(255,0,60,0.5)]' : 'bg-accent-cyan shadow-[0_0_8px_rgba(0,255,222,0.5)]'
-                                        }`}
-                                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                                />
-                            )}
+                            {/* Removed absolute layout bar as border-l suffices */}
 
                             <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? '' : 'opacity-60 group-hover:opacity-100'}`} />
                             <span className="text-[13px] font-medium truncate">{item.label}</span>

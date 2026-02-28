@@ -32,7 +32,7 @@ export function TabGroup({ tabs, active, onChange, accent = 'cyan' }: TabGroupPr
     const styles = accentStyles[accent]
 
     return (
-        <div className="relative flex gap-1 p-1 bg-app-bg/60 border border-card-border rounded-xl backdrop-blur-sm">
+        <div className="relative flex gap-1 p-1 glass-light rounded-xl backdrop-blur-md">
             {tabs.map((tab) => {
                 const isActive = active === tab.id
                 return (

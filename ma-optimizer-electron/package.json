@@ -4,6 +4,7 @@
   "description": "MA-Optimizer — The Ultimate Windows System Optimizer",
   "author": "Mathisha Angirasa",
   "homepage": "https://mathiyass.github.io/MAportfolio/",
+  "repository": "https://github.com/Mathiyass/MA-Optimizer",
   "license": "MIT",
   "main": "electron/dist/main.js",
   "scripts": {
@@ -25,33 +26,58 @@
   },
   "dependencies": {
     "electron-store": "^8.2.0",
-    "systeminformation": "^5.22.0",
     "electron-updater": "^6.1.7",
+    "systeminformation": "^5.22.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "electron": "^33.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@tanstack/react-query": "^5.45.1",
+    "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/node": "^20.14.0",
     "@types/winston": "^2.4.4",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^24.13.3",
+    "framer-motion": "^11.2.10",
+    "lucide-react": "^0.395.0",
+    "postcss": "^8.4.38",
+    "react": "^18.3.1",
+    "react-circular-progressbar": "^2.1.0",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7",
+    "tailwindcss": "^3.4.4",
+    "terser": "^5.46.0",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",
-    "@vitejs/plugin-react": "^4.3.1",
-    "tailwindcss": "^3.4.4",
-    "postcss": "^8.4.38",
-    "autoprefixer": "^10.4.19",
-    "framer-motion": "^11.2.10",
-    "zustand": "^4.5.2",
-    "@tanstack/react-query": "^5.45.1",
-    "recharts": "^2.12.7",
-    "react-circular-progressbar": "^2.1.0",
-    "lucide-react": "^0.395.0",
-    "electron-builder": "^24.13.3",
-    "concurrently": "^8.2.2",
     "wait-on": "^7.2.0",
-    "cross-env": "^7.0.3"
+    "zustand": "^4.5.2"
+  },
+  "build": {
+    "appId": "com.maoptimizer.app",
+    "productName": "MA-Optimizer",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "public/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true,
+      "warningsAsErrors": false
+    },
+    "portable": {
+      "requestExecutionLevel": "requireAdministrator"
+    }
   }
 }

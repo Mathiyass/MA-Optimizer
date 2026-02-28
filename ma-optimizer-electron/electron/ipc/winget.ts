@@ -1,11 +1,12 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { execSync, spawn } from 'child_process'
+import { spawn } from 'child_process'
+import { execPromise } from './utils'
 import { sendLog, sendError } from './logger'
 
 ipcMain.handle('winget:isInstalled', async () => {
     try {
-        const result = execSync('winget --version', { encoding: 'utf-8', timeout: 10000, windowsHide: true }).trim()
-        return { installed: true, version: result }
+        const { stdout } = await execPromise('winget --version', { timeout: 10000, windowsHide: true })
+        return { installed: true, version: stdout.trim() }
     } catch {
         return { installed: false, version: null }
     }
@@ -13,10 +14,10 @@ ipcMain.handle('winget:isInstalled', async () => {
 
 ipcMain.handle('winget:listInstalled', async () => {
     try {
-        const result = execSync('winget list --accept-source-agreements', {
-            encoding: 'utf-8', timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
+        const { stdout } = await execPromise('winget list --accept-source-agreements', {
+            timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
         })
-        const lines = result.split('\n').filter(l => l.trim())
+        const lines = stdout.split('\n').filter(l => l.trim())
         // Parse the table output
         const installed: string[] = []
         let headerPassed = false
@@ -48,10 +49,23 @@ ipcMain.handle('winget:install', async (event, id: string) => {
             windowsHide: true,
             shell: true,
         })
+        let currentStage: 'download' | 'install' = 'download'
         proc.stdout.on('data', (d: Buffer) => {
             const line = d.toString().trim()
             if (line) {
                 win?.webContents.send('log:line', `[winget] ${line}`)
+                if (line.toLowerCase().includes('download')) currentStage = 'download'
+                if (line.toLowerCase().includes('install') || line.toLowerCase().includes('extract')) currentStage = 'install'
+                // Parse progress
+                const match = line.match(/(\d+)%/)
+                if (match) {
+                    const percent = parseInt(match[1])
+                    win?.webContents.send('log:progress', {
+                        percent,
+                        message: currentStage === 'download' ? `Downloading ${id}...` : `Installing ${id}...`,
+                        stage: currentStage
+                    })
+                }
             }
         })
         proc.stderr.on('data', (d: Buffer) => {
@@ -115,16 +129,16 @@ ipcMain.handle('winget:upgradeAll', async (event) => {
         })
         proc.on('close', (code) => resolve(code === 0))
         proc.on('error', () => resolve(false))
-        setTimeout(() => { try { proc.kill() } catch { }; resolve(false) }, 600000)
+        setTimeout(() => { try { proc.kill() } catch { }; resolve(false) }, 60000)
     })
 })
 
 ipcMain.handle('winget:search', async (_, query: string) => {
     try {
-        const result = execSync(`winget search "${query}" --accept-source-agreements`, {
-            encoding: 'utf-8', timeout: 30000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
+        const { stdout } = await execPromise(`winget search "${query}" --accept-source-agreements`, {
+            timeout: 30000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
         })
-        const lines = result.split('\n').filter(l => l.trim())
+        const lines = stdout.split('\n').filter(l => l.trim())
         const results: { name: string; id: string; version: string; source: string }[] = []
         let headerPassed = false
         for (const line of lines) {
@@ -152,10 +166,10 @@ ipcMain.handle('winget:search', async (_, query: string) => {
 
 ipcMain.handle('winget:checkUpdate', async (_, id: string) => {
     try {
-        const result = execSync(`winget upgrade --id ${id} -e --accept-source-agreements`, {
-            encoding: 'utf-8', timeout: 30000, windowsHide: true,
+        const { stdout } = await execPromise(`winget upgrade --id ${id} -e --accept-source-agreements`, {
+            timeout: 30000, windowsHide: true,
         })
-        return result.toLowerCase().includes('available')
+        return stdout.toLowerCase().includes('available')
     } catch {
         return false
     }

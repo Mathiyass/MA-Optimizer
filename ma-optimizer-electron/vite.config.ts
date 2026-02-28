@@ -9,7 +9,27 @@ export default defineConfig({
     build: {
         outDir: 'dist-vite',
         emptyOutDir: true,
-        sourcemap: true,
+        sourcemap: false, // Disable for production to save space
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true,
+            },
+        },
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
+                    ui: [
+                        './src/components/ui/ConfirmDialog.tsx',
+                        './src/components/ui/ProgressModal.tsx',
+                        './src/components/ui/SearchOverlay.tsx',
+                    ],
+                },
+            },
+        },
+        chunkSizeWarningLimit: 1000,
     },
     resolve: {
         alias: {

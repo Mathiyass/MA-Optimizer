@@ -70,7 +70,7 @@ export function RingGauge({ value, label, sublabel, size = 100 }: RingGaugeProps
                 </svg>
                 {/* Center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={`text-lg font-bold ${color.text}`}>
+                    <span className="text-lg font-bold text-[var(--accent-cyan)]" style={{ textShadow: 'var(--glow-cyan)' }}>
                         {Math.round(value)}%
                     </span>
                 </div>

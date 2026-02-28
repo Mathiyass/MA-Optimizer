@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { execSync, spawn } from 'child_process'
 import { sendLog, sendError } from './logger'
 
@@ -249,3 +249,70 @@ ipcMain.handle('system:setPriority', async (_, pid: number, priority: number) =>
         return false
     }
 })
+
+// 🔧 FIX: Shift live stat polling to the main process and push to renderer (Debounce & Centralize)
+let isPollingSystemStats = false
+let systemStatsInterval: NodeJS.Timeout | null = null
+
+export function startSystemStatsPolling() {
+    if (isPollingSystemStats) return
+    isPollingSystemStats = true
+    systemStatsInterval = setInterval(async () => {
+        const windows = BrowserWindow.getAllWindows()
+        if (windows.length === 0) return
+        try {
+            const [load, mem, fs, net] = await Promise.all([
+                getSi().currentLoad(),
+                getSi().mem(),
+                process.platform === 'win32' ? null : getSi().fsStats(),
+                getSi().networkStats(),
+            ])
+
+            let diskData = { readPerSec: 0, writePerSec: 0, readBytesPerSec: 0, writeBytesPerSec: 0 }
+            if (process.platform === 'win32') {
+                diskData = {
+                    readPerSec: 0, writePerSec: 0,
+                    readBytesPerSec: diskIOMetrics.readBytesPerSec,
+                    writeBytesPerSec: diskIOMetrics.writeBytesPerSec,
+                }
+            } else if (fs && (fs.rx_sec !== null || fs.wx_sec !== null)) {
+                diskData = {
+                    readPerSec: fs.rx_sec || 0, writePerSec: fs.wx_sec || 0,
+                    readBytesPerSec: fs.rx_sec || 0, writeBytesPerSec: fs.wx_sec || 0,
+                }
+            } else {
+                const io = await getSi().disksIO()
+                diskData = {
+                    readPerSec: io?.rIO_sec || 0, writePerSec: io?.wIO_sec || 0,
+                    readBytesPerSec: io?.rIO_sec || 0, writeBytesPerSec: io?.wIO_sec || 0,
+                }
+            }
+
+            const primaryNet = net[0] || {}
+
+            const stats = {
+                cpu: {
+                    currentLoad: Math.round((load?.currentLoad || 0) * 10) / 10,
+                    cpus: load?.cpus?.map((c: any) => Math.round((c?.load || 0) * 10) / 10) || [],
+                },
+                ram: {
+                    total: mem?.total || 0,
+                    used: mem?.active || 0,
+                    free: mem?.available || 0,
+                    percent: Math.round(((mem?.active || 0) / (mem?.total || 1)) * 1000) / 10,
+                },
+                disk: diskData,
+                network: {
+                    rxSec: primaryNet.rx_sec || 0,
+                    txSec: primaryNet.tx_sec || 0,
+                }
+            }
+
+            windows.forEach((win: BrowserWindow) => {
+                if (!win.isDestroyed()) {
+                    win.webContents.send('system:stats', stats)
+                }
+            })
+        } catch { }
+    }, 2000)
+}

@@ -32,7 +32,7 @@ export function StatusBar() {
     const ramColor = ram.percent > 85 ? '#ff4444' : ram.percent > 60 ? '#ffd700' : '#00ff88'
 
     return (
-        <footer className="h-8 bg-header-bg/80 backdrop-blur-sm border-t border-card-border flex items-center px-4 shrink-0 select-none text-[11px]">
+        <footer className="h-8 glass-panel flex items-center px-4 shrink-0 select-none text-[11px] z-20">
             {/* System stats */}
             <div className="flex items-center gap-5 flex-1">
                 <div className="flex items-center gap-1.5 text-text-muted">

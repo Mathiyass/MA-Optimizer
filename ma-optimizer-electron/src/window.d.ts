@@ -64,8 +64,8 @@ export interface WindowApi {
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>
         clean: (categories: string[]) => Promise<{ freed: number }>
-        scanBrowsers: () => Promise<Array<{ id: string; name: string; detected: boolean; size: number }>>
-        cleanBrowsers: (browsers: string[], types: string[]) => Promise<{ freed: number }>
+        scanBrowsers: () => Promise<Array<{ id: string; name: string; detected: boolean; size: number; items: any[] }>>
+        cleanBrowsers: (selections: { id: string, types: string[] }[]) => Promise<{ freed: number }>
         getLargeFiles: (path: string, minSize: number) => Promise<any[]>
         getDiskUsage: (drive: string) => Promise<any>
         scanRegistry: () => Promise<any[]>
@@ -87,6 +87,7 @@ export interface WindowApi {
         upgradeAll: () => Promise<boolean>
         search: (query: string) => Promise<any[]>
         checkUpdate: (id: string) => Promise<boolean>
+        getIcon: (appName: string) => Promise<string | null>
     }
     repair: {
         runSfc: () => Promise<string>
@@ -102,6 +103,7 @@ export interface WindowApi {
         checkDisk: (drive: string) => Promise<string>
         runMemDiag: () => Promise<boolean>
     }
+    createRestorePoint: () => Promise<{ success: boolean; error?: string }>
     advanced: {
         getInstalledApps: () => Promise<any[]>
         removeApps: (names: string[]) => Promise<{ removed: number; total: number }>
@@ -146,6 +148,7 @@ export interface WindowApi {
     onLogLine: (cb: (line: string) => void) => void
     offLogLine: () => void
     onAdminStatus: (cb: (ok: boolean) => void) => void
+    onProgress: (cb: (data: { percent: number; message: string }) => void) => void
     openDialog: (opts: any) => Promise<any>
     saveDialog: (opts: any) => Promise<any>
 }

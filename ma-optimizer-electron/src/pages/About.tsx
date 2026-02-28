@@ -1,6 +1,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Crown, Github, Globe, Heart, Shield, Code, Zap, Star, ExternalLink } from 'lucide-react'
+import meImg from '../../img/me.jpg'
+import logoVideo from '../../img/logo.mp4'
 
 export function About() {
     const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
@@ -19,7 +21,7 @@ export function About() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,0,60,0.06),transparent_50%)]" />
                 <div className="relative z-10">
                     <motion.div
-                        className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-accent-cyan to-accent-violet flex items-center justify-center text-3xl font-extrabold text-white shadow-2xl"
+                        className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-2xl bg-black/40 border border-white/10 relative"
                         animate={{
                             boxShadow: [
                                 '0 0 20px rgba(0,255,222,0.2), 0 25px 50px rgba(0,0,0,0.3)',
@@ -29,7 +31,14 @@ export function About() {
                         }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                        MA
+                        <video
+                            src={logoVideo}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-[120%] h-[120%] object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                        />
                     </motion.div>
                     <h1 className="text-3xl font-bold text-text-primary mb-1">MA-Optimizer</h1>
                     <p className="text-accent-cyan text-sm font-medium mb-4">Version 7.1.0</p>
@@ -43,12 +52,12 @@ export function About() {
             <motion.div variants={item} className="bg-card-bg border border-card-border rounded-xl p-6 card-premium">
                 <h3 className="text-text-primary font-semibold mb-4 flex items-center gap-2"><Heart className="w-4 h-4 text-danger" />Created By</h3>
                 <div className="flex items-center gap-4 mb-4">
-                    <motion.div
-                        className="w-14 h-14 rounded-full bg-gradient-to-br from-accent-violet to-red-700 flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                    <motion.img
+                        src={meImg}
+                        alt="Mathisha Angirasa"
+                        className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-accent-violet/50"
                         whileHover={{ scale: 1.1 }}
-                    >
-                        MA
-                    </motion.div>
+                    />
                     <div>
                         <div className="text-text-primary font-semibold text-lg">Mathisha Angirasa</div>
                         <div className="text-text-muted text-sm">Windows Systems Engineer & Developer</div>
