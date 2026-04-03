@@ -1,11 +1,12 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { execSync, spawn } from 'child_process'
+import { execSync, spawn, spawnSync } from 'child_process'
 import { sendLog, sendError } from './logger'
+import { escapePS, spawnSyncChecked } from './utils'
 
 function streamCommand(cmd: string, args: string[], win: BrowserWindow | null): Promise<string> {
     return new Promise((resolve) => {
         let output = ''
-        const proc = spawn(cmd, args, { windowsHide: true, shell: true })
+        const proc = spawn(cmd, args, { windowsHide: true, shell: false })
         proc.stdout.on('data', (d: Buffer) => {
             const line = d.toString().trim()
             if (line) {
@@ -57,18 +58,20 @@ ipcMain.handle('repair:dism', async (_, action: string) => {
 // Create restore point
 ipcMain.handle('repair:createRestorePoint', async (_, desc: string) => {
     try {
-        const ps = `Checkpoint-Computer -Description "${desc || 'MA-Optimizer Backup'}" -RestorePointType "MODIFY_SETTINGS"`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 120000, windowsHide: true,
+        const safeDesc = escapePS(desc || 'MA-Optimizer Backup')
+        const ps = `Checkpoint-Computer -Description '${safeDesc}' -RestorePointType 'MODIFY_SETTINGS'`
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            timeout: 120000, encoding: 'utf-8',
         })
         sendLog(`[Repair] Restore point created: ${desc}`)
         return true
     } catch (e: any) {
         // Try via WMI if PowerShell cmdlet fails
         try {
-            const wmi = `(Get-WmiObject -List -Class SystemRestore -Namespace 'root\\default').CreateRestorePoint("${desc || 'MA-Optimizer Backup'}",12,100)`
-            execSync(`powershell -NonInteractive -NoProfile -Command "${wmi}"`, {
-                encoding: 'utf-8', timeout: 120000, windowsHide: true,
+            const safeDesc = escapePS(desc || 'MA-Optimizer Backup')
+            const wmi = `(Get-WmiObject -List -Class SystemRestore -Namespace 'root\\default').CreateRestorePoint('${safeDesc}',12,100)`
+            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', wmi], {
+                timeout: 120000, encoding: 'utf-8',
             })
             sendLog(`[Repair] Restore point created via WMI: ${desc}`)
             return true
@@ -83,9 +86,10 @@ ipcMain.handle('repair:createRestorePoint', async (_, desc: string) => {
 ipcMain.handle('repair:listRestorePoints', async () => {
     try {
         const ps = `Get-ComputerRestorePoint | Select-Object SequenceNumber,Description,CreationTime,RestorePointType | ConvertTo-Json`
-        const result = execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 15000, windowsHide: true,
-        }).trim()
+        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            encoding: 'utf-8', timeout: 15000,
+        })
+        const result = stdout.trim()
         if (!result) return []
         const parsed = JSON.parse(result)
         return Array.isArray(parsed) ? parsed : [parsed]
@@ -134,8 +138,8 @@ Start-Service cryptsvc -ErrorAction SilentlyContinue
 Start-Service msiserver -ErrorAction SilentlyContinue
 `
     try {
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps.replace(/\r?\n/g, '; ')}"`, {
-            encoding: 'utf-8', timeout: 60000, windowsHide: true,
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, '; ')], {
+            timeout: 60000, encoding: 'utf-8',
         })
         sendLog('[Repair] Windows Update components reset complete')
         return true
@@ -188,8 +192,8 @@ Remove-Item "$env:LOCALAPPDATA\\IconCache.db" -Force -ErrorAction SilentlyContin
 Remove-Item "$env:LOCALAPPDATA\\Microsoft\\Windows\\Explorer\\iconcache_*" -Force -ErrorAction SilentlyContinue
 Start-Process explorer
 `
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps.replace(/\r?\n/g, '; ')}"`, {
-            encoding: 'utf-8', timeout: 15000, windowsHide: true,
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, '; ')], {
+            timeout: 15000, encoding: 'utf-8',
         })
         sendLog('[Repair] Icon cache rebuilt')
         return true
@@ -198,8 +202,10 @@ Start-Process explorer
 
 // Check disk
 ipcMain.handle('repair:chkdsk', async (_, drive: string) => {
-    sendLog(`[Repair] Running chkdsk on ${drive || 'C:'}...`)
-    return await streamCommand('chkdsk', [drive || 'C:', '/scan'], getWin())
+    const safeDrive = (drive || 'C:').replace(/[^a-zA-Z0-9:]/g, '')
+    if (!safeDrive) return 'Invalid drive'
+    sendLog(`[Repair] Running chkdsk on ${safeDrive}...`)
+    return await streamCommand('chkdsk', [safeDrive, '/scan'], getWin())
 })
 
 // Memory diagnostic

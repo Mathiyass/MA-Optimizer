@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import { execSync, spawn } from 'child_process'
 import { sendLog, sendError } from './logger'
+import { escapePS, spawnSyncChecked } from './utils'
 
 let si: any = null
 function getSi() {
@@ -36,7 +37,7 @@ let diskIOMetrics = { readBytesPerSec: 0, writeBytesPerSec: 0 }
 
 function startTypeperfDiskIO() {
     if (process.platform !== 'win32') return
-    const tp = spawn('typeperf', ['\\PhysicalDisk(_Total)\\Disk Read Bytes/sec', '\\PhysicalDisk(_Total)\\Disk Write Bytes/sec', '-si', '1'], { windowsHide: true })
+    const tp = spawn('typeperf', ['\\PhysicalDisk(_Total)\\Disk Read Bytes/sec', '\\PhysicalDisk(_Total)\\Disk Write Bytes/sec', '-si', '1'], { windowsHide: true, shell: false })
 
     tp.stdout.on('data', (data) => {
         const lines = data.toString().split('\n')
@@ -227,8 +228,10 @@ ipcMain.handle('system:processes', async () => {
 
 ipcMain.handle('system:killProcess', async (_, pid: number) => {
     try {
-        execSync(`taskkill /PID ${pid} /F`, { timeout: 5000, windowsHide: true })
-        sendLog(`[System] Killed process PID ${pid}`)
+        const safePid = parseInt(String(pid))
+        if (isNaN(safePid)) return false
+        spawnSyncChecked('taskkill', ['/PID', String(safePid), '/F'], { timeout: 5000, encoding: 'utf-8' })
+        sendLog(`[System] Killed process PID ${safePid}`)
         return true
     } catch (e: any) {
         sendError(`Failed to kill process ${pid}: ${e.message}`)
@@ -238,9 +241,12 @@ ipcMain.handle('system:killProcess', async (_, pid: number) => {
 
 ipcMain.handle('system:setPriority', async (_, pid: number, priority: number) => {
     try {
-        const ps = `(Get-Process -Id ${pid}).PriorityClass = ${priority}`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 5000, windowsHide: true,
+        const safePid = parseInt(String(pid))
+        const safePriority = parseInt(String(priority))
+        if (isNaN(safePid) || isNaN(safePriority)) return false
+        const ps = `(Get-Process -Id ${safePid}).PriorityClass = ${safePriority}`
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            timeout: 5000, encoding: 'utf-8',
         })
         sendLog(`[System] Set process ${pid} priority to ${priority}`)
         return true

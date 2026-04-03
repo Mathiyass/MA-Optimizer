@@ -4,6 +4,7 @@ import * as path from 'path'
 import { app } from 'electron'
 import { sendLog, sendError } from './logger'
 import { loadBackups } from './registry'
+import { escapePS, spawnSyncChecked } from './utils'
 
 const backupDir = path.join(app.getPath('userData'), 'backups')
 
@@ -62,7 +63,6 @@ ipcMain.handle('backup:import', async (_, filePath: string) => {
 
 // Undo all changes — restores all original registry values
 ipcMain.handle('backup:undoAll', async () => {
-    const { execSync } = require('child_process')
     const backups = loadBackups()
     let restored = 0
     let failed = 0
@@ -71,11 +71,11 @@ ipcMain.handle('backup:undoAll', async () => {
         try {
             const { hive, path: regPath, name, originalValue } = entry as any
             if (originalValue !== null && originalValue !== undefined) {
-                const fullPath = `${hive}:\\${regPath}`
-                const val = typeof originalValue === 'string' ? `'${originalValue}'` : originalValue
-                const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${name}' -Value ${val} -Force`
-                execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-                    encoding: 'utf-8', timeout: 10000, windowsHide: true,
+                const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+                const val = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
+                const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${val} -Force`
+                spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                    timeout: 10000, encoding: 'utf-8',
                 })
                 restored++
             }
@@ -90,7 +90,6 @@ ipcMain.handle('backup:undoAll', async () => {
 
 // Undo last change only
 ipcMain.handle('backup:undoLast', async () => {
-    const { execSync } = require('child_process')
     const backups = loadBackups()
     const entries = Object.entries(backups)
     if (entries.length === 0) return { success: false, error: 'No changes to undo' }
@@ -103,11 +102,11 @@ ipcMain.handle('backup:undoLast', async () => {
 
     try {
         if (originalValue !== null && originalValue !== undefined) {
-            const fullPath = `${hive}:\\${regPath}`
-            const val = typeof originalValue === 'string' ? `'${originalValue}'` : originalValue
-            const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${name}' -Value ${val} -Force`
-            execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-                encoding: 'utf-8', timeout: 10000, windowsHide: true,
+            const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
+            const val = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
+            const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${val} -Force`
+            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                timeout: 10000, encoding: 'utf-8',
             })
         }
         // Remove this entry from backups
