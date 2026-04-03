@@ -4,7 +4,7 @@ import { sendLog, sendError } from './logger'
 import * as path from 'path'
 import * as fs from 'fs'
 import { app } from 'electron'
-import { escapePS, spawnSyncChecked } from './utils'
+import { escapePS, spawnSyncChecked, spawnPromise } from './utils'
 import { ipcRenderer } from 'electron' // wait, this is main process, use ipcMain
 
 let restorePointCreated = false
@@ -163,6 +163,9 @@ ipcMain.handle('registry:backup', async () => {
 ipcMain.handle('registry:restoreAll', async () => {
     const backups = loadBackups()
     let restored = 0
+    const batchSize = 20
+    let commands: string[] = []
+
     for (const [key, entry] of Object.entries(backups)) {
         try {
             const { hive, path: regPath, name, originalValue } = entry as any
@@ -170,15 +173,40 @@ ipcMain.handle('registry:restoreAll', async () => {
                 const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
                 const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
                 const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
-                spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-                    timeout: 10000, encoding: 'utf-8',
-                })
-                restored++
+                commands.push(ps)
+
+                if (commands.length >= batchSize) {
+                    const batchPs = commands.join('; ')
+                    try {
+                        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', batchPs], {
+                            timeout: 30000
+                        })
+                        restored += commands.length
+                    } catch (batchError: any) {
+                        sendError(`[Registry] Failed to restore a batch of ${commands.length} items: ${batchError.message}`)
+                    } finally {
+                        commands = [] // Always clear the queue
+                    }
+                }
             }
         } catch (e: any) {
-            sendError(`[Registry] Failed to restore ${key}: ${e.message}`)
+            sendError(`[Registry] Failed to prepare restore for ${key}: ${e.message}`)
         }
     }
+
+    // Run any remaining commands
+    if (commands.length > 0) {
+        try {
+            const batchPs = commands.join('; ')
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', batchPs], {
+                timeout: 30000
+            })
+            restored += commands.length
+        } catch (e: any) {
+            sendError(`[Registry] Failed to restore final batch of ${commands.length} items: ${e.message}`)
+        }
+    }
+
     sendLog(`[Registry] Restored ${restored} registry values`)
     return { success: true, restored }
 })

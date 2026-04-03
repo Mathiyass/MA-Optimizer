@@ -6,6 +6,10 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { checkIsAdmin } from './admin'
 
+import { spawn } from 'child_process'
+import { spawnSyncChecked, spawnPromise, escapePS } from './utils'
+
+
 const execAsync = promisify(exec)
 
 // 🔧 FIX: Shared PowerShell wrapper to handle escaping and execution
