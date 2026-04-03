@@ -148,7 +148,7 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'))
     }
 
-    // 🔧 FIX: Show only when ready to eliminate visual flicker/empty window
+
     mainWindow.once('ready-to-show', async () => {
         console.log('[Diagnostic] ready-to-show event triggered.');
         mainWindow?.show()
