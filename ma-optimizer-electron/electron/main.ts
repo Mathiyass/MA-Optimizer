@@ -310,13 +310,13 @@ try {
     ipcMain.handle('updates:check', async () => null)
 }
 
+// 🔧 FIX: Suppress noisy Chromium devtools autofill warnings
+app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
+
 // 🔧 FIX: App lifecycle properly handling startup operations
 app.whenReady().then(async () => {
     // 🔧 FIX: Add CSP headers via session.defaultSession
     const { session } = require('electron')
-
-    // 🔧 FIX: Suppress noisy Chromium devtools autofill warnings
-    app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
 
     session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
         callback({
