@@ -311,7 +311,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                 await pollLog();
             } else {
                 // Elevate via Start-Process
-                console.log('Elevating driver installer...');
+
                 const command = `Start-Process powershell -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', '${tempScript}' -Verb RunAs -Wait`
 
                 // Create a wrapper script to run the elevated command and wait
