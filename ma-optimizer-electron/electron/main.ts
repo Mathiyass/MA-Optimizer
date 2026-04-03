@@ -192,8 +192,22 @@ ipcMain.handle('dialog:save', async (_, opts) => {
 // System tool launcher
 ipcMain.handle('system:openPath', async (_, p: string) => {
     // 🔧 FIX: Validate paths being opened are legitimate to prevent directory traversal
-    if (typeof p !== 'string' || p.includes('..')) return false
-    shell.openPath(p)
+    if (typeof p !== 'string' || p.includes('..')) {
+        console.warn(`[Security] Blocked invalid path opening attempt: ${p}`)
+        return false
+    }
+
+    const normalizedPath = path.normalize(p)
+    if (!path.isAbsolute(normalizedPath)) {
+        console.warn(`[Security] Blocked non-absolute path opening attempt: ${p}`)
+        return false
+    }
+
+    const error = await shell.openPath(normalizedPath)
+    if (error) {
+        console.error(`[System] Failed to open path: ${normalizedPath}. Error: ${error}`)
+        return false
+    }
     return true
 })
 
