@@ -236,7 +236,6 @@ contextBridge.exposeInMainWorld('api', {
         },
         runMemDiag: () => ipcRenderer.invoke('repair:memdiag'),
     },
-    // 🔧 FIX: Dedicated bridge method for creating a restore point via the header UI button.
     createRestorePoint: () => ipcRenderer.invoke('create-restore-point'),
     advanced: {
         getInstalledApps: () => ipcRenderer.invoke('advanced:getApps'),

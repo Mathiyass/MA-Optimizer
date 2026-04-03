@@ -1,3 +1,4 @@
+import { spawnPromise } from './ipc/utils'
 import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -232,22 +233,14 @@ ipcMain.handle('system:runTool', async (_, cmd: string) => {
     }
 })
 
-// 🔧 FIX: Add dedicated restore point method
 ipcMain.handle('create-restore-point', async () => {
-    return new Promise((resolve) => {
-        const { exec } = require('child_process')
-        // Checks to ensure modifying settings is allowed. Uses elevated child process.
-        exec('powershell.exe -Command "Checkpoint-Computer -Description \'MA Optimizer Restore Point\' -RestorePointType \'MODIFY_SETTINGS\'"',
-            { windowsHide: true },
-            (error: any, stdout: string, stderr: string) => {
-                if (error || stderr) {
-                    console.error('[Restore Point Error]:', error || stderr)
-                    resolve({ success: false, error: error?.message || stderr })
-                } else {
-                    resolve({ success: true })
-                }
-            })
-    })
+    try {
+        await spawnPromise('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', "Checkpoint-Computer -Description 'MA Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'"])
+        return { success: true }
+    } catch (error: any) {
+        console.error('[Restore Point Error]:', error.message || error)
+        return { success: false, error: error.message || String(error) }
+    }
 })
 
 // 🔧 FIX: Fetch Winget app icons via Win32 API / Registry via IPC
