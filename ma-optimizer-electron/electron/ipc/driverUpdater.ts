@@ -13,7 +13,7 @@ async function runPowerShell(script: string) {
     const tempFile = join(tmpdir(), `ma_opt_${Date.now()}.ps1`)
     try {
         await writeFile(tempFile, script, 'utf8')
-        return await execAsync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tempFile}"`, {
+        return await spawnPromise('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', tempFile], {
             maxBuffer: 1024 * 1024 * 10
         })
     } finally {
@@ -91,6 +91,7 @@ ipcMain.handle('drivers:scanUpdates', async () => {
 ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
     try {
         const isAdmin = checkIsAdmin()
+        const safeUpdateId = String(updateId).replace(/[^a-zA-Z0-9-]/g, '')
 
         // If we are not admin, we need to elevate. We can't capture stdout directly from an elevated process,
         // so we write output to a temporary file and read it back.
@@ -110,12 +111,12 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                 $UpdateSession = New-Object -ComObject Microsoft.Update.Session
                 $UpdateSearcher = $UpdateSession.CreateUpdateSearcher()
                 
-                Write-Log (ConvertTo-Json @{ type = "debug"; step = "search"; message = "Searching for driver UpdateID: ${updateId}" } -Compress)
+                Write-Log (ConvertTo-Json @{ type = "debug"; step = "search"; message = "Searching for driver UpdateID: ${safeUpdateId}" } -Compress)
                 $SearcherResult = $UpdateSearcher.Search("IsInstalled=0 and Type='Driver'")
                 
                 $targetUpdate = $null
                 foreach ($update in $SearcherResult.Updates) {
-                    if ($update.Identity.UpdateID -eq '${updateId}') {
+                    if ($update.Identity.UpdateID -eq '${safeUpdateId}') {
                         $targetUpdate = $update
                         break
                     }
@@ -288,7 +289,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
         try {
             if (isAdmin) {
                 // If already admin, just run it
-                const child = exec(`powershell -NoProfile -ExecutionPolicy Bypass -File "${tempScript}"`)
+                const child = spawn('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', tempScript], { windowsHide: true })
 
                 // Keep polling while child runs
                 await new Promise((resolve) => {
@@ -317,7 +318,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                 const wrapperScript = join(tmpdir(), `ma_opt_wrapper_${Date.now()}.ps1`)
                 await writeFile(wrapperScript, command, 'utf8')
 
-                const child = exec(`powershell -NoProfile -ExecutionPolicy Bypass -File "${wrapperScript}"`)
+                const child = spawn('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', wrapperScript], { windowsHide: true })
 
                 // Poll logs while the elevated process runs
                 await new Promise((resolve) => {
@@ -354,9 +355,10 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
 // 4. Backup drivers
 ipcMain.handle('drivers:backup', async (_, folderPath: string) => {
     try {
-        await mkdir(folderPath, { recursive: true })
-        const command = `dism /online /export-driver /destination:\\"${folderPath}\\"`
-        await execAsync(`powershell -NoProfile -Command "Start-Process powershell -ArgumentList \\"-NoProfile -Command ${command}\\" -Verb RunAs -Wait"`)
+        const safeFolderPath = String(folderPath)
+        await mkdir(safeFolderPath, { recursive: true })
+        const command = `dism /online /export-driver /destination:'${escapePS(safeFolderPath)}'`
+        await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile -Command ${command}' -Verb RunAs -Wait`])
         return true
     } catch (error) {
         console.error('Failed to backup drivers:', error)

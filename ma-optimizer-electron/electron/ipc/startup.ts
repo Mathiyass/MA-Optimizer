@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { escapePS, execPromise } from './utils'
+import { escapePS, spawnPromise } from './utils'
 import * as path from 'path'
 import * as fs from 'fs'
 import { sendLog, sendError } from './logger'
@@ -15,8 +15,8 @@ interface StartupItem {
 
 async function runPS(cmd: string): Promise<string> {
     try {
-        const { stdout } = await execPromise(`powershell -NonInteractive -NoProfile -Command "${cmd}"`, {
-            timeout: 10000, windowsHide: true,
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', cmd], {
+            timeout: 10000,
         })
         return stdout.trim()
     } catch {
@@ -158,7 +158,7 @@ ipcMain.handle('startup:delete', async (_, id: string) => {
 
 ipcMain.handle('startup:add', async (_, name: string, exePath: string) => {
     try {
-        await runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Value '"${escapePS(exePath)}"'`)
+        await runPS(`Set-ItemProperty -Path 'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run' -Name '${escapePS(name)}' -Value '"${escapePS(exePath).replace(/"/g, '\"\"')}"'`)
         sendLog(`[Startup] Added ${name}: ${exePath}`)
         return true
     } catch (e: any) {

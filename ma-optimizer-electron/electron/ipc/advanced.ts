@@ -1,17 +1,19 @@
 import { ipcMain, BrowserWindow, shell } from 'electron'
-import { execSync } from 'child_process'
+import { execSync, spawnSync } from 'child_process'
 import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs'
 import { sendLog, sendError } from './logger'
+import { escapePS, spawnSyncChecked } from './utils'
 
 // Get installed UWP apps
 ipcMain.handle('advanced:getApps', async () => {
     try {
         const ps = `Get-AppxPackage -AllUsers | Select-Object Name,PackageFullName,InstallLocation,Publisher,IsFramework | Where-Object { $_.IsFramework -ne $true } | ConvertTo-Json -Depth 2`
-        const result = execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
-        }).trim()
+        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            encoding: 'utf-8', timeout: 60000, maxBuffer: 10 * 1024 * 1024,
+        })
+        const result = stdout.trim()
         if (!result) return []
         const parsed = JSON.parse(result)
         return (Array.isArray(parsed) ? parsed : [parsed]).map((a: any) => ({
@@ -31,9 +33,9 @@ ipcMain.handle('advanced:removeApps', async (_, names: string[]) => {
     let removed = 0
     for (const name of names) {
         try {
-            const ps = `Get-AppxPackage -AllUsers '*${name}*' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue`
-            execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-                encoding: 'utf-8', timeout: 30000, windowsHide: true,
+            const ps = `Get-AppxPackage -AllUsers '*${escapePS(name)}*' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue`
+            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                timeout: 30000, encoding: 'utf-8',
             })
             removed++
             sendLog(`[Advanced] Removed ${name}`)
@@ -49,9 +51,10 @@ ipcMain.handle('advanced:removeApps', async (_, names: string[]) => {
 ipcMain.handle('advanced:getFeatures', async () => {
     try {
         const ps = `Get-WindowsOptionalFeature -Online | Select-Object FeatureName,State | ConvertTo-Json`
-        const result = execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
-        }).trim()
+        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            encoding: 'utf-8', timeout: 60000, maxBuffer: 10 * 1024 * 1024,
+        })
+        const result = stdout.trim()
         if (!result) return []
         const parsed = JSON.parse(result)
         return (Array.isArray(parsed) ? parsed : [parsed]).map((f: any) => ({
@@ -67,11 +70,12 @@ ipcMain.handle('advanced:getFeatures', async () => {
 // Toggle Windows Feature
 ipcMain.handle('advanced:toggleFeature', async (_, name: string, enable: boolean) => {
     try {
+        const safeName = escapePS(name)
         const cmd = enable
-            ? `Enable-WindowsOptionalFeature -Online -FeatureName '${name}' -All -NoRestart`
-            : `Disable-WindowsOptionalFeature -Online -FeatureName '${name}' -NoRestart`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${cmd}"`, {
-            encoding: 'utf-8', timeout: 120000, windowsHide: true,
+            ? `Enable-WindowsOptionalFeature -Online -FeatureName '${safeName}' -All -NoRestart`
+            : `Disable-WindowsOptionalFeature -Online -FeatureName '${safeName}' -NoRestart`
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', cmd], {
+            timeout: 120000, encoding: 'utf-8',
         })
         sendLog(`[Advanced] ${enable ? 'Enabled' : 'Disabled'} feature: ${name}`)
         return true
@@ -84,9 +88,14 @@ ipcMain.handle('advanced:toggleFeature', async (_, name: string, enable: boolean
 // BCDedit
 ipcMain.handle('advanced:bcdedit', async (_, args: string) => {
     try {
-        const result = execSync(`bcdedit ${args}`, {
-            encoding: 'utf-8', timeout: 10000, windowsHide: true,
-        }).trim()
+        // Since bcdedit doesn't have a stable list of subcommands I can whitelist,
+        // and it is a string from renderer, I should at least use spawnSync to avoid shell injection.
+        // But bcdedit args can be multiple.
+        const argArray = String(args).split(' ').filter(a => a.trim())
+        const { stdout } = spawnSyncChecked('bcdedit', argArray, {
+            encoding: 'utf-8', timeout: 10000,
+        })
+        const result = stdout.trim()
         sendLog(`[Advanced] bcdedit ${args}`)
         return result
     } catch (e: any) {
@@ -115,9 +124,9 @@ ipcMain.handle('advanced:godMode', async () => {
 // Change computer name
 ipcMain.handle('advanced:computerName', async (_, name: string) => {
     try {
-        const ps = `Rename-Computer -NewName '${name}' -Force`
-        execSync(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            encoding: 'utf-8', timeout: 15000, windowsHide: true,
+        const ps = `Rename-Computer -NewName '${escapePS(name)}' -Force`
+        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            timeout: 15000, encoding: 'utf-8',
         })
         sendLog(`[Advanced] Computer name changed to ${name} — restart required`)
         return true
