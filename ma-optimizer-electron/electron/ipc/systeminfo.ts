@@ -322,3 +322,11 @@ export function startSystemStatsPolling() {
         } catch { }
     }, 2000)
 }
+
+export function stopSystemStatsPolling() {
+    if (systemStatsInterval) {
+        clearInterval(systemStatsInterval)
+        systemStatsInterval = null
+    }
+    isPollingSystemStats = false
+}
