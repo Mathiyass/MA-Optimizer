@@ -221,16 +221,19 @@ ipcMain.handle('cleaner:scanBrowsers', async () => {
         let detected = false
         const scanItems = await Promise.all(b.items.map(async item => {
             let itemSize = 0
+            const promises: Promise<number>[] = []
             for (const profile of b.profiles) {
                 if (fs.existsSync(profile)) {
                     detected = true
                     // if sub is empty, it means we scan the profile root itself (like Firefox)
                     const targets = item.sub.length > 0 ? item.sub.map(s => path.join(profile, s)) : [profile]
                     for (const t of targets) {
-                        itemSize += await getDirSize(t)
+                        promises.push(getDirSize(t))
                     }
                 }
             }
+            const sizes = await Promise.all(promises)
+            itemSize += sizes.reduce((acc, curr) => acc + curr, 0)
             return { id: item.id, name: item.name, size: itemSize }
         }))
         const totalSize = scanItems.reduce((acc, curr) => acc + curr.size, 0)
