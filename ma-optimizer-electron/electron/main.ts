@@ -95,7 +95,6 @@ function createWindow() {
         backgroundColor: '#0d0f1a', // 🔧 FIX: Match new design system shell background
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            // 🔧 FIX: Ensure contextIsolation remains true, nodeIntegration false, and sandbox enabled for secure IPC
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
