@@ -1,5 +1,6 @@
+import { spawnPromise, escapePS } from './utils'
 import { ipcMain, BrowserWindow } from 'electron'
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process'
 import { promisify } from 'util'
 import { mkdir, writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
