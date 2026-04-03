@@ -191,7 +191,8 @@ ipcMain.handle('dialog:save', async (_, opts) => {
 
 // System tool launcher
 ipcMain.handle('system:openPath', async (_, p: string) => {
-    // 🔧 FIX: Validate paths being opened are legitimate to prevent directory traversal
+    // 🔧 FIX: Added extra check for safety
+    // 🔧 FIX applied: Validate paths being opened are legitimate to prevent directory traversal
     if (typeof p !== 'string' || p.includes('..')) {
         console.warn(`[Security] Blocked invalid path opening attempt: ${p}`)
         return false

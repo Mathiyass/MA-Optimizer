@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow, shell } from 'electron'
-import { execSync, exec } from 'child_process'
+import { execSync, exec, spawn } from "child_process"
 import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs'
@@ -22,15 +22,15 @@ async function run(cmd: string, args: string[]): Promise<string> {
     return new Promise(resolve => {
         const proc = spawn(cmd, args, { timeout: 30000, windowsHide: true })
         let stdout = ''
-        proc.stdout?.on('data', (d) => stdout += d.toString())
+        proc.stdout?.on("data", (d: Buffer) => stdout += d.toString())
         proc.on('close', () => resolve(stdout))
-        proc.on('error', (err) => resolve(err.message))
+        proc.on("error", (err: Error) => resolve(err.message))
     })
 }
 
 function reg(regPath: string, name: string, value: string | number, type = 'REG_DWORD') {
     try {
-        spawnSyncChecked('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { timeout: 10000 })
+        spawnSyncChecked('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { timeout: 10000, encoding: "utf-8" })
     } catch { }
 }
 
@@ -231,7 +231,7 @@ Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
 [TimerRes]::Set(${safeNs})
 `
         spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, ' ')], {
-            timeout: 10000,
+            timeout: 10000, encoding: "utf-8",
         })
         send(`Timer resolution set to ${ns / 10000}ms`)
         return true
