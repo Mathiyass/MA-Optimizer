@@ -5,6 +5,7 @@ import { RingGauge } from '../components/ui/RingGauge'
 import { useSystemStore } from '../store/systemStore'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
+import { calculateHealthScore } from '../utils/health'
 
 function formatBytes(b: number) {
     if (!b) return '0 B'
@@ -37,15 +38,6 @@ function AnimatedNumber({ value, suffix = '', decimals = 0 }: { value: number; s
     }, [value])
 
     return <>{display.toFixed(decimals)}{suffix}</>
-}
-
-/** System Health Score — weighted composite */
-function calculateHealthScore(cpu: number, ramPercent: number, applied: number): number {
-    // Low CPU usage = good, Low RAM usage = good, more tweaks = better
-    const cpuScore = Math.max(0, 100 - cpu)
-    const ramScore = Math.max(0, 100 - ramPercent)
-    const tweakScore = Math.min(applied * 2, 100) // max 50 tweaks = 100
-    return Math.round(cpuScore * 0.35 + ramScore * 0.35 + tweakScore * 0.3)
 }
 
 function HealthGauge({ score }: { score: number }) {
