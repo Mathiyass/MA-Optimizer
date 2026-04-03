@@ -1,9 +1,9 @@
-import { exec, spawn, spawnSync, SpawnSyncOptionsWithEncoding } from 'child_process'
+import { exec, spawn, spawnSync, SpawnSyncOptionsWithStringEncoding } from 'child_process'
 import { promisify } from 'util'
 
 export const execPromise = promisify(exec)
 
-export function spawnSyncChecked(cmd: string, args: string[], options: SpawnSyncOptionsWithEncoding<string> = { encoding: 'utf-8' }): { stdout: string, stderr: string } {
+export function spawnSyncChecked(cmd: string, args: string[], options: SpawnSyncOptionsWithStringEncoding = { encoding: 'utf-8' }): { stdout: string, stderr: string } {
     const result = spawnSync(cmd, args, { ...options, windowsHide: true })
     if (result.status !== 0 && result.status !== null) {
         throw new Error(`Process ${cmd} exited with code ${result.status}\n${result.stderr || ''}`)

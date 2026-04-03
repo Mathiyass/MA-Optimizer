@@ -1,10 +1,11 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process'
 import { promisify } from 'util'
 import { mkdir, writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { checkIsAdmin } from './admin'
+import { spawnPromise, escapePS } from './utils'
 
 const execAsync = promisify(exec)
 
