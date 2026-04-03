@@ -1,11 +1,10 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { exec, spawn } from 'child_process'
+import { exec } from 'child_process'
 import { promisify } from 'util'
 import { mkdir, writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { checkIsAdmin } from './admin'
-import { spawnPromise, escapePS } from './utils'
 
 const execAsync = promisify(exec)
 
@@ -26,12 +25,12 @@ async function runPowerShell(script: string) {
 ipcMain.handle('drivers:getInstalled', async () => {
     try {
         const script = `
-            $drivers = Get-WmiObject Win32_PnPSignedDriver | Where-Object { 
-                $_.DeviceName -ne $null -and 
-                $_.DriverVersion -ne $null -and 
+            $drivers = Get-WmiObject Win32_PnPSignedDriver | Where-Object {
+                $_.DeviceName -ne $null -and
+                $_.DriverVersion -ne $null -and
                 $_.DeviceClass -notmatch 'System|Computer|Processor|BluetoothVirtual|Volume|Battery'
             };
-            
+
             $results = @();
             foreach ($driver in $drivers) {
                 $results += [PSCustomObject]@{
@@ -63,7 +62,7 @@ ipcMain.handle('drivers:scanUpdates', async () => {
             $UpdateSession = New-Object -ComObject Microsoft.Update.Session;
             $UpdateSearcher = $UpdateSession.CreateUpdateSearcher();
             $SearcherResult = $UpdateSearcher.Search("IsInstalled=0 and Type='Driver'");
-            
+
             $updates = @();
             foreach ($update in $SearcherResult.Updates) {
                 $cleanTitle = ($update.Title -replace '\s+', ' ').Trim()
@@ -101,20 +100,20 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
         const script = `
             $ErrorActionPreference = 'Stop'
             $logFile = "${logFile}"
-            
+
             function Write-Log {
                 param([string]$json)
                 Add-Content -Path $logFile -Value $json
             }
-            
+
             try {
                 Write-Log (ConvertTo-Json @{ type = "debug"; step = "init"; message = "Creating Update Session..." } -Compress)
                 $UpdateSession = New-Object -ComObject Microsoft.Update.Session
                 $UpdateSearcher = $UpdateSession.CreateUpdateSearcher()
-                
+
                 Write-Log (ConvertTo-Json @{ type = "debug"; step = "search"; message = "Searching for driver UpdateID: ${safeUpdateId}" } -Compress)
                 $SearcherResult = $UpdateSearcher.Search("IsInstalled=0 and Type='Driver'")
-                
+
                 $targetUpdate = $null
                 foreach ($update in $SearcherResult.Updates) {
                     if ($update.Identity.UpdateID -eq '${safeUpdateId}') {
@@ -122,7 +121,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                         break
                     }
                 }
-                
+
                 if ($null -eq $targetUpdate) {
                     Write-Log (ConvertTo-Json @{ type = "result"; success = $false; error = "Update not found in current search results." } -Compress)
                     exit
@@ -136,7 +135,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                 Write-Log (ConvertTo-Json @{ type = "debug"; step = "collection"; message = "Adding to collection..." } -Compress)
                 $updateColl = New-Object -ComObject Microsoft.Update.UpdateColl
                 $updateColl.Add($targetUpdate) | Out-Null
-                
+
                 if (-not $targetUpdate.IsDownloaded) {
                     Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_init"; message = "Starting Download..." } -Compress)
                     $downloader = $UpdateSession.CreateUpdateDownloader()
@@ -153,9 +152,9 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                             try {
                                 $dlProgress = $downloader.GetProgress()
                                 if ($null -ne $dlProgress) {
-                                    Write-Log (ConvertTo-Json @{ 
-                                        type = "progress"; 
-                                        percent = [int]($dlProgress.CurrentUpdatePercentComplete); 
+                                    Write-Log (ConvertTo-Json @{
+                                        type = "progress";
+                                        percent = [int]($dlProgress.CurrentUpdatePercentComplete);
                                         message = "Downloading Driver...";
                                         stage = "download"
                                     } -Compress)
@@ -170,7 +169,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                             $downloader.Download() | Out-Null
                         } catch {
                             Write-Log (ConvertTo-Json @{ type = "debug"; step = "download_error"; message = "Synchronous Download failed: $($_.Exception.Message | Out-String)" } -Compress)
-                            Write-Log (ConvertTo-Json @{ 
+                            Write-Log (ConvertTo-Json @{
                                 type = "result";
                                 success = $false;
                                 error = "Synchronous Download failed: $($_.Exception.Message)"
@@ -179,16 +178,16 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                         }
                     }
                 }
-                
+
                 Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "Starting Installation..." } -Compress)
                 $installer = $UpdateSession.CreateUpdateInstaller()
-                
+
                 $updateColl = New-Object -ComObject Microsoft.Update.UpdateColl
                 $updateColl.Add($targetUpdate) | Out-Null
                 Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_init"; message = "Update collection count: $($updateColl.Count)" } -Compress)
-                
+
                 $installer.Updates = $updateColl
-                
+
                 $installJob = $null
                 try {
                     $installJob = $installer.BeginInstall($null, $null)
@@ -201,9 +200,9 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                         try {
                             $instProgress = $installer.GetProgress()
                             if ($null -ne $instProgress) {
-                                Write-Log (ConvertTo-Json @{ 
-                                    type = "progress"; 
-                                    percent = [int]($instProgress.CurrentUpdatePercentComplete); 
+                                Write-Log (ConvertTo-Json @{
+                                    type = "progress";
+                                    percent = [int]($instProgress.CurrentUpdatePercentComplete);
                                     message = "Installing Driver...";
                                     stage = "install"
                                 } -Compress)
@@ -220,7 +219,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                         Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_sync"; message = "Sync Install Finished. ResultCode: $($result.ResultCode)" } -Compress)
                     } catch {
                         Write-Log (ConvertTo-Json @{ type = "debug"; step = "install_error"; message = "Synchronous Install failed: $($_.Exception.Message | Out-String)" } -Compress)
-                        Write-Log (ConvertTo-Json @{ 
+                        Write-Log (ConvertTo-Json @{
                             type = "result";
                             success = $false;
                             error = "Synchronous Install failed: $($_.Exception.Message)"
@@ -228,8 +227,8 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                         exit
                     }
                 }
-                
-                Write-Log (ConvertTo-Json @{ 
+
+                Write-Log (ConvertTo-Json @{
                     type = "result";
                     success = ($result.ResultCode -eq 2 -or $result.ResultCode -eq 3);
                     resultCode = $result.ResultCode;

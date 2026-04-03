@@ -1,0 +1,10 @@
+--- ma-optimizer-electron/electron/main.ts
++++ ma-optimizer-electron/electron/main.ts
+@@ -2,6 +2,7 @@
+ import * as path from 'path'
+ import * as fs from 'fs'
+
++import { escapePS, spawnPromise } from './ipc/utils'
+ // IPC handler imports
+ import './ipc/admin'
+ import './ipc/logger'

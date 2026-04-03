@@ -1,0 +1,12 @@
+--- ma-optimizer-electron/electron/ipc/utils.ts
++++ ma-optimizer-electron/electron/ipc/utils.ts
+@@ -1,7 +1,7 @@
+-import { exec, spawn, spawnSync, SpawnSyncOptionsWithEncoding } from 'child_process'
++import { exec, spawn, spawnSync, SpawnSyncOptionsWithStringEncoding } from 'child_process'
+ import { promisify } from 'util'
+
+ export const execPromise = promisify(exec)
+
+-export function spawnSyncChecked(cmd: string, args: string[], options: SpawnSyncOptionsWithEncoding<string> = { encoding: 'utf-8' }): { stdout: string, stderr: string } {
++export function spawnSyncChecked(cmd: string, args: string[], options: any = { encoding: 'utf-8' }): { stdout: string, stderr: string } {
+     const result = spawnSync(cmd, args, { ...options, windowsHide: true })

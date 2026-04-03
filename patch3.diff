@@ -1,0 +1,20 @@
+--- ma-optimizer-electron/electron/main.ts
++++ ma-optimizer-electron/electron/main.ts
+@@ -286,9 +286,13 @@
+     } catch { Write-Output "" }
+ } else { Write-Output "" }
+ `
+-        require('child_process').exec(`powershell -NoProfile -Command "${psCommand.replace(/\n/g, ' ')}"`, { windowsHide: true, maxBuffer: 1024 * 1024 * 10 }, (err: any, stdout: string) => {
+-            if (err || !stdout || !stdout.trim()) resolve(null)
+-            else resolve(`data:image/png;base64,${stdout.trim()}`)
+-        })
++        spawnPromise('powershell', ['-NoProfile', '-Command', psCommand])
++            .then(({ stdout }) => {
++                if (!stdout || !stdout.trim()) resolve(null)
++                else resolve(`data:image/png;base64,${stdout.trim()}`)
++            })
++            .catch(() => {
++                resolve(null)
++            })
+     })
+ })

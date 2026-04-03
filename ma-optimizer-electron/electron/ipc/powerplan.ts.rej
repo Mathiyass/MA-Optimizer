@@ -1,0 +1,13 @@
+--- ma-optimizer-electron/electron/ipc/powerplan.ts
++++ ma-optimizer-electron/electron/ipc/powerplan.ts
+@@ -22,9 +22,9 @@
+         const proc = spawn('powercfg', ['/list'], { windowsHide: true })
+         let stdout = ''
+         let stderr = ''
+-        proc.stdout?.on('data', (d) => stdout += d.toString())
+-        proc.stderr?.on('data', (err) => stderr += err.toString())
++        proc.stdout?.on('data', (d: any) => stdout += d.toString())
++        proc.stderr?.on('data', (err: any) => stderr += err.toString())
+
+         proc.on('close', (code) => {
+             if (code !== 0) {

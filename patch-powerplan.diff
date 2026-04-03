@@ -1,0 +1,32 @@
+--- ma-optimizer-electron/electron/ipc/powerplan.ts
++++ ma-optimizer-electron/electron/ipc/powerplan.ts
+@@ -22,9 +22,9 @@
+     return new Promise(resolve => {
+         const proc = spawn(cmd, args, { timeout: 30000, windowsHide: true })
+         let stdout = ''
+-        proc.stdout?.on('data', (d) => stdout += d.toString())
++        proc.stdout?.on('data', (d: any) => stdout += d.toString())
+         proc.on('close', () => resolve(stdout))
+-        proc.on('error', (err) => resolve(err.message))
++        proc.on('error', (err: any) => resolve(err.message))
+     })
+ }
+
+@@ -30,7 +30,7 @@
+
+ function reg(regPath: string, name: string, value: string | number, type = 'REG_DWORD') {
+     try {
+-        spawnSyncChecked('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { timeout: 10000 })
++        spawnSyncChecked('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { encoding: 'utf-8', timeout: 10000 })
+     } catch { }
+ }
+
+@@ -230,7 +230,8 @@
+ [TimerRes]::Set(${safeNs})
+ `
+         spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, ' ')], {
+             timeout: 10000,
++            encoding: 'utf-8',
+         })
+         send(`Timer resolution set to ${ns / 10000}ms`)
+         return true

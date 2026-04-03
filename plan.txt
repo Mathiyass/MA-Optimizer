@@ -1,0 +1,4 @@
+1. Import `escapePS` and `spawnPromise` from `./ipc/utils` in `ma-optimizer-electron/electron/main.ts`.
+2. Update `winget:getIcon` IPC handler to use `escapePS(appName)` and encapsulate it in single quotes `$appName = '${escapePS(appName)}'`.
+3. Refactor the shell execution in `winget:getIcon` to use `spawnPromise('powershell', ['-NoProfile', '-Command', psCommand.replace(/\n/g, ' ')])` instead of `require('child_process').exec` to prevent shell injection.
+4. Run tests and lint checks to verify the fix works and doesn't break anything.

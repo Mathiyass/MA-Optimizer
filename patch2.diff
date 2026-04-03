@@ -1,0 +1,14 @@
+--- ma-optimizer-electron/electron/main.ts
++++ ma-optimizer-electron/electron/main.ts
+@@ -254,10 +254,8 @@
+ ipcMain.handle('winget:getIcon', async (_, appName: string) => {
+     return new Promise((resolve) => {
+         if (!appName) return resolve(null);
+-        // Cleanse the input string for powershell injection safety
+-        const safeName = appName.replace(/"/g, '`"').replace(/'/g, "''");
+         const psCommand = `
+-$appName = "${safeName}"
++$appName = '${escapePS(appName)}'
+ $paths = @(
+     "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*",
+     "HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*",
