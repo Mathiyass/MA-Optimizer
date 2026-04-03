@@ -99,7 +99,7 @@ function createWindow() {
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
-            backgroundThrottling: false, // 🔧 FIX: Prevent background throttle for system tool
+            backgroundThrottling: false, // Prevent background throttling since this application is a system tool that needs to run consistently
         },
         icon: path.join(__dirname, '../../public/icon.ico'),
         show: false, // 🔧 FIX: Correctly kept false initially to show only when ready
