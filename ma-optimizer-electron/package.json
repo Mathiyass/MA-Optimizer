@@ -22,7 +22,8 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "lint": "eslint src electron --ext .ts,.tsx",
     "electron:dev": "npm run dev",
-    "electron:build": "npm run dist:installer"
+    "electron:build": "npm run dist:installer",
+    "test": "node --experimental-strip-types --test src/utils/health.test.ts"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
