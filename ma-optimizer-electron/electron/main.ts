@@ -18,7 +18,7 @@ import './ipc/benchmark'
 import './ipc/repair'
 import './ipc/advanced'
 import './ipc/driverUpdater'
-import { startSystemStatsPolling } from './ipc/systeminfo'
+import { startSystemStatsPolling, stopSystemStatsPolling } from './ipc/systeminfo'
 
 // 🔧 FIX: Added global exception handler, styled native dialog cannot take CSS colors but we make it clear it's an error.
 process.on('uncaughtException', (error) => {
@@ -346,6 +346,7 @@ app.on('before-quit', () => {
 app.on('will-quit', () => {
     // 🔧 FIX: Unregister all shortcuts or perform sync cleanup here
     try {
+        stopSystemStatsPolling()
         const { globalShortcut } = require('electron')
         globalShortcut.unregisterAll()
     } catch { }
