@@ -102,7 +102,7 @@ function createWindow() {
             backgroundThrottling: false, // 🔧 FIX: Prevent background throttle for system tool
         },
         icon: path.join(__dirname, '../../public/icon.ico'),
-        show: false, // 🔧 FIX: Correctly kept false initially to show only when ready
+        show: false, // Correctly kept false initially to show only when ready
         titleBarStyle: 'hidden',
     })
 
@@ -148,7 +148,7 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'))
     }
 
-    // 🔧 FIX: Show only when ready to eliminate visual flicker/empty window
+    // Show only when ready to eliminate visual flicker/empty window
     mainWindow.once('ready-to-show', async () => {
         console.log('[Diagnostic] ready-to-show event triggered.');
         mainWindow?.show()
