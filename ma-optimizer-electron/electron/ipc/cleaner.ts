@@ -276,24 +276,32 @@ ipcMain.handle('cleaner:cleanBrowsers', async (_, browserSelections: { id: strin
         }
     ]
 
+    const promises: Promise<number>[] = []
+
     for (const selection of browserSelections) {
         const bid = selection.id
         const browserDef = browsers.find(b => b.id === bid)
         if (!browserDef) continue
+
         for (const type of selection.types) {
             const subs = (browserDef.items as any)[type]
             if (subs) {
                 for (const profile of browserDef.profiles) {
                     const targets = subs.length > 0 ? subs.map((s: string) => path.join(profile, s)) : [profile]
                     for (const t of targets) {
-                        const freed = await deleteDir(t)
-                        totalFreed += freed
-                        if (freed > 0) sendLog(`[Cleaner] Cleaned ${bid} ${type}: ${(freed / 1024 / 1024).toFixed(1)} MB`)
+                        promises.push((async () => {
+                            const freed = await deleteDir(t)
+                            if (freed > 0) sendLog(`[Cleaner] Cleaned ${bid} ${type}: ${(freed / 1024 / 1024).toFixed(1)} MB`)
+                            return freed
+                        })())
                     }
                 }
             }
         }
     }
+
+    const results = await Promise.all(promises)
+    totalFreed = results.reduce((acc, f) => acc + f, 0)
 
     return { freed: totalFreed }
 })
