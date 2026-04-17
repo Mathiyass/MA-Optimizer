@@ -1,11 +1,11 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import { spawn } from 'child_process'
-import { execPromise } from './utils'
+import { spawnPromise } from './utils'
 import { sendLog, sendError } from './logger'
 
 ipcMain.handle('winget:isInstalled', async () => {
     try {
-        const { stdout } = await execPromise('winget --version', { timeout: 10000, windowsHide: true })
+        const { stdout } = await spawnPromise('winget', ['--version'], { timeout: 10000, windowsHide: true })
         return { installed: true, version: stdout.trim() }
     } catch {
         return { installed: false, version: null }
@@ -14,7 +14,7 @@ ipcMain.handle('winget:isInstalled', async () => {
 
 ipcMain.handle('winget:listInstalled', async () => {
     try {
-        const { stdout } = await execPromise('winget list --accept-source-agreements', {
+        const { stdout } = await spawnPromise('winget', ['list', '--accept-source-agreements'], {
             timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
         })
         const lines = stdout.split('\n').filter(l => l.trim())
@@ -47,7 +47,7 @@ ipcMain.handle('winget:install', async (event, id: string) => {
         const proc = spawn('winget', ['install', '--id', id, '-e', '--silent',
             '--accept-source-agreements', '--accept-package-agreements'], {
             windowsHide: true,
-            shell: true,
+            shell: false,
         })
         let currentStage: 'download' | 'install' = 'download'
         proc.stdout.on('data', (d: Buffer) => {
@@ -92,7 +92,7 @@ ipcMain.handle('winget:uninstall', async (event, id: string) => {
         const proc = spawn('winget', ['uninstall', '--id', id, '-e', '--silent',
             '--accept-source-agreements'], {
             windowsHide: true,
-            shell: true,
+            shell: false,
         })
         proc.stdout.on('data', (d: Buffer) => {
             const line = d.toString().trim()
@@ -117,7 +117,7 @@ ipcMain.handle('winget:upgradeAll', async (event) => {
         const proc = spawn('winget', ['upgrade', '--all', '--silent',
             '--accept-source-agreements', '--accept-package-agreements'], {
             windowsHide: true,
-            shell: true,
+            shell: false,
         })
         proc.stdout.on('data', (d: Buffer) => {
             const line = d.toString().trim()
@@ -135,8 +135,8 @@ ipcMain.handle('winget:upgradeAll', async (event) => {
 
 ipcMain.handle('winget:search', async (_, query: string) => {
     try {
-        const { stdout } = await execPromise(`winget search "${query}" --accept-source-agreements`, {
-            timeout: 30000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
+        const { stdout } = await spawnPromise('winget', ['search', query, '--accept-source-agreements'], {
+            timeout: 60000, windowsHide: true, maxBuffer: 10 * 1024 * 1024,
         })
         const lines = stdout.split('\n').filter(l => l.trim())
         const results: { name: string; id: string; version: string; source: string }[] = []
@@ -166,7 +166,7 @@ ipcMain.handle('winget:search', async (_, query: string) => {
 
 ipcMain.handle('winget:checkUpdate', async (_, id: string) => {
     try {
-        const { stdout } = await execPromise(`winget upgrade --id ${id} -e --accept-source-agreements`, {
+        const { stdout } = await spawnPromise('winget', ['upgrade', '--id', id, '-e', '--accept-source-agreements'], {
             timeout: 30000, windowsHide: true,
         })
         return stdout.toLowerCase().includes('available')
