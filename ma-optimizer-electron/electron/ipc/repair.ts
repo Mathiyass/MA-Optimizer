@@ -1,4 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron'
+import * as fs from 'fs'
 import { execSync, spawn, spawnSync } from 'child_process'
 import { sendLog, sendError } from './logger'
 import { escapePS, spawnSyncChecked } from './utils'
@@ -174,7 +175,7 @@ ipcMain.handle('repair:fixHosts', async () => {
     try {
         const hostsPath = 'C:\\Windows\\System32\\drivers\\etc\\hosts'
         const defaultHosts = `# Copyright (c) 1993-2009 Microsoft Corp.\r\n#\r\n# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.\r\n#\r\n# localhost name resolution is handled within DNS itself.\r\n#\t127.0.0.1       localhost\r\n#\t::1             localhost\r\n`
-        require('fs').writeFileSync(hostsPath, defaultHosts, 'utf-8')
+        await fs.promises.writeFile(hostsPath, defaultHosts, 'utf-8')
         sendLog('[Repair] Hosts file restored to default')
         return true
     } catch (e: any) {
