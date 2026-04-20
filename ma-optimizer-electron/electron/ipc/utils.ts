@@ -15,17 +15,29 @@ export function spawnSyncChecked(cmd: string, args: string[], options: SpawnSync
 }
 
 export function spawnPromise(cmd: string, args: string[], options: any = {}): Promise<{ stdout: string, stderr: string }> {
+    const maxBuffer = options.maxBuffer || 10 * 1024 * 1024; // 10MB default
     return new Promise((resolve, reject) => {
-        const proc = spawn(cmd, args, { ...options, windowsHide: true })
+        const proc = spawn(cmd, args, { ...options, windowsHide: true, shell: false })
         let stdout = ''
         let stderr = ''
-        proc.stdout?.on('data', (d) => stdout += d.toString())
-        proc.stderr?.on('data', (d) => stderr += d.toString())
+        let totalSize = 0
+
+        proc.stdout?.on('data', (d: Buffer) => {
+            totalSize += d.length
+            if (totalSize > maxBuffer) {
+                proc.kill()
+                reject(new Error(`Process ${cmd} exceeded maxBuffer (${maxBuffer} bytes)`))
+            }
+            stdout += d.toString()
+        })
+        proc.stderr?.on('data', (d: Buffer) => {
+            stderr += d.toString()
+        })
         proc.on('close', (code) => {
             if (code === 0) resolve({ stdout, stderr })
             else reject(new Error(`Process exited with code ${code}\n${stderr}`))
         })
-        proc.on('error', reject)
+        proc.on('error', (err: Error) => reject(err))
     })
 }
 
