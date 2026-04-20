@@ -75,6 +75,11 @@ function ScanProgressRing({ scanning }: { scanning: boolean }) {
 
 export function Cleaner() {
     const [scanResults, setScanResults] = useState<any[]>([])
+    const scanResultsMap = React.useMemo(() => {
+        const map = new Map<string, any>()
+        scanResults.forEach(r => map.set(r.id, r))
+        return map
+    }, [scanResults])
     const [browserResults, setBrowserResults] = useState<any[]>([])
     // Set of selected item IDs:
     // system items simply use their 'id' (e.g. 'wintemp')
@@ -242,7 +247,7 @@ export function Cleaner() {
 
                             <div className="p-3 space-y-2">
                                 {Object.entries(systemGroups).map(([groupName, sysIds]) => {
-                                    const groupItems = sysIds.map(id => scanResults.find(r => r.id === id)).filter(Boolean)
+                                    const groupItems = sysIds.map(id => scanResultsMap.get(id)).filter(Boolean)
                                     if (groupItems.length === 0) return null
 
                                     const groupKey = `sys_${groupName}`
