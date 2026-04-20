@@ -34,12 +34,16 @@ ipcMain.handle('system:ramUsage', async () => {
 })
 
 let diskIOMetrics = { readBytesPerSec: 0, writeBytesPerSec: 0 }
+let typeperfProcess: any = null
+let typeperfRestartTimeout: NodeJS.Timeout | null = null
 
 function startTypeperfDiskIO() {
     if (process.platform !== 'win32') return
-    const tp = spawn('typeperf', ['\\PhysicalDisk(_Total)\\Disk Read Bytes/sec', '\\PhysicalDisk(_Total)\\Disk Write Bytes/sec', '-si', '1'], { windowsHide: true, shell: false })
+    if (typeperfProcess) return
 
-    tp.stdout.on('data', (data) => {
+    typeperfProcess = spawn('typeperf', ['\\PhysicalDisk(_Total)\\Disk Read Bytes/sec', '\\PhysicalDisk(_Total)\\Disk Write Bytes/sec', '-si', '1'], { windowsHide: true, shell: false })
+
+    typeperfProcess.stdout.on('data', (data: Buffer) => {
         const lines = data.toString().split('\n')
         for (const line of lines) {
             if (line.includes(',') && !line.includes('PDH-CSV') && !line.includes('Exiting')) {
@@ -56,8 +60,13 @@ function startTypeperfDiskIO() {
         }
     })
 
-    tp.on('error', () => { /* ignore */ })
-    tp.on('close', () => setTimeout(startTypeperfDiskIO, 5000))
+    typeperfProcess.on('error', () => { /* ignore */ })
+    typeperfProcess.on('close', () => {
+        typeperfProcess = null
+        if (isPollingSystemStats) {
+            typeperfRestartTimeout = setTimeout(startTypeperfDiskIO, 5000)
+        }
+    })
 }
 
 startTypeperfDiskIO()
@@ -329,4 +338,16 @@ export function stopSystemStatsPolling() {
         systemStatsInterval = null
     }
     isPollingSystemStats = false
+
+    if (typeperfProcess) {
+        try {
+            typeperfProcess.kill()
+        } catch { }
+        typeperfProcess = null
+    }
+
+    if (typeperfRestartTimeout) {
+        clearTimeout(typeperfRestartTimeout)
+        typeperfRestartTimeout = null
+    }
 }

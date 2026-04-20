@@ -1,7 +1,8 @@
 import { spawnPromise } from './ipc/utils'
-import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, dialog, globalShortcut } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
+import { logger } from './ipc/logger'
 
 // IPC handler imports
 import './ipc/admin'
@@ -333,16 +334,18 @@ app.on('window-all-closed', () => {
 // 🔧 FIX: Add missing lifecycle events
 app.on('before-quit', () => {
     // Logic before process exit
-    console.log('[System] App is preparing to quit...')
+    logger.info('[System] App is preparing to quit...')
 })
 
 app.on('will-quit', () => {
     // 🔧 FIX: Unregister all shortcuts or perform sync cleanup here
     try {
         stopSystemStatsPolling()
-        const { globalShortcut } = require('electron')
         globalShortcut.unregisterAll()
-    } catch { }
+        logger.info('[System] App resources cleaned up. Global shortcuts unregistered.')
+    } catch (e: any) {
+        logger.error(`[System] Cleanup error: ${e.message}`)
+    }
 })
 
 app.on('activate', () => {
