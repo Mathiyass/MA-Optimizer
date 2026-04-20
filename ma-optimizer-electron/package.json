@@ -23,7 +23,7 @@
     "lint": "eslint src electron --ext .ts,.tsx",
     "electron:dev": "npm run dev",
     "electron:build": "npm run dist:installer",
-    "test": "node --experimental-strip-types --test src/utils/health.test.ts"
+    "test": "node --experimental-strip-types --test src/**/*.test.ts"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
