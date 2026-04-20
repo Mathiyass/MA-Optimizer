@@ -333,7 +333,6 @@ app.on('window-all-closed', () => {
 // 🔧 FIX: Add missing lifecycle events
 app.on('before-quit', () => {
     // Logic before process exit
-    console.log('[System] App is preparing to quit...')
 })
 
 app.on('will-quit', () => {
