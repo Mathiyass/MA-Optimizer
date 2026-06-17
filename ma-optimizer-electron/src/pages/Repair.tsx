@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { HeartPulse, Shield, Wifi, RefreshCw, HardDrive, Loader2, Image, FileText, Clock, CheckCircle2 } from 'lucide-react'
+import { HeartPulse, Shield, Wifi, RefreshCw, HardDrive, Loader2, Image, FileText, Clock, CheckCircle2, LucideIcon } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { useLogStore } from '../store/logStore'
 
 interface RepairAction {
     id: string
-    icon: any
+    icon: LucideIcon
     label: string
     desc: string
     category: string

@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
     Terminal, HardDrive, Cog, Settings, Monitor, TerminalSquare, FileCog, Search,
-    Globe, Wifi, Activity, Shield, Eye
+    Globe, Wifi, Activity, Shield, Eye, LucideIcon
 } from 'lucide-react'
 
 interface Tool {
     label: string
     cmd: string
-    icon: any
+    icon: LucideIcon
     desc: string
     category: string
 }
@@ -45,7 +45,7 @@ const categoryColors: Record<string, string> = {
     'Diagnostics': 'from-rose-500 to-pink-500',
 }
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, LucideIcon> = {
     'System': Monitor,
     'Terminal': Terminal,
     'Network': Globe,
