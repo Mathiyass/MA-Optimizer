@@ -8,18 +8,18 @@ import { escapePS, spawnSyncChecked } from './utils'
 
 const backupDir = path.join(app.getPath('userData'), 'backups')
 
-function ensureDir(dir: string) {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+async function ensureDir(dir: string) {
+    if (!fs.existsSync(dir)) await fs.promises.mkdir(dir, { recursive: true })
 }
 
 // Export all MA-Optimizer settings as .maopt JSON
 ipcMain.handle('backup:export', async (_, savePath: string) => {
     try {
-        ensureDir(path.dirname(savePath))
+        await ensureDir(path.dirname(savePath))
         const data = {
             version: '7.0.0',
             exportedAt: new Date().toISOString(),
-            registryBackups: loadBackups(),
+            registryBackups: await loadBackups(),
             appliedTweaks: {},
         }
         // Also include electron-store settings
@@ -28,7 +28,7 @@ ipcMain.handle('backup:export', async (_, savePath: string) => {
             const store = new Store()
             data.appliedTweaks = store.get('appliedTweaks') || {}
         } catch { }
-        fs.writeFileSync(savePath, JSON.stringify(data, null, 2), 'utf-8')
+        await fs.promises.writeFile(savePath, JSON.stringify(data, null, 2), 'utf-8')
         sendLog(`[Backup] Exported settings to ${savePath}`)
         return { success: true }
     } catch (e: any) {
@@ -40,7 +40,7 @@ ipcMain.handle('backup:export', async (_, savePath: string) => {
 // Import settings from .maopt JSON
 ipcMain.handle('backup:import', async (_, filePath: string) => {
     try {
-        const raw = fs.readFileSync(filePath, 'utf-8')
+        const raw = await fs.promises.readFile(filePath, 'utf-8')
         const data = JSON.parse(raw)
         if (!data.version) {
             return { success: false, error: 'Invalid backup file' }
@@ -63,7 +63,7 @@ ipcMain.handle('backup:import', async (_, filePath: string) => {
 
 // Undo all changes — restores all original registry values
 ipcMain.handle('backup:undoAll', async () => {
-    const backups = loadBackups()
+    const backups = await loadBackups()
     let restored = 0
     let failed = 0
 
@@ -90,7 +90,7 @@ ipcMain.handle('backup:undoAll', async () => {
 
 // Undo last change only
 ipcMain.handle('backup:undoLast', async () => {
-    const backups = loadBackups()
+    const backups = await loadBackups()
     const entries = Object.entries(backups)
     if (entries.length === 0) return { success: false, error: 'No changes to undo' }
 
@@ -110,10 +110,10 @@ ipcMain.handle('backup:undoLast', async () => {
             })
         }
         // Remove this entry from backups
-        const allBackups = loadBackups()
+        const allBackups = await loadBackups()
         delete allBackups[key]
         const backupPath = path.join(app.getPath('userData'), 'backups', 'registry_backup.json')
-        fs.writeFileSync(backupPath, JSON.stringify(allBackups, null, 2), 'utf-8')
+        await fs.promises.writeFile(backupPath, JSON.stringify(allBackups, null, 2), 'utf-8')
         sendLog(`[Backup] Undone last change: ${key}`)
         return { success: true, key }
     } catch (e: any) {
