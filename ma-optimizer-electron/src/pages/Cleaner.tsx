@@ -179,65 +179,94 @@ export function Cleaner() {
     const itemMotion = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }
 
     return (
-        <div className="space-y-6 max-w-5xl">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <Trash2 className="w-6 h-6 text-accent-cyan" /> System Cleaner
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">Free disk space by removing junk files</p>
-                </div>
-                <div className="flex gap-2">
-                    <motion.button whileTap={{ scale: 0.95 }} onClick={scan} disabled={scanning}
-                        className="px-5 py-2.5 bg-accent-cyan/15 text-accent-cyan rounded-xl text-sm font-medium hover:bg-accent-cyan/25 transition-all disabled:opacity-50 flex items-center gap-2">
-                        {scanning ? <><Loader2 className="w-4 h-4 animate-spin" />Scanning...</> : <><Search className="w-4 h-4" />Scan</>}
-                    </motion.button>
-                    {scanResults.length > 0 && (
-                        <motion.button whileTap={{ scale: 0.95 }} onClick={clean} disabled={cleaning || selected.size === 0}
-                            className="px-5 py-2.5 bg-danger/15 text-danger rounded-xl text-sm font-medium hover:bg-danger/25 transition-all disabled:opacity-50 flex items-center gap-2">
-                            {cleaning ? <><Loader2 className="w-4 h-4 animate-spin" />Cleaning...</> : <><Trash2 className="w-4 h-4" />Clean {fmt(totalSelected)}</>}
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium Cleaner Hero Section */}
+            <motion.div
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#ff003c]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <Trash2 className="w-12 h-12 text-[#ff003c] drop-shadow-[0_0_15px_rgba(255,0,60,0.8)]" />
+                            System Cleaner
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            Reclaim Disk Space
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Aggressively sweep your drives for temporary files, cache, log dumps, and bloatware residue. Optimize browser performance and free up gigabytes in seconds.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <motion.button whileTap={{ scale: 0.95 }} onClick={scan} disabled={scanning}
+                            className="group relative px-8 py-4 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-300 w-full overflow-hidden shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/0 via-[var(--accent-cyan)]/10 to-[var(--accent-cyan)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-white group-hover:text-[var(--accent-cyan)] transition-colors">
+                                {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                                {scanning ? 'Scanning System...' : 'Initiate Scan'}
+                            </span>
                         </motion.button>
-                    )}
+
+                        {scanResults.length > 0 && (
+                            <motion.button whileTap={{ scale: 0.95 }} onClick={clean} disabled={cleaning || selected.size === 0}
+                                className="group relative px-8 py-4 rounded-2xl bg-[#ff003c]/10 border-[#ff003c]/30 hover:border-[#ff003c]/80 hover:bg-[#ff003c]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.2)] disabled:opacity-50 disabled:cursor-not-allowed border">
+                                <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#ff003c] drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]">
+                                    {cleaning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                                    {cleaning ? 'Erasing Data...' : `Clean ${fmt(totalSelected)}`}
+                                </span>
+                            </motion.button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
             <ScanProgressRing scanning={scanning} />
 
             {/* Total waste bar */}
             {scanResults.length > 0 && !scanning && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card-bg border border-card-border rounded-xl p-5 relative overflow-hidden">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-8 relative overflow-hidden shadow-xl mt-6 border">
                     {lastCleaned > 0 && (
-                        <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="absolute right-5 top-4 flex items-center gap-2 text-success bg-success/10 px-3 py-1.5 rounded-full border border-success/20">
+                        <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="absolute right-8 top-6 flex items-center gap-2 text-[#00FFDE] bg-[#00FFDE]/10 px-4 py-2 rounded-2xl border-[#00FFDE]/30 shadow-[0_0_15px_rgba(0,255,222,0.2)] border">
                             <Check className="w-4 h-4" />
-                            <span className="text-xs font-bold font-mono">Cleaned {fmt(lastCleaned)}</span>
+                            <span className="text-xs font-black uppercase tracking-widest">Cleaned {fmt(lastCleaned)}</span>
                         </motion.div>
                     )}
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-text-primary text-sm font-semibold">Total Junk Found</span>
-                        <span className="text-warning text-lg font-bold font-mono">{fmt(totalFound)}</span>
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-[var(--text-muted)] text-sm font-black uppercase tracking-[0.2em]">Total Junk Identified</span>
+                        <span className="text-[#ff003c] text-3xl font-black tracking-tight drop-shadow-[0_0_15px_rgba(255,0,60,0.5)]">{fmt(totalFound)}</span>
                     </div>
-                    <div className="w-full h-3 bg-app-bg rounded-full overflow-hidden">
+                    <div className="w-full h-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border">
                         <motion.div
-                            className="h-full rounded-full bg-gradient-to-r from-warning to-danger"
+                            className="h-full rounded-full bg-gradient-to-r from-[#ff003c] via-[#FF003C] to-[#ff003c]"
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((totalSelected / (totalFound || 1)) * 100, 100)}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
+                            style={{ backgroundSize: '200% 100%', animation: 'gradientMove 3s linear infinite' }}
                         />
                     </div>
-                    <div className="flex justify-between mt-2">
-                        <span className="text-text-dim text-xs">Selected: {fmt(totalSelected)}</span>
+                    <div className="flex justify-between mt-4">
+                        <span className="text-[var(--text-secondary)] text-sm font-bold tracking-wide">Selected for removal: <span className="text-white">{fmt(totalSelected)}</span></span>
                     </div>
                 </motion.div>
             )}
 
             {scanResults.length > 0 && !scanning && (
-                <motion.div className="space-y-4" variants={container} initial={false} animate="show">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div className="space-y-6 mt-6" variants={container} initial={false} animate="show">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* System Categories */}
-                        <motion.div variants={itemMotion} className="bg-card-bg border border-card-border rounded-xl p-0 overflow-hidden">
-                            <div className="px-5 py-4 border-b border-card-border bg-black/20 flex items-center gap-2">
-                                <HardDrive className="w-4 h-4 text-accent-cyan" />
-                                <h3 className="text-text-primary font-semibold">System Categories</h3>
+                        <motion.div variants={itemMotion} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-0 overflow-hidden shadow-xl border">
+                            <div className="px-8 py-6 border-b bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center gap-4">
+                                <HardDrive className="w-6 h-6 text-[var(--accent-cyan)]" />
+                                <h3 className="text-white text-lg font-black tracking-wide">System Repositories</h3>
                             </div>
 
                             <div className="p-3 space-y-2">
@@ -252,31 +281,37 @@ export function Cleaner() {
                                     const groupSize = groupItems.reduce((a, c) => a + c.size, 0)
 
                                     return (
-                                        <div key={groupName} className="rounded-lg bg-black/10 border border-white/5 overflow-hidden">
-                                            <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
-                                                {isExpanded ? <ChevronDown className="w-4 h-4 text-text-muted" /> : <ChevronRight className="w-4 h-4 text-text-muted" />}
-                                                <input
-                                                    type="checkbox"
-                                                    checked={allSelected}
-                                                    ref={input => { if (input) input.indeterminate = someSelected }}
-                                                    onChange={(e) => { e.stopPropagation(); toggle('grp', groupItems.map(r => r.id)) }}
-                                                    className="accent-accent-cyan"
-                                                />
-                                                <span className="text-text-primary text-sm font-medium flex-1">{groupName}</span>
-                                                <span className="text-xs font-mono text-text-dim">{fmt(groupSize)}</span>
+                                        <div key={groupName} className="rounded-2xl bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 overflow-hidden mb-2 shadow-inner border">
+                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.05)] cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
+                                                {isExpanded ? <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />}
+                                                <div className="relative flex items-center justify-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={allSelected}
+                                                        ref={input => { if (input) input.indeterminate = someSelected }}
+                                                        onChange={(e) => { e.stopPropagation(); toggle('grp', groupItems.map(r => r.id)) }}
+                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-2xl checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] indeterminate:bg-[var(--accent-cyan)]/50 indeterminate:border-[var(--accent-cyan)]/50 cursor-pointer transition-all"
+                                                    />
+                                                    {allSelected && <Check className="w-3.5 h-3.5 text-black absolute pointer-events-none font-bold" />}
+                                                </div>
+                                                <span className="text-white text-[15px] font-bold tracking-wide flex-1">{groupName}</span>
+                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-2 py-1 rounded-2xl border">{fmt(groupSize)}</span>
                                             </div>
                                             <AnimatePresence>
                                                 {isExpanded && (
                                                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                                                        <div className="pl-9 pr-3 py-2 space-y-1 bg-black/20">
+                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-t">
                                                             {groupItems.map(c => {
                                                                 const CatIcon = categoryIcons[c.id] || File
                                                                 return (
-                                                                    <label key={c.id} className="flex items-center gap-3 py-1.5 cursor-pointer hover:bg-white/5 rounded px-2 transition-colors">
-                                                                        <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} className="accent-accent-cyan" />
-                                                                        <CatIcon className="w-3.5 h-3.5 text-text-dim" />
-                                                                        <span className="text-text-secondary text-sm flex-1">{c.name}</span>
-                                                                        <span className={`text-xs font-mono ${c.size > 0 ? 'text-warning/80' : 'text-text-dim'}`}>{fmt(c.size)}</span>
+                                                                    <label key={c.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] rounded-2xl px-3 transition-colors group">
+                                                                        <div className="relative flex items-center justify-center">
+                                                                            <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded-2xl md checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] cursor-pointer transition-all" />
+                                                                            {selected.has(c.id) && <Check className="w-3 h-3 text-black absolute pointer-events-none font-bold" />}
+                                                                        </div>
+                                                                        <CatIcon className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-cyan)] transition-colors" />
+                                                                        <span className="text-[var(--text-secondary)] text-sm flex-1 font-medium group-hover:text-white transition-colors">{c.name}</span>
+                                                                        <span className={`text-[11px] font-mono tracking-widest ${c.size > 0 ? 'text-[#ff003c]' : 'text-[var(--text-dim)]'}`}>{fmt(c.size)}</span>
                                                                     </label>
                                                                 )
                                                             })}
@@ -291,13 +326,13 @@ export function Cleaner() {
                         </motion.div>
 
                         {/* Browser Categories */}
-                        <motion.div variants={itemMotion} className="bg-card-bg border border-card-border rounded-xl p-0 overflow-hidden">
-                            <div className="px-5 py-4 border-b border-card-border bg-black/20 flex items-center gap-2">
-                                <Globe className="w-4 h-4 text-accent-cyan" />
-                                <h3 className="text-text-primary font-semibold">Browsers</h3>
+                        <motion.div variants={itemMotion} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-0 overflow-hidden shadow-xl border">
+                            <div className="px-8 py-6 border-b bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center gap-4">
+                                <Globe className="w-6 h-6 text-[#ff003c]" />
+                                <h3 className="text-white text-lg font-black tracking-wide">Web Browsers</h3>
                             </div>
 
-                            <div className="p-3 space-y-2">
+                            <div className="p-4 space-y-3">
                                 {browserResults.filter(b => b.detected).map(b => {
                                     const groupKey = `browser_${b.id}`
                                     const isExpanded = !!expanded[groupKey]
@@ -306,31 +341,37 @@ export function Cleaner() {
                                     const someSelected = childIds.some((id: string) => selected.has(id)) && !allSelected
 
                                     return (
-                                        <div key={b.id} className="rounded-lg bg-black/10 border border-white/5 overflow-hidden">
-                                            <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
-                                                {isExpanded ? <ChevronDown className="w-4 h-4 text-text-muted" /> : <ChevronRight className="w-4 h-4 text-text-muted" />}
-                                                <input
-                                                    type="checkbox"
-                                                    checked={allSelected}
-                                                    ref={input => { if (input) input.indeterminate = someSelected }}
-                                                    onChange={(e) => { e.stopPropagation(); toggle('grp', childIds) }}
-                                                    className="accent-accent-cyan"
-                                                />
-                                                <Globe className="w-3.5 h-3.5 text-text-dim" />
-                                                <span className="text-text-primary text-sm font-medium flex-1">{b.name}</span>
-                                                <span className="text-xs font-mono text-text-dim">{fmt(b.size)}</span>
+                                        <div key={b.id} className="rounded-2xl bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 overflow-hidden mb-2 shadow-inner border">
+                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.05)] cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
+                                                {isExpanded ? <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />}
+                                                <div className="relative flex items-center justify-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={allSelected}
+                                                        ref={input => { if (input) input.indeterminate = someSelected }}
+                                                        onChange={(e) => { e.stopPropagation(); toggle('grp', childIds) }}
+                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-2xl checked:bg-[#ff003c] checked:border-[#ff003c] indeterminate:bg-[#ff003c]/50 indeterminate:border-[#ff003c]/50 cursor-pointer transition-all"
+                                                    />
+                                                    {allSelected && <Check className="w-3.5 h-3.5 text-white absolute pointer-events-none font-bold" />}
+                                                </div>
+                                                <Globe className="w-4 h-4 text-[var(--text-dim)]" />
+                                                <span className="text-white text-[15px] font-bold tracking-wide flex-1">{b.name}</span>
+                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-2 py-1 rounded-2xl border">{fmt(b.size)}</span>
                                             </div>
                                             <AnimatePresence>
                                                 {isExpanded && (
                                                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                                                        <div className="pl-9 pr-3 py-2 space-y-1 bg-black/20">
+                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-t">
                                                             {b.items.map((item: any) => {
                                                                 const itemId = `${groupKey}_${item.id}`
                                                                 return (
-                                                                    <label key={item.id} className="flex items-center gap-3 py-1.5 cursor-pointer hover:bg-white/5 rounded px-2 transition-colors">
-                                                                        <input type="checkbox" checked={selected.has(itemId)} onChange={() => toggle(itemId)} className="accent-accent-cyan" />
-                                                                        <span className="text-text-secondary text-sm flex-1">{item.name}</span>
-                                                                        <span className={`text-xs font-mono ${item.size > 0 ? 'text-warning/80' : 'text-text-dim'}`}>{fmt(item.size)}</span>
+                                                                    <label key={item.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] rounded-2xl px-3 transition-colors group">
+                                                                        <div className="relative flex items-center justify-center">
+                                                                            <input type="checkbox" checked={selected.has(itemId)} onChange={() => toggle(itemId)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded-2xl md checked:bg-[#ff003c] checked:border-[#ff003c] cursor-pointer transition-all" />
+                                                                            {selected.has(itemId) && <Check className="w-3 h-3 text-white absolute pointer-events-none font-bold" />}
+                                                                        </div>
+                                                                        <span className="text-[var(--text-secondary)] text-sm flex-1 font-medium group-hover:text-white transition-colors">{item.name}</span>
+                                                                        <span className={`text-[11px] font-mono tracking-widest ${item.size > 0 ? 'text-[#ff003c]' : 'text-[var(--text-dim)]'}`}>{fmt(item.size)}</span>
                                                                     </label>
                                                                 )
                                                             })}
@@ -354,7 +395,7 @@ export function Cleaner() {
                         variants={itemMotion}
                         onClick={() => window.api?.cleaner.emptyRecycleBin()}
                         whileTap={{ scale: 0.98 }}
-                        className="px-4 py-2.5 bg-card-bg border border-card-border rounded-xl text-sm text-text-muted hover:text-[var(--accent-red)] transition-all flex items-center gap-2 hover-lift w-full sm:w-auto mt-4"
+                        className="px-4 py-2.5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-sm text-text-muted hover:text-[#FF003C] transition-all flex items-center gap-2 hover-lift w-full sm:w-auto mt-4 border"
                     >
                         <Recycle className="w-4 h-4" />Empty Recycle Bin
                     </motion.button>

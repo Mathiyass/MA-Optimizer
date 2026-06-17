@@ -38,11 +38,11 @@ const tools: Tool[] = [
 ]
 
 const categoryColors: Record<string, string> = {
-    'System': 'from-cyan-500 to-blue-500',
-    'Terminal': 'from-violet-500 to-purple-500',
-    'Network': 'from-orange-500 to-amber-500',
-    'Storage': 'from-green-500 to-emerald-500',
-    'Diagnostics': 'from-rose-500 to-pink-500',
+    'System': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Terminal': 'from-[#FF003C] to-[#FF003C]/50',
+    'Network': 'from-[#FF003C] to-[#00FFDE]',
+    'Storage': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Diagnostics': 'from-[#FF003C] to-[#00FFDE]/50',
 }
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -69,33 +69,48 @@ export function Tools() {
     const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }
 
     return (
-        <div className="space-y-6 max-w-5xl">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <Settings className="w-6 h-6 text-accent-cyan" /> System Tools
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">Quick access to Windows administration tools</p>
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium Tools Hero Section */}
+            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#ff003c]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <Settings className="w-12 h-12 text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            System Arsenal
+                        </h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            Administrative Payload
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Direct launch endpoints for core Windows administrative tools, bypassing conventional navigation. Immediate execution of diagnostic and management payloads.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Search + Category filters */}
-            <div className="flex items-center gap-3">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim" />
+            <div className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2rem] p-6 flex flex-col xl:flex-row items-center gap-6 shadow-xl border">
+                <div className="relative w-full xl:w-auto xl:flex-1">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-dim)]" />
                     <input
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
-                        placeholder="Search tools..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-app-bg border border-card-border rounded-xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-accent-cyan/40 transition-colors"
+                        placeholder="Search payload index..."
+                        className="w-full pl-14 pr-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all border"
                     />
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex flex-wrap gap-3 justify-center w-full xl:w-auto">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${!activeCategory ? 'bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/20' : 'bg-card-bg border border-card-border text-text-muted hover:text-text-primary'}`}
+                        className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] hover:text-white hover:border-white/30 border'}`}
                     >
-                        All
+                        All Classes
                     </button>
                     {categories.map(cat => {
                         const CatIcon = categoryIcons[cat] || Monitor
@@ -103,9 +118,9 @@ export function Tools() {
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${activeCategory === cat ? 'bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/20' : 'bg-card-bg border border-card-border text-text-muted hover:text-text-primary'}`}
+                                className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeCategory === cat ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] hover:text-white hover:border-white/30 border'}`}
                             >
-                                <CatIcon className="w-3 h-3" />{cat}
+                                <CatIcon className="w-4 h-4" />{cat}
                             </button>
                         )
                     })}
@@ -114,31 +129,32 @@ export function Tools() {
 
             {/* Tools grid */}
             <motion.div
-                className="grid grid-cols-2 gap-3"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                 variants={container}
                 initial="hidden"
                 animate="show"
                 key={`${activeCategory}-${filter}`}
             >
                 {filtered.map(t => {
-                    const gradient = categoryColors[t.category] || 'from-gray-500 to-gray-600'
+                    const gradient = categoryColors[t.category] || 'from-[rgba(255,255,255,0.2)] to-[rgba(255,255,255,0.1)]'
                     return (
                         <motion.button
                             key={t.cmd}
                             variants={item}
                             onClick={() => launch(t.cmd)}
-                            whileHover={{ scale: 1.01, y: -2 }}
-                            whileTap={{ scale: 0.99 }}
-                            className="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card-bg text-left hover:border-accent-cyan/20 transition-all group card-premium hover-lift"
+                            whileHover={{ scale: 1.02, y: -4 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex flex-col items-center text-center gap-4 p-8 rounded-[2rem] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl hover:bg-[rgba(255,255,255,0.05)] hover:border-white/20 transition-all duration-300 group card-premium shadow-xl relative overflow-hidden border"
                         >
-                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow`}>
-                                <t.icon className="w-5 h-5 text-white" />
+                            <div className={`absolute -right-8 -top-8 w-32 h-32 blur-[40px] rounded-full pointer-events-none bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-30 transition-opacity duration-500`}></div>
+                            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow relative z-10 border-white/20 border`}>
+                                <t.icon className="w-8 h-8 text-white drop-shadow-md" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="text-text-primary text-sm font-medium">{t.label}</div>
-                                <div className="text-text-dim text-xs">{t.desc}</div>
+                            <div className="w-full relative z-10 flex flex-col items-center">
+                                <div className="text-white text-[15px] font-black tracking-wide mb-2">{t.label}</div>
+                                <div className="text-[var(--text-muted)] text-[11px] font-medium leading-relaxed">{t.desc}</div>
+                                <div className="mt-4 px-3 py-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[var(--accent-cyan)] font-mono text-[10px] tracking-widest border">{t.cmd}</div>
                             </div>
-                            <span className="text-[10px] text-text-dim px-2 py-0.5 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">{t.category}</span>
                         </motion.button>
                     )
                 })}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Globe, RefreshCw, Loader2, Wifi, Activity } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -56,44 +57,49 @@ function DnsTab() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="space-y-6">
+            <h3 className="text-white text-lg font-black tracking-wide mb-4">Fast DNS Providers</h3>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {dnsPresets.map((dns, i) => (
                     <button
                         key={i}
                         onClick={() => setSelectedDns(i)}
-                        className={`p-3 rounded-xl border text-left transition-all ${selectedDns === i
-                            ? 'border-accent-cyan/50 bg-accent-cyan/10 shadow-[0_0_12px_rgba(0,255,222,0.1)]'
-                            : 'border-card-border bg-card-bg hover:border-accent-cyan/20'
+                        className={`p-5 rounded-2xl border text-left transition-all duration-300 group ${selectedDns === i
+                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)] border'
+                            : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
                             }`}
                     >
-                        <div className="text-sm font-medium text-text-primary">{dns.name}</div>
-                        <div className="text-xs text-text-muted mt-1">{dns.primary} / {dns.secondary}</div>
+                        <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">
+                            {dns.name}
+                            {selectedDns === i && <Activity className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />}
+                        </div>
+                        <div className="text-xs font-mono text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">{dns.primary}</div>
+                        <div className="text-xs font-mono text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors mt-1">{dns.secondary}</div>
                     </button>
                 ))}
             </div>
 
-            <div className="flex items-center gap-3">
-                <select
-                    value={selectedAdapter}
-                    onChange={e => setSelectedAdapter(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-app-bg border border-card-border rounded-lg text-sm text-text-primary outline-none"
-                >
-                    {adapters.map(a => <option key={a} value={a}>{a}</option>)}
-                </select>
-                <button
-                    onClick={applyDns}
-                    disabled={selectedDns === null}
-                    className="px-4 py-2 bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg text-accent-cyan text-sm font-medium hover:bg-accent-cyan/20 transition-colors disabled:opacity-40"
-                >
-                    Apply DNS
-                </button>
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-                <button onClick={() => window.api?.network.flushDns()} className="px-3 py-1.5 bg-card-bg border border-card-border rounded-lg text-xs text-text-muted hover:text-text-primary transition-colors">
-                    Flush DNS
-                </button>
+            <div className="mt-8 pt-8 border-t border-white/10">
+                <h3 className="text-white text-lg font-black tracking-wide mb-4">Apply Settings</h3>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <div className="relative flex-1 w-full">
+                        <Wifi className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] pointer-events-none" />
+                        <select
+                            value={selectedAdapter}
+                            onChange={e => setSelectedAdapter(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[15px] text-white font-medium outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all appearance-none cursor-pointer border"
+                        >
+                            {adapters.map(a => <option key={a} value={a}>{a}</option>)}
+                        </select>
+                    </div>
+                    <button
+                        onClick={applyDns}
+                        disabled={selectedDns === null}
+                        className="px-8 py-4 bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap border"
+                    >
+                        Override DNS
+                    </button>
+                </div>
             </div>
         </div>
     )
@@ -124,29 +130,47 @@ function DiagnosticsTab() {
     useEffect(() => { runPingTests() }, [])
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-sm font-semibold text-text-primary">Live Ping Test</h3>
-                <button onClick={runPingTests} disabled={testing} className="p-1.5 border border-card-border rounded-lg text-text-muted hover:text-text-primary">
-                    <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
+        <div className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h3 className="text-white text-lg font-black tracking-wide">Live Latency Monitor</h3>
+                    <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Real-time ping testing to major backbone servers</p>
+                </div>
+                <button onClick={runPingTests} disabled={testing} className="p-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[var(--text-secondary)] hover:text-white hover:border-[var(--accent-cyan)]/50 transition-all hover:bg-[rgba(0,255,222,0.1)] shadow-md border">
+                    <RefreshCw className={`w-5 h-5 ${testing ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} />
                 </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(pings).map(([host, result]) => (
-                    <div key={host} className="p-3 bg-card-bg border border-card-border rounded-xl text-center">
-                        <div className="text-xs text-text-muted mb-1">{host}</div>
-                        <div className={`text-lg font-bold ${result.ms < 0 ? 'text-danger' :
-                            result.ms < 20 ? 'text-success' :
-                                result.ms < 80 ? 'text-warning' : 'text-danger'
-                            }`}>
-                            {result.ms >= 0 ? `${result.ms}ms` : 'Timeout'}
+            
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {Object.entries(pings).map(([host, result]) => {
+                    const isOk = result.ms >= 0;
+                    const isGreat = result.ms < 20 && isOk;
+                    const isWarn = result.ms >= 20 && result.ms < 80;
+                    const isBad = result.ms >= 80 || !isOk;
+                    
+                    return (
+                        <div key={host} className="p-5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-center relative overflow-hidden shadow-inner group hover:border-white/20 transition-all duration-300 border">
+                            {/* Status Indicator Glow */}
+                            <div className={`absolute top-0 left-0 right-0 h-1 ${isGreat ? 'bg-[#00FFDE] shadow-[0_0_10px_rgba(0,255,222,0.8)]' : isWarn ? 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]' : 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]'}`} />
+                            
+                            <div className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">{host}</div>
+                            <div className={`text-3xl font-black font-mono tracking-tighter ${isGreat ? 'text-[#00FFDE]' : isWarn ? 'text-[#FF003C]' : 'text-[#FF003C]'}`}>
+                                {isOk ? `${result.ms}ms` : 'FAIL'}
+                            </div>
+                            
+                            {/* Mini chart visualizer placeholder */}
+                            {isOk && (
+                                <div className="flex items-end justify-center gap-1 mt-4 h-6 opacity-30 group-hover:opacity-100 transition-opacity">
+                                    {[1,2,3,4,5].map(bar => (
+                                        <div key={bar} className={`w-1.5 rounded-full ${isGreat ? 'bg-[#00FFDE]' : isWarn ? 'bg-[#FF003C]' : 'bg-[#FF003C]'}`} style={{ height: `${Math.max(10, Math.random() * 100)}%` }}></div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div className={`w-2 h-2 rounded-full mx-auto mt-1 ${result.status === 'ok' ? 'bg-success' : 'bg-danger'
-                            }`} />
-                    </div>
-                ))}
+                    )
+                })}
             </div>
-            {testing && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-accent-cyan" /></div>}
+            {testing && <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-[var(--accent-cyan)]" /></div>}
         </div>
     )
 }
@@ -162,32 +186,60 @@ export function Network() {
     ]
 
     return (
-        <div className="space-y-6 max-w-5xl">
-            <div>
-                <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                    <Globe className="w-6 h-6 text-accent-cyan" /> Network / TCP Optimizer
-                </h2>
-                <p className="text-text-muted text-sm mt-1">Optimize network stack for lower latency and higher throughput</p>
-            </div>
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium Network Hero Section */}
+            <motion.div
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#FF003C]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
-            <div className="flex gap-2 flex-wrap">
-                {quickActions.map(a => (
-                    <button key={a.label} onClick={a.fn} className="px-4 py-2 bg-card-bg border border-card-border rounded-lg text-sm text-text-muted hover:text-text-primary hover:border-accent-cyan/30 transition-all">
-                        {a.label}
-                    </button>
-                ))}
-            </div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <Globe className="w-12 h-12 text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            Network Optimization
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            TCP/IP Stack Tuning
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Fine-tune your TCP stack for absolute minimum latency and maximum throughput. Bypass congested DNS routes and flush stale connections instantly.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center justify-center gap-4 max-w-sm">
+                        {quickActions.map((a, i) => (
+                            <button key={i} onClick={a.fn}
+                                className="flex-1 min-w-[140px] px-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-xs font-black tracking-widest uppercase text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-2 shadow-xl text-center border">
+                                {a.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </motion.div>
 
-            <TabGroup tabs={tabs} active={tab} onChange={setTab} />
+            <div className="mt-8">
+                <TabGroup tabs={tabs} active={tab} onChange={setTab} />
+            </div>
 
             {tab === 'dns' ? (
-                <DnsTab />
+                <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6 border">
+                    <DnsTab />
+                </div>
             ) : tab === 'diagnostics' ? (
-                <DiagnosticsTab />
+                <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6 border">
+                    <DiagnosticsTab />
+                </div>
             ) : (
-                <div className="grid gap-3">
+                <div className="grid gap-4 mt-6">
                     {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
-                    {items.length === 0 && <div className="text-text-dim text-center py-8">No tweaks in this tab</div>}
+                    {items.length === 0 && <div className="text-[var(--text-muted)] text-center py-12 font-bold tracking-widest uppercase">No tweaks in this category</div>}
                 </div>
             )}
         </div>

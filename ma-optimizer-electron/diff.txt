@@ -1,0 +1,270 @@
+﻿ ma-optimizer-electron/src/App.tsx                  |  8 +--
+ .../src/components/layout/Header.tsx               | 54 ++++++++++---------
+ .../src/components/layout/Sidebar.tsx              | 63 ++++++++++++++--------
+ .../src/components/layout/StatusBar.tsx            |  6 +--
+ 4 files changed, 79 insertions(+), 52 deletions(-)
+diff --git a/ma-optimizer-electron/src/App.tsx b/ma-optimizer-electron/src/App.tsx
+index 3f99f69..7e4e7dd 100644
+--- a/ma-optimizer-electron/src/App.tsx
++++ b/ma-optimizer-electron/src/App.tsx
+@@ -143,10 +143,12 @@ export default function App() {
+     const PageComponent = pages[currentPage] || Dashboard
+ 
+     return (
+-        <div className="flex h-screen bg-app-bg overflow-hidden font-sans select-none relative">
++        <div className="flex h-screen bg-transparent overflow-hidden font-sans select-none relative">
+             {/* Ambient Aurora Background */}
+-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+-                <div className="aurora-bg"></div>
++            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl">
++                <div className="absolute top-[15%] left-[20%] w-[40vw] h-[40vw] bg-[#00FFDE] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
++                <div className="absolute bottom-[15%] right-[20%] w-[40vw] h-[40vw] bg-[#FF003C] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
++                <div className="aurora-bg opacity-40"></div>
+             </div>
+ 
+             <div className="flex h-full w-full relative z-10">
+diff --git a/ma-optimizer-electron/src/components/layout/Header.tsx b/ma-optimizer-electron/src/components/layout/Header.tsx
+index 9a28b15..47272c0 100644
+--- a/ma-optimizer-electron/src/components/layout/Header.tsx
++++ b/ma-optimizer-electron/src/components/layout/Header.tsx
+@@ -52,14 +52,18 @@ export function Header() {
+     }
+ 
+     return (
+-        <header className="h-12 glass-panel flex items-center shrink-0 select-none z-20" style={{ WebkitAppRegion: 'drag' } as any}>
++        <header className="h-16 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-b border-white/5 flex items-center shrink-0 select-none z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)] relative overflow-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
++            {/* Ambient Background Glows */}
++            <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
++            <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#cc00ff]/5 to-transparent pointer-events-none" />
++
+             {/* Left section */}
+-            <div className="flex items-center gap-2 pl-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
++            <div className="flex items-center gap-2 pl-6 relative z-10" style={{ WebkitAppRegion: 'no-drag' } as any}>
+                 {/* Admin badge */}
+-                <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border ${isAdmin ? 'bg-success/10 border-success/20 text-success shadow-[0_0_10px_rgba(0,255,136,0.1)]' : 'bg-danger/10 border-danger/20 text-danger shadow-[0_0_10px_rgba(255,68,68,0.1)]'
++                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border transition-all ${isAdmin ? 'bg-[rgba(0,255,222,0.1)] border-[#00FFDE]/40 text-[#00FFDE] shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,0,60,0.1)] border-[#FF003C]/40 text-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.2)]'
+                     }`}>
+-                    <UserCog className="w-3 h-3" />
+-                    {isAdmin ? 'Admin Mode' : 'Standard User'}
++                    <UserCog className="w-4 h-4" />
++                    {isAdmin ? 'Admin Privileges Active' : 'Standard Mode'}
+                 </div>
+             </div>
+ 
+@@ -67,39 +71,39 @@ export function Header() {
+             <div className="flex-1" />
+ 
+             {/* Right section */}
+-            <div className="flex items-center gap-1 pr-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
++            <div className="flex items-center gap-2 pr-2 relative z-10" style={{ WebkitAppRegion: 'no-drag' } as any}>
+ 
+                 {/* ≡ƒ¢í∩╕Å Create Restore Point Button */}
+                 <button
+                     onClick={handleRestorePoint}
+                     disabled={restoreStatus === 'loading'}
+-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-xs font-semibold mr-2
+-                        ${restoreStatus === 'idle' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)]' : ''}
+-                        ${restoreStatus === 'loading' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] opacity-80' : ''}
+-                        ${restoreStatus === 'success' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 shadow-[var(--glow-cyan)]' : ''}
+-                        ${restoreStatus === 'error' ? 'border border-[var(--accent-red)] text-[var(--accent-red)] bg-[var(--accent-red)]/10 shadow-[var(--glow-red)]' : ''}
++                    className={`flex items-center gap-2 px-5 py-2 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase mr-3
++                        ${restoreStatus === 'idle' ? 'border border-[var(--accent-cyan)]/50 text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)] hover:bg-[rgba(0,255,222,0.15)] hover:shadow-[0_0_20px_rgba(0,255,222,0.3)] hover:border-[var(--accent-cyan)]' : ''}
++                        ${restoreStatus === 'loading' ? 'border border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)] opacity-80' : ''}
++                        ${restoreStatus === 'success' ? 'border border-[var(--accent-cyan)] text-black bg-[var(--accent-cyan)] shadow-[0_0_20px_rgba(0,255,222,0.4)]' : ''}
++                        ${restoreStatus === 'error' ? 'border border-[#ff003c] text-white bg-[#ff003c] shadow-[0_0_20px_rgba(255,0,60,0.4)]' : ''}
+                     `}
+                 >
+-                    {restoreStatus === 'idle' && <><span>≡ƒ¢í∩╕Å Create Restore Point</span></>}
+-                    {restoreStatus === 'loading' && <><Loader className="w-3.5 h-3.5 animate-spin" /> <span>Creating...</span></>}
+-                    {restoreStatus === 'success' && <><span>Γ£ô Restore Point Created</span></>}
++                    {restoreStatus === 'idle' && <><span>≡ƒ¢í∩╕Å Restore Point</span></>}
++                    {restoreStatus === 'loading' && <><Loader className="w-4 h-4 animate-spin" /> <span>Creating...</span></>}
++                    {restoreStatus === 'success' && <><span>Γ£ô Created</span></>}
+                     {restoreStatus === 'error' && <><span>Γ£ò Failed</span></>}
+                 </button>
+ 
+                 {/* Search */}
+                 <button
+                     onClick={() => setSearchOpen(true)}
+-                    className="flex items-center gap-1.5 px-3 py-1.5 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all text-xs"
++                    className="flex items-center gap-2 px-4 py-2 text-[var(--text-secondary)] hover:text-white hover:bg-white/10 rounded-xl transition-all text-[11px] font-black tracking-widest uppercase border border-transparent hover:border-white/10 group"
+                 >
+-                    <Search className="w-3.5 h-3.5" />
++                    <Search className="w-4 h-4 group-hover:text-[var(--accent-cyan)] transition-colors" />
+                     <span>Search</span>
+-                    <kbd className="ml-1 px-1.5 py-0.5 bg-card-bg border border-card-border rounded text-[10px]">Ctrl+K</kbd>
++                    <kbd className="ml-1 px-2 py-0.5 bg-black/60 border border-white/10 rounded text-[9px] uppercase tracking-widest text-[var(--accent-cyan)] shadow-inner">Ctrl+K</kbd>
+                 </button>
+ 
+                 {/* Profiles */}
+                 <button
+                     onClick={() => setProfilesOpen(true)}
+-                    className="px-3 py-1.5 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all text-xs"
++                    className="px-4 py-2 text-[var(--text-secondary)] hover:text-white hover:bg-white/10 rounded-xl transition-all text-[11px] font-black tracking-widest uppercase border border-transparent hover:border-white/10 mx-1"
+                 >
+                     Profiles
+                 </button>
+@@ -108,28 +112,30 @@ export function Header() {
+                 <button
+                     onClick={handleUndo}
+                     title="Undo last change (Ctrl+Z)"
+-                    className="p-2 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all"
++                    className="p-2 text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] hover:bg-[rgba(0,255,222,0.1)] rounded-xl transition-all mx-1 group"
+                 >
+-                    <Undo2 className="w-4 h-4" />
++                    <Undo2 className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)] transition-all" />
+                 </button>
+ 
++                <div className="w-px h-8 bg-white/10 mx-3" />
++
+                 {/* Window controls */}
+-                <div className="flex items-center ml-2">
++                <div className="flex items-center gap-1">
+                     <button
+                         onClick={() => window.api?.window.minimize()}
+-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-white/10 transition-colors"
++                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/10 hover:text-white transition-colors"
+                     >
+                         <Minus className="w-4 h-4" />
+                     </button>
+                     <button
+                         onClick={() => window.api?.window.maximize()}
+-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-white/10 transition-colors"
++                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/10 hover:text-white transition-colors"
+                     >
+                         <Square className="w-3.5 h-3.5" />
+                     </button>
+                     <button
+                         onClick={() => window.api?.window.close()}
+-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-[var(--accent-red)] hover:text-white transition-colors"
++                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-[#ff003c] hover:text-white hover:shadow-[0_0_15px_rgba(255,0,60,0.5)] transition-all"
+                     >
+                         <X className="w-4 h-4" />
+                     </button>
+diff --git a/ma-optimizer-electron/src/components/layout/Sidebar.tsx b/ma-optimizer-electron/src/components/layout/Sidebar.tsx
+index 27f90c9..a2de370 100644
+--- a/ma-optimizer-electron/src/components/layout/Sidebar.tsx
++++ b/ma-optimizer-electron/src/components/layout/Sidebar.tsx
+@@ -33,10 +33,18 @@ export function Sidebar() {
+     const setPage = useAppStore((s) => s.setPage)
+ 
+     return (
+-        <aside className="w-[240px] h-full glass-panel flex flex-col overflow-hidden shrink-0 z-20">
++        <aside className="w-[280px] h-full bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-r border-white/5 flex flex-col overflow-hidden shrink-0 z-20 shadow-[20px_0_50px_rgba(0,0,0,0.5)] relative">
++            {/* Ambient Background Glows */}
++            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
++            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[var(--accent-violet)]/5 to-transparent pointer-events-none" />
++            
+             {/* Logo */}
+-            <div className="flex items-center gap-3 px-5 py-5">
+-                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-white/10 shrink-0 flex items-center justify-center bg-black/40 relative">
++            <div className="flex items-center gap-4 px-6 py-8 relative group">
++                <div className="absolute inset-0 bg-gradient-to-r from-[rgba(0,255,222,0.1)] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
++                <motion.div 
++                    className="w-14 h-14 rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(0,255,222,0.3)] group-hover:shadow-[0_0_35px_rgba(0,255,222,0.5)] transition-shadow duration-500 border border-white/10 shrink-0 flex items-center justify-center bg-black relative z-10"
++                    whileHover={{ scale: 1.05, rotate: 2 }}
++                >
+                     <video
+                         src={logoVideo}
+                         autoPlay
+@@ -45,10 +53,10 @@ export function Sidebar() {
+                         playsInline
+                         className="w-[120%] h-[120%] object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                     />
+-                </div>
+-                <div>
+-                    <h1 className="text-text-primary font-bold text-base tracking-tight leading-none text-gradient-cyan">MA-Optimizer</h1>
+-                    <span className="text-text-dim text-[10px] tracking-wider uppercase font-bold">v7.1</span>
++                </motion.div>
++                <div className="z-10 flex flex-col">
++                    <h1 className="text-white font-black text-xl tracking-tight leading-none text-gradient-ultra pb-1 drop-shadow-[0_0_8px_rgba(0,255,222,0.3)]">MA-Optimizer</h1>
++                    <span className="text-[var(--accent-cyan)] text-[9px] tracking-[0.3em] uppercase font-black bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/20 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(0,255,222,0.1)] self-start mt-1">PRO EDITION</span>
+                 </div>
+             </div>
+ 
+@@ -63,25 +71,35 @@ export function Sidebar() {
+                         <motion.button
+                             key={item.id}
+                             onClick={() => setPage(item.id)}
++                            whileHover={{ x: 4 }}
+                             whileTap={{ scale: 0.98 }}
+                             className={`
+-                relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group
+-                border-l-[3px]
+-                ${active
+-                                    ? 'bg-[var(--bg-elevated)] text-[var(--accent-cyan)] border-[var(--accent-cyan)] rounded-l-none'
+-                                    : 'text-[var(--text-secondary)] border-transparent hover:bg-white/5 hover:text-[var(--text-primary)]'
++                                relative w-[92%] mx-auto flex items-center gap-4 px-5 py-3.5 rounded-xl text-left transition-all duration-300 group overflow-hidden
++                                ${active
++                                    ? 'bg-[rgba(255,255,255,0.08)] text-white shadow-[0_0_15px_rgba(0,255,222,0.4)] border border-white/10'
++                                    : 'text-[var(--text-secondary)] border border-transparent hover:bg-white/5 hover:text-white'
+                                 }
+-              `}
++                            `}
+                         >
+-                            {/* Removed absolute layout bar as border-l suffices */}
++                            {active && (
++                                <motion.div 
++                                    layoutId="activeTabIndicator"
++                                    className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/20 to-transparent opacity-60"
++                                    initial={false}
++                                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
++                                />
++                            )}
++                            {active && (
++                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-3/4 bg-[var(--accent-cyan)] rounded-r-full shadow-[0_0_15px_var(--accent-cyan)]" />
++                            )}
+ 
+-                            <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? '' : 'opacity-60 group-hover:opacity-100'}`} />
+-                            <span className="text-[13px] font-medium truncate">{item.label}</span>
++                            <Icon className={`w-5 h-5 shrink-0 z-10 transition-all duration-300 ${active ? 'text-[var(--accent-cyan)] drop-shadow-[0_0_8px_var(--accent-cyan)] scale-110' : 'opacity-70 group-hover:opacity-100 group-hover:text-[var(--accent-cyan)] group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)] group-hover:scale-110'}`} />
++                            <span className={`text-[11px] font-bold tracking-[0.2em] uppercase truncate z-10 ${active ? 'text-white' : 'group-hover:text-white'}`}>{item.label}</span>
+ 
+                             {item.badge && (
+-                                <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isViolet
+-                                    ? 'bg-accent-violet/20 text-accent-violet'
+-                                    : 'bg-accent-cyan/20 text-accent-cyan'
++                                <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded border shadow-lg ${isViolet
++                                    ? 'bg-[#cc00ff]/20 text-[#e066ff] border-[#cc00ff]/40 shadow-[0_0_10px_rgba(204,0,255,0.3)]'
++                                    : 'bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/40 shadow-[0_0_10px_rgba(0,255,222,0.3)]'
+                                     }`}>
+                                     {item.badge}
+                                 </span>
+@@ -92,14 +110,15 @@ export function Sidebar() {
+             </nav>
+ 
+             {/* Footer */}
+-            <div className="px-5 py-3 border-t border-card-border">
++            <div className="px-6 py-6 border-t border-white/5 bg-black/20 backdrop-blur-md relative z-10">
+                 <a
+                     href="https://mathiyass.github.io/MAportfolio/"
+                     target="_blank"
+                     rel="noopener noreferrer"
+-                    className="text-text-dim text-[10px] hover:text-accent-cyan transition-colors cursor-pointer"
++                    className="flex flex-col items-center justify-center text-[var(--text-dim)] hover:text-[var(--accent-cyan)] transition-colors cursor-pointer group"
+                 >
+-                    ┬⌐ Mathisha Angirasa
++                    <span className="text-[9px] font-black uppercase tracking-[0.2em] mb-1">Architected By</span>
++                    <span className="text-xs font-black tracking-widest text-white group-hover:text-[var(--accent-cyan)] transition-colors drop-shadow-[0_0_8px_rgba(0,255,222,0)] group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]">Mathisha Angirasa</span>
+                 </a>
+             </div>
+         </aside>
+diff --git a/ma-optimizer-electron/src/components/layout/StatusBar.tsx b/ma-optimizer-electron/src/components/layout/StatusBar.tsx
+index 3d28212..23a8609 100644
+--- a/ma-optimizer-electron/src/components/layout/StatusBar.tsx
++++ b/ma-optimizer-electron/src/components/layout/StatusBar.tsx
+@@ -28,11 +28,11 @@ export function StatusBar() {
+     const logOpen = useAppStore((s) => s.logOpen)
+     const setLogOpen = useAppStore((s) => s.setLogOpen)
+ 
+-    const cpuColor = cpu > 80 ? '#ff4444' : cpu > 60 ? '#ffd700' : '#00ff88'
+-    const ramColor = ram.percent > 85 ? '#ff4444' : ram.percent > 60 ? '#ffd700' : '#00ff88'
++    const cpuColor = cpu > 80 ? '#FF003C' : cpu > 60 ? '#ffd700' : '#00FFDE'
++    const ramColor = ram.percent > 85 ? '#FF003C' : ram.percent > 60 ? '#ffd700' : '#00FFDE'
+ 
+     return (
+-        <footer className="h-8 glass-panel flex items-center px-4 shrink-0 select-none text-[11px] z-20">
++        <footer className="h-8 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-t border-white/5 flex items-center px-4 shrink-0 select-none text-[11px] z-20">
+             {/* System stats */}
+             <div className="flex items-center gap-5 flex-1">
+                 <div className="flex items-center gap-1.5 text-text-muted">

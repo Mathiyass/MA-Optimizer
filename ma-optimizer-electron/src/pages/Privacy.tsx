@@ -55,50 +55,93 @@ export function Privacy() {
     }
 
     return (
-        <div className="space-y-6 max-w-5xl">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <ShieldCheck className="w-6 h-6 text-accent-cyan" /> Privacy & Telemetry
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">Take control of your data. Disable tracking, telemetry, and advertising.</p>
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium Privacy Hero Section */}
+            <motion.div
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00FFDE]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <ShieldCheck className="w-12 h-12 text-[#00FFDE] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            Privacy & Telemetry
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            Take back your data
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Lock down your system by disabling unnecessary telemetry, background data harvesting, and advertising IDs. Secure your OS to ensure maximum privacy without breaking essential functionality.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center">
+                        <button
+                            onClick={applyAllSafe}
+                            disabled={optimizing}
+                            className="group relative px-8 py-5 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[#00FFDE]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl border"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#00FFDE]/0 via-[#00FFDE]/10 to-[#00FFDE]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center gap-3 text-white group-hover:text-[#00FFDE] transition-colors">
+                                {optimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
+                                {optimizing ? 'Securing...' : 'Apply Safe Tweaks'}
+                            </span>
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={applyAllSafe}
-                    className="px-4 py-2 bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg text-accent-cyan text-sm font-medium hover:bg-accent-cyan/20 transition-colors"
-                >
-                    🔒 Apply All Safe Tweaks
-                </button>
+            </motion.div>
+
+            <div className="mt-8">
+                <TabGroup tabs={tabs} active={tab} onChange={setTab} />
             </div>
 
-            <TabGroup tabs={tabs} active={tab} onChange={setTab} />
-
-            <div className="grid gap-3">
+            <div className="grid gap-4 mt-6">
                 {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
-                {items.length === 0 && <div className="text-text-dim text-center py-8">No tweaks in this tab</div>}
+                {items.length === 0 && <div className="text-[var(--text-muted)] text-center py-12 font-bold tracking-widest uppercase">No tweaks in this category</div>}
             </div>
 
             {optimizing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,12,20,0.85)] backdrop-blur-3xl">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-card-bg border border-accent-cyan/30 rounded-2xl p-6 w-[400px] shadow-2xl shadow-accent-cyan/10"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="border-[#00FFDE]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl relative overflow-hidden border"
                     >
-                        <div className="flex items-center gap-3 mb-4">
-                            <Loader2 className="w-6 h-6 text-accent-cyan animate-spin" />
-                            <h3 className="text-lg font-bold text-text-primary">Optimizing Privacy...</h3>
+                        {/* Scanning beam effect */}
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00FFDE]/10 to-transparent h-[200%]"
+                            animate={{ top: ['-100%', '100%'] }}
+                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        />
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-8 justify-center">
+                                <Loader2 className="w-10 h-10 text-[#00FFDE] animate-spin drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                                <h3 className="text-2xl font-black text-white tracking-wide">Securing Privacy...</h3>
+                            </div>
+                            
+                            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl p-4 mb-6 border">
+                                <p className="text-[#00FFDE] font-mono text-xs mb-1 uppercase tracking-widest">Executing Payload</p>
+                                <p className="text-white text-sm truncate font-medium">{optCurrent}</p>
+                            </div>
+
+                            <div className="w-full h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-[#00FFDE] to-[#00FFDE] shadow-[0_0_15px_rgba(0,255,222,0.5)]"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${optProgress}%` }}
+                                    transition={{ duration: 0.2 }}
+                                />
+                            </div>
+                            <div className="text-right text-[#00FFDE] font-black text-xs mt-3 tracking-widest">{optProgress}% SECURED</div>
                         </div>
-                        <p className="text-text-muted text-sm mb-4 truncate">Applying: {optCurrent}</p>
-                        <div className="w-full h-2 bg-app-bg rounded-full overflow-hidden">
-                            <motion.div
-                                className="h-full bg-accent-cyan"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${optProgress}%` }}
-                                transition={{ duration: 0.2 }}
-                            />
-                        </div>
-                        <div className="text-right text-text-dim text-xs mt-2">{optProgress}%</div>
                     </motion.div>
                 </div>
             )}

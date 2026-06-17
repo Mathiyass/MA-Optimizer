@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { escapePS } from './utils.ts';
+import { escapePS } from './utils';
 
 test('escapePS - should escape single quotes', () => {
     assert.strictEqual(escapePS("normal string"), "normal string");

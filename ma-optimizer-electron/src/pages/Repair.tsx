@@ -33,10 +33,10 @@ const actions: RepairAction[] = [
 ]
 
 const categoryColors: Record<string, string> = {
-    'System Files': 'from-cyan-500 to-blue-500',
-    'Network': 'from-orange-500 to-amber-500',
-    'Storage': 'from-green-500 to-emerald-500',
-    'Misc': 'from-violet-500 to-purple-500',
+    'System Files': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Network': 'from-[#FF003C] to-[#00FFDE]',
+    'Storage': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Misc': 'from-[#FF003C] to-[#FF003C]/50',
 }
 
 export function Repair() {
@@ -75,89 +75,118 @@ export function Repair() {
     const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }
 
     return (
-        <motion.div className="space-y-6 max-w-5xl" variants={container} initial={false} animate="show">
-            <motion.div variants={item} className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <HeartPulse className="w-6 h-6 text-accent-cyan" /> Repair & Fix
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">System repair tools and recovery options</p>
+        <motion.div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10" variants={container} initial={false} animate="show">
+            {/* Ultra-Premium Repair Hero Section */}
+            <motion.div variants={item}
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00FFDE]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <HeartPulse className="w-12 h-12 text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            System Repair
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            Integrity & Recovery Tools
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Diagnose and repair corrupted system files, broken network stacks, and registry inconsistencies. Restore stability safely.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={createRP}
+                            disabled={running === 'rp'}
+                            className="group relative px-8 py-5 rounded-2xl bg-[#00FFDE]/10 border-[#00FFDE]/30 hover:border-[#00FFDE]/80 hover:bg-[#00FFDE]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(0,255,222,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px] border"
+                        >
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#00FFDE] drop-shadow-[0_0_8px_rgba(0,255,222,0.8)]">
+                                {running === 'rp' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
+                                {running === 'rp' ? 'Creating...' : 'Create Restore Point'}
+                            </span>
+                        </motion.button>
+                    </div>
                 </div>
-                <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={createRP}
-                    disabled={running === 'rp'}
-                    className="px-5 py-2.5 bg-success/15 text-success rounded-xl text-sm font-medium hover:bg-success/25 transition-all disabled:opacity-50 flex items-center gap-2"
-                >
-                    {running === 'rp' ? <><Loader2 className="w-4 h-4 animate-spin" />Creating...</> : '📌 Create Restore Point'}
-                </motion.button>
             </motion.div>
 
             {/* Progress indicator for running action */}
             {running && running !== 'rp' && (
                 <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="bg-accent-cyan/5 border border-accent-cyan/20 rounded-xl p-4 flex items-center gap-4"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="card-premium bg-[rgba(0,255,222,0.05)] border-[var(--accent-cyan)]/30 rounded-[2rem] p-8 flex items-center gap-6 shadow-[0_0_30px_rgba(0,255,222,0.1)] relative overflow-hidden backdrop-blur-xl border"
                 >
-                    <Loader2 className="w-5 h-5 animate-spin text-accent-cyan shrink-0" />
+                    <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-[var(--accent-cyan)] to-transparent"></div>
+                    <Loader2 className="w-8 h-8 animate-spin text-[var(--accent-cyan)] shrink-0 drop-shadow-[0_0_10px_rgba(0,255,222,0.8)]" />
                     <div className="flex-1">
-                        <div className="text-text-primary text-sm font-medium">Running: {actions.find(a => a.id === running)?.label}</div>
-                        <div className="text-text-dim text-xs mt-0.5">
-                            Estimated time: {actions.find(a => a.id === running)?.estimatedTime}
+                        <div className="text-white text-lg font-black tracking-wide">Executing: {actions.find(a => a.id === running)?.label}</div>
+                        <div className="text-[var(--text-muted)] text-sm mt-1 font-medium flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Estimated duration: {actions.find(a => a.id === running)?.estimatedTime}
                         </div>
                     </div>
-                    <div className="w-32 h-1.5 bg-card-border rounded-full overflow-hidden">
-                        <div className="h-full bg-accent-cyan rounded-full animate-shimmer" style={{ width: '60%' }} />
+                    <div className="w-48 h-2 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border">
+                        <div className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE] rounded-full animate-shimmer" style={{ width: '60%' }} />
                     </div>
                 </motion.div>
             )}
 
             {/* Grouped actions */}
-            {categories.map(category => (
-                <motion.div key={category} variants={item} className="space-y-2">
-                    <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2 mb-3">
-                        <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-br ${categoryColors[category] || 'from-gray-500 to-gray-600'}`} />
-                        {category}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        {actions.filter(a => a.category === category).map(a => {
-                            const isCompleted = completed.has(a.id)
-                            const isRunning = running === a.id
-                            return (
-                                <motion.button
-                                    key={a.id}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={() => run(a)}
-                                    disabled={running !== null}
-                                    className={`flex items-center gap-4 p-4 rounded-xl border text-left transition-all card-premium ${isRunning
-                                        ? 'border-accent-cyan/30 bg-accent-cyan/5'
-                                        : isCompleted
-                                            ? 'border-success/20 bg-success/5'
-                                            : 'border-card-border bg-card-bg hover:border-white/10'
-                                        } ${running !== null && !isRunning ? 'opacity-40' : ''}`}
-                                >
-                                    {isRunning ? (
-                                        <Loader2 className="w-5 h-5 animate-spin text-accent-cyan shrink-0" />
-                                    ) : isCompleted ? (
-                                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                                    ) : (
-                                        <a.icon className="w-5 h-5 text-accent-cyan shrink-0" />
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-text-primary text-sm font-medium">{a.label}</div>
-                                        <div className="text-text-dim text-xs">{a.desc}</div>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-text-dim">
-                                        <Clock className="w-3 h-3" />
-                                        <span className="text-[10px]">{a.estimatedTime}</span>
-                                    </div>
-                                </motion.button>
-                            )
-                        })}
-                    </div>
-                </motion.div>
-            ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                {categories.map(category => (
+                    <motion.div key={category} variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-8 shadow-xl border">
+                        <h3 className="text-white text-xl font-black tracking-wide flex items-center gap-3 mb-6">
+                            <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${categoryColors[category] || 'from-[rgba(255,255,255,0.2)] to-[rgba(255,255,255,0.1)]'} shadow-[0_0_10px_rgba(255,255,255,0.3)]`} />
+                            {category}
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4">
+                            {actions.filter(a => a.category === category).map(a => {
+                                const isCompleted = completed.has(a.id)
+                                const isRunning = running === a.id
+                                return (
+                                    <motion.button
+                                        key={a.id}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => run(a)}
+                                        disabled={running !== null}
+                                        className={`flex items-center gap-5 p-5 rounded-2xl border text-left transition-all duration-300 ${isRunning
+                                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_15px_rgba(0,255,222,0.1)] border'
+                                            : isCompleted
+                                                ? 'border-[#00FFDE]/30 bg-[#00FFDE]/10 border'
+                                                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
+                                            } ${running !== null && !isRunning ? 'opacity-40 grayscale' : ''}`}
+                                    >
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isRunning ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20 border' : isCompleted ? 'border-[#00FFDE]/30 bg-[#00FFDE]/20 border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border'}`}>
+                                            {isRunning ? (
+                                                <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-cyan)]" />
+                                            ) : isCompleted ? (
+                                                <CheckCircle2 className="w-6 h-6 text-[#00FFDE]" />
+                                            ) : (
+                                                <a.icon className="w-6 h-6 text-[var(--accent-cyan)]" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-white text-[15px] font-bold tracking-wide">{a.label}</div>
+                                            <div className="text-[var(--text-muted)] text-xs mt-1 font-medium">{a.desc}</div>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-[var(--text-dim)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl whitespace-nowrap border">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            <span className="text-[11px] font-black tracking-widest uppercase">{a.estimatedTime}</span>
+                                        </div>
+                                    </motion.button>
+                                )
+                            })}
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
         </motion.div>
     )
 }

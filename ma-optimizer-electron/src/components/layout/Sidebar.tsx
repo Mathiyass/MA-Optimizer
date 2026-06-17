@@ -33,10 +33,18 @@ export function Sidebar() {
     const setPage = useAppStore((s) => s.setPage)
 
     return (
-        <aside className="w-[240px] h-full glass-panel flex flex-col overflow-hidden shrink-0 z-20">
+        <aside className="w-64 h-full flex flex-col magnetic-dock relative z-20 shrink-0">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[var(--accent-violet)]/5 to-transparent pointer-events-none" />
+            
             {/* Logo */}
-            <div className="flex items-center gap-3 px-5 py-5">
-                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-white/10 shrink-0 flex items-center justify-center bg-black/40 relative">
+            <div className="flex items-center gap-4 px-6 py-8 relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-[rgba(0,255,222,0.1)] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <motion.div 
+                    className="w-14 h-14 rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(0,255,222,0.3)] group-hover:shadow-[0_0_35px_rgba(0,255,222,0.5)] transition-shadow duration-500 border border-white/10 shrink-0 flex items-center justify-center bg-black relative z-10"
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                >
                     <video
                         src={logoVideo}
                         autoPlay
@@ -45,10 +53,10 @@ export function Sidebar() {
                         playsInline
                         className="w-[120%] h-[120%] object-cover absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                     />
-                </div>
-                <div>
-                    <h1 className="text-text-primary font-bold text-base tracking-tight leading-none text-gradient-cyan">MA-Optimizer</h1>
-                    <span className="text-text-dim text-[10px] tracking-wider uppercase font-bold">v7.1</span>
+                </motion.div>
+                <div className="z-10 flex flex-col">
+                    <h1 className="text-white font-black text-xl tracking-tight leading-none text-gradient-ultra pb-1 drop-shadow-[0_0_8px_rgba(0,255,222,0.3)]">MA-Optimizer</h1>
+                    <span className="text-[var(--accent-cyan)] text-[9px] tracking-[0.3em] uppercase font-black bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/20 px-2 py-0.5 rounded-2xl shadow-[0_0_10px_rgba(0,255,222,0.1)] self-start mt-1">PRO EDITION</span>
                 </div>
             </div>
 
@@ -60,46 +68,43 @@ export function Sidebar() {
                     const Icon = item.icon
 
                     return (
-                        <motion.button
+                        <button
                             key={item.id}
                             onClick={() => setPage(item.id)}
-                            whileTap={{ scale: 0.98 }}
-                            className={`
-                relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 group
-                border-l-[3px]
-                ${active
-                                    ? 'bg-[var(--bg-elevated)] text-[var(--accent-cyan)] border-[var(--accent-cyan)] rounded-l-none'
-                                    : 'text-[var(--text-secondary)] border-transparent hover:bg-white/5 hover:text-[var(--text-primary)]'
-                                }
-              `}
+                            className={`w-full flex items-center gap-3 px-6 py-3.5 transition-all duration-300 group relative
+                                ${active 
+                                    ? 'text-[#00FFDE] bg-[rgba(0,255,222,0.05)]' 
+                                    : 'text-[var(--text-secondary)] hover:text-white hover:bg-white/5'}`}
                         >
-                            {/* Removed absolute layout bar as border-l suffices */}
-
-                            <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? '' : 'opacity-60 group-hover:opacity-100'}`} />
-                            <span className="text-[13px] font-medium truncate">{item.label}</span>
+                            {active && (
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00FFDE] shadow-[0_0_10px_#00FFDE]" />
+                            )}
+                            <Icon className="w-5 h-5 shrink-0 z-10 transition-all duration-300" />
+                            <span className="text-[13px] font-bold uppercase tracking-widest truncate z-10">{item.label}</span>
 
                             {item.badge && (
-                                <span className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isViolet
-                                    ? 'bg-accent-violet/20 text-accent-violet'
-                                    : 'bg-accent-cyan/20 text-accent-cyan'
+                                <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded-2xl border shadow-lg ${isViolet
+                                    ? 'bg-[#FF003C]/20 text-[#FF003C] border-[#FF003C]/40 shadow-[0_0_10px_rgba(255,0,60,0.3)]'
+                                    : 'bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/40 shadow-[0_0_10px_rgba(0,255,222,0.3)]'
                                     }`}>
                                     {item.badge}
                                 </span>
                             )}
-                        </motion.button>
+                        </button>
                     )
                 })}
             </nav>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-card-border">
+            <div className="px-6 py-6 border-t border-white/5 bg-black/20 backdrop-blur-md relative z-10">
                 <a
-                    href="https://mathiyass.github.io/MAportfolio/"
+                    href="https://maportfolio.mathishaangirasass.workers.dev/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-text-dim text-[10px] hover:text-accent-cyan transition-colors cursor-pointer"
+                    className="flex flex-col items-center justify-center text-[var(--text-dim)] hover:text-[var(--accent-cyan)] transition-colors cursor-pointer group"
                 >
-                    © Mathisha Angirasa
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] mb-1">Architected By</span>
+                    <span className="text-xs font-black tracking-widest text-white group-hover:text-[var(--accent-cyan)] transition-colors drop-shadow-[0_0_8px_rgba(0,255,222,0)] group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]">Mathisha Angirasa</span>
                 </a>
             </div>
         </aside>
