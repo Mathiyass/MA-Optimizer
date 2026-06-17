@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { motion } from 'framer-motion'
-import { Zap, Shield, Cpu, HardDrive, Wifi, MemoryStick, Crown, Monitor, Clock, Activity, ChevronRight, RefreshCw, Loader2 } from 'lucide-react'
-import { RingGauge } from '../components/ui/RingGauge'
+import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2 } from 'lucide-react'
 import { useSystemStore } from '../store/systemStore'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -13,32 +12,6 @@ function formatBytes(b: number) {
     const k = 1024, s = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.floor(Math.log(Math.abs(b) || 1) / Math.log(k))
     return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]
-}
-
-/** Animated number counter */
-function AnimatedNumber({ value, suffix = '', decimals = 0 }: { value: number; suffix?: string; decimals?: number }) {
-    const [display, setDisplay] = useState(0)
-    const rafRef = useRef<number>()
-
-    useEffect(() => {
-        const start = display
-        const diff = value - start
-        const duration = 600
-        const startTime = performance.now()
-
-        function animate(currentTime: number) {
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-            setDisplay(start + diff * eased)
-            if (progress < 1) rafRef.current = requestAnimationFrame(animate)
-        }
-
-        rafRef.current = requestAnimationFrame(animate)
-        return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
-    }, [value])
-
-    return <>{display.toFixed(decimals)}{suffix}</>
 }
 
 function HealthGauge({ score }: { score: number }) {
@@ -103,14 +76,9 @@ export function Dashboard() {
     
     const cpu = useSystemStore(s => s.cpu)
     const ram = useSystemStore(s => s.ram)
-    const disk = useSystemStore(s => s.disk)
-    const net = useSystemStore(s => s.network)
     const setPage = useAppStore(s => s.setPage)
     const addNotification = useAppStore(s => s.addNotification)
     const applied = useSettingsStore(s => Object.values(s.appliedTweaks).filter(Boolean).length)
-    const cleaned = useSettingsStore(s => s.totalCleaned)
-    const [osInfo, setOsInfo] = useState<{ platform: string; distro: string; release: string; build: string; hostname: string; arch: string } | null>(null)
-    const [uptime, setUptime] = useState(0)
     const [cpuHistory, setCpuHistory] = useState<{ time: string, load: number }[]>([])
 
     useEffect(() => {
@@ -156,27 +124,7 @@ export function Dashboard() {
         }, 1000)
     }
 
-    useEffect(() => {
-        window.api?.system.getFullInfo().then((info: any) => {
-            if (info?.os) {
-                setOsInfo({
-                    platform: info.os.platform || 'Windows',
-                    distro: info.os.distro || 'Windows',
-                    release: info.os.release || '',
-                    build: info.os.build || '',
-                    hostname: info.os.hostname || '',
-                    arch: info.os.arch || 'x64',
-                })
-            }
-            if (info?.time?.uptime) setUptime(info.time.uptime)
-        }).catch(() => { })
-    }, [])
 
-    const formatUptime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600)
-        const m = Math.floor((seconds % 3600) / 60)
-        return `${h}h ${m}m`
-    }
 
     const quickCards = [
         { icon: Crown, label: 'Power Plan', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'ma-power' as const, desc: 'Flagship performance profile' },
