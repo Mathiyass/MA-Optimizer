@@ -27,31 +27,32 @@ async function ensureRestorePoint() {
 
 const backupPath = path.join(app.getPath('userData'), 'backups', 'registry_backup.json')
 
-function ensureBackupDir() {
+async function ensureBackupDir() {
     const dir = path.dirname(backupPath)
     if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
+        await fs.promises.mkdir(dir, { recursive: true })
     }
 }
 
-function loadBackups(): Record<string, any> {
-    ensureBackupDir()
+export async function loadBackups(): Promise<Record<string, any>> {
+    await ensureBackupDir()
     try {
         if (fs.existsSync(backupPath)) {
-            return JSON.parse(fs.readFileSync(backupPath, 'utf-8'))
+            const data = await fs.promises.readFile(backupPath, 'utf-8')
+            return JSON.parse(data)
         }
     } catch { }
     return {}
 }
 
-function saveBackups(data: Record<string, any>) {
-    ensureBackupDir()
-    fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf-8')
+export async function saveBackups(data: Record<string, any>) {
+    await ensureBackupDir()
+    await fs.promises.writeFile(backupPath, JSON.stringify(data, null, 2), 'utf-8')
 }
 
-function backupOriginalValue(hive: string, regPath: string, name: string, currentValue: any) {
+export async function backupOriginalValue(hive: string, regPath: string, name: string, currentValue: any) {
     const key = `${hive}\\${regPath}\\${name}`
-    const backups = loadBackups()
+    const backups = await loadBackups()
     // Never overwrite an existing backup for the same key
     if (!(key in backups)) {
         backups[key] = {
@@ -61,7 +62,7 @@ function backupOriginalValue(hive: string, regPath: string, name: string, curren
             originalValue: currentValue,
             backedUpAt: new Date().toISOString(),
         }
-        saveBackups(backups)
+        await saveBackups(backups)
         sendLog(`[Backup] Saved original value for ${key}: ${currentValue}`)
     }
 }
@@ -104,7 +105,7 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
         } catch { }
 
         // Backup original value
-        backupOriginalValue(hive, regPath, name, currentValue)
+        await backupOriginalValue(hive, regPath, name, currentValue)
 
         // Map type names
         const typeMap: Record<string, string> = {
@@ -156,12 +157,12 @@ ipcMain.handle('registry:delete', async (_, hive: string, regPath: string, name:
 
 // Full registry backup export
 ipcMain.handle('registry:backup', async () => {
-    return loadBackups()
+    return await loadBackups()
 })
 
 // Restore all backed up values
 ipcMain.handle('registry:restoreAll', async () => {
-    const backups = loadBackups()
+    const backups = await loadBackups()
     let restored = 0
     for (const [key, entry] of Object.entries(backups)) {
         try {
@@ -185,7 +186,7 @@ ipcMain.handle('registry:restoreAll', async () => {
 
 // Restore last backed up value
 ipcMain.handle('registry:restoreLast', async () => {
-    const backups = loadBackups()
+    const backups = await loadBackups()
     const entries = Object.entries(backups)
     if (entries.length === 0) return { success: false, error: 'No backups found' }
 
@@ -207,7 +208,7 @@ ipcMain.handle('registry:restoreLast', async () => {
         }
         // Remove from backups
         delete backups[key]
-        saveBackups(backups)
+        await saveBackups(backups)
         sendLog(`[Registry] Restored last change: ${key}`)
         return { success: true, key }
     } catch (e: any) {
@@ -216,4 +217,3 @@ ipcMain.handle('registry:restoreLast', async () => {
     }
 })
 
-export { backupOriginalValue, loadBackups }
