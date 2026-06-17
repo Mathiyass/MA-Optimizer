@@ -2,11 +2,8 @@ import { ipcMain } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import { sendLog } from './logger'
-
-const execPromise = promisify(exec)
+import { escapePS, execPromise, spawnPromise } from './utils'
 
 interface CleanerCategory {
     id: string
@@ -148,7 +145,7 @@ ipcMain.handle('cleaner:clean', async (_, categoryIds: string[]) => {
     }
 
     // Flush DNS cache too
-    try { await execPromise('ipconfig /flushdns') } catch { }
+    try { await spawnPromise('ipconfig', ['/flushdns']) } catch { }
 
     sendLog(`[Cleaner] Total space freed: ${(totalFreed / 1024 / 1024).toFixed(1)} MB`)
     return { freed: totalFreed }
@@ -363,8 +360,8 @@ ipcMain.handle('cleaner:scanRegistry', async () => {
     const results: any[] = []
     try {
         const ps = `Get-ChildItem "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | ForEach-Object { $key = $_; $path = (Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue).InstallLocation; if ($path -and !(Test-Path $path -ErrorAction SilentlyContinue)) { [PSCustomObject]@{ Type='Invalid Uninstall Entry'; Path=$key.PSPath; Detail="Missing: $path" } } } | ConvertTo-Json`
-        const { stdout } = await execPromise(`powershell -NonInteractive -NoProfile -Command "${ps}"`, {
-            timeout: 30000, windowsHide: true,
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            timeout: 30000,
         })
         const result = stdout.trim()
         if (result) {
@@ -381,8 +378,9 @@ ipcMain.handle('cleaner:cleanRegistry', async (_, items: any[]) => {
     let cleaned = 0
     for (const item of items) {
         try {
-            await execPromise(`powershell -NonInteractive -NoProfile -Command "Remove-Item '${item.Path}' -Recurse -Force -ErrorAction SilentlyContinue"`, {
-                timeout: 10000, windowsHide: true,
+            const ps = `Remove-Item '${escapePS(item.Path)}' -Recurse -Force -ErrorAction SilentlyContinue`
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                timeout: 10000,
             })
             cleaned++
         } catch { }
@@ -393,8 +391,8 @@ ipcMain.handle('cleaner:cleanRegistry', async (_, items: any[]) => {
 
 ipcMain.handle('cleaner:emptyRecycleBin', async () => {
     try {
-        await execPromise('powershell -NonInteractive -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"', {
-            timeout: 15000, windowsHide: true,
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'Clear-RecycleBin -Force -ErrorAction SilentlyContinue'], {
+            timeout: 15000,
         })
         sendLog('[Cleaner] Recycle Bin emptied')
         return true
