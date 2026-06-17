@@ -69,7 +69,7 @@ export function Gaming() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Gaming Hero Section */}
             <motion.div
-                className={`relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] ${gameBoostOn
+                className={`relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl ${gameBoostOn
                     ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_40px_rgba(0,255,222,0.2)]'
                     : 'border-white/5'
                 }`}
@@ -77,7 +77,7 @@ export function Gaming() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <div className={`absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[var(--accent-cyan)]/20' : 'bg-white/5'}`}></div>
-                <div className={`absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[#cc00ff]/20' : 'bg-white/5'}`}></div>
+                <div className={`absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[#FF003C]/20' : 'bg-white/5'}`}></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                     <div className="flex-1 text-center md:text-left">
@@ -91,7 +91,7 @@ export function Gaming() {
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                             {gpuInfo && (
                                 <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
-                                    <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${isNvidia ? 'bg-[#76b900] text-[#76b900]' : isAmd ? 'bg-[#ed1c24] text-[#ed1c24]' : 'bg-[var(--accent-cyan)] text-[var(--accent-cyan)]'}`} />
+                                    <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${isNvidia ? 'bg-[#00FFDE] text-[#00FFDE]' : isAmd ? 'bg-[#FF003C] text-[#FF003C]' : 'bg-[var(--accent-cyan)] text-[var(--accent-cyan)]'}`} />
                                     <span className="text-white font-bold text-sm tracking-wide">{gpuInfo.model}</span>
                                     {gpuInfo.vram > 0 && <span className="text-[var(--text-muted)] text-xs font-black">{gpuInfo.vram} MB VRAM</span>}
                                 </div>
@@ -126,7 +126,7 @@ export function Gaming() {
             {/* Metrics Row */}
             {gameBoostOn && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-scale-in">
-                    <div className="card-premium rounded-3xl p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl">
                         <div className="flex justify-between items-start mb-4">
                             <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">FPS Stability</span>
                             <Zap className="w-5 h-5 text-[var(--accent-cyan)] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" />
@@ -140,31 +140,31 @@ export function Gaming() {
                         </div>
                     </div>
 
-                    <div className="card-premium rounded-3xl p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl">
                         <div className="flex justify-between items-start mb-4">
                             <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">Input Latency</span>
                             <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-[#cc00ff] animate-pulse shadow-[0_0_8px_#cc00ff]"></span>
-                                <span className="text-[10px] font-black text-[#cc00ff] tracking-wider">ULTRA-LOW</span>
+                                <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse shadow-[0_0_8px_#FF003C]"></span>
+                                <span className="text-[10px] font-black text-[#FF003C] tracking-wider">ULTRA-LOW</span>
                             </div>
                         </div>
                         <div className="flex items-baseline gap-2 mb-4">
                             <span className="text-4xl font-black text-white">0.5</span>
-                            <span className="text-xl font-bold text-[#cc00ff] opacity-80">ms</span>
+                            <span className="text-xl font-bold text-[#FF003C] opacity-80">ms</span>
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Polling Rate: <span className="text-[#cc00ff]">Maximized</span></p>
+                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Polling Rate: <span className="text-[#FF003C]">Maximized</span></p>
                     </div>
 
-                    <div className="card-premium rounded-3xl p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl">
                         <div className="flex justify-between items-start mb-4">
                             <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">Background Apps</span>
-                            <span className="text-xs font-black text-[#ff003c] tracking-wider bg-[#ff003c]/10 px-2 py-1 rounded-md">SUSPENDED</span>
+                            <span className="text-xs font-black text-[#FF003C] tracking-wider bg-[#FF003C]/10 px-2 py-1 rounded-md">SUSPENDED</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-4">
                             <span className="text-4xl font-black text-white">42</span>
-                            <span className="text-xl font-bold text-[#ff003c] opacity-80">PROCS</span>
+                            <span className="text-xl font-bold text-[#FF003C] opacity-80">PROCS</span>
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Resources: <span className="text-[#ff003c]">Freed</span></p>
+                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Resources: <span className="text-[#FF003C]">Freed</span></p>
                     </div>
                 </div>
             )}

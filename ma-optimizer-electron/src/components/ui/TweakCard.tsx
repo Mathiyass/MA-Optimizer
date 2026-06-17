@@ -20,7 +20,7 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
 
     const borderColor = enabled
         ? risk === 'aggressive'
-            ? 'border-[#ff003c]/40 bg-[#ff003c]/[0.03] shadow-[0_0_30px_rgba(255,0,60,0.1)] hover:border-[#FF003C] hover:shadow-[0_0_30px_rgba(255,0,60,0.3)]'
+            ? 'border-[#FF003C]/40 bg-[#FF003C]/[0.03] shadow-[0_0_30px_rgba(255,0,60,0.1)] hover:border-[#FF003C] hover:shadow-[0_0_30px_rgba(255,0,60,0.3)]'
             : 'border-[#00FFDE]/40 bg-[#00FFDE]/[0.03] shadow-[0_0_30px_rgba(0,255,222,0.1)] hover:border-[#00FFDE] hover:shadow-[0_0_30px_rgba(0,255,222,0.3)]'
         : 'border-white/5 bg-[rgba(255,255,255,0.03)] hover:border-[#00FFDE] hover:bg-[rgba(255,255,255,0.05)] hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]'
 
@@ -31,7 +31,7 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
             transition={{ duration: 0.3, ease: 'easeOut' }}
             whileHover={{ scale: 1.01, translateY: -2 }}
             className={`
-                relative p-5 rounded-3xl border transition-all duration-300 backdrop-blur-3xl
+                relative p-5 rounded-2xl border transition-all duration-300 backdrop-blur-3xl
                 ${borderColor}
                 ${disabled ? 'opacity-50 pointer-events-none' : ''}
             `}
@@ -68,8 +68,8 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
                                 relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none shadow-inner
                                 ${enabled
                                     ? risk === 'aggressive'
-                                        ? 'bg-[#ff003c] shadow-[0_0_20px_rgba(255,0,60,0.4)]'
-                                        : 'bg-gradient-to-r from-[var(--accent-cyan)] to-[#00aaff] shadow-[0_0_20px_rgba(0,255,222,0.4)]'
+                                        ? 'bg-[#FF003C] shadow-[0_0_20px_rgba(255,0,60,0.4)]'
+                                        : 'bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE] shadow-[0_0_20px_rgba(0,255,222,0.4)]'
                                     : 'bg-black/40 border border-white/10 hover:bg-black/60'
                                 }
                             `}
@@ -82,7 +82,7 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
                         </button>
                     )}
                     {enabled && !loading && (
-                        <span className={`text-[10px] font-black uppercase mt-2 tracking-widest ${risk === 'aggressive' ? 'text-[#ff003c]' : 'text-[var(--accent-cyan)]'}`}>
+                        <span className={`text-[10px] font-black uppercase mt-2 tracking-widest ${risk === 'aggressive' ? 'text-[#FF003C]' : 'text-[var(--accent-cyan)]'}`}>
                             Active
                         </span>
                     )}

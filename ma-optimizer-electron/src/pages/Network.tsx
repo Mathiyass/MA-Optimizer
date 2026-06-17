@@ -66,7 +66,7 @@ function DnsTab() {
                         onClick={() => setSelectedDns(i)}
                         className={`p-5 rounded-2xl border text-left transition-all duration-300 group ${selectedDns === i
                             ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)]'
-                            : 'border-white/10 bg-black/40 hover:border-white/20 hover:bg-black/60 shadow-inner'
+                            : 'border-white/10 bg-black/40 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner'
                             }`}
                     >
                         <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">
@@ -151,10 +151,10 @@ function DiagnosticsTab() {
                     return (
                         <div key={host} className="p-5 bg-black/40 border border-white/10 rounded-2xl text-center relative overflow-hidden shadow-inner group hover:border-white/20 transition-all duration-300">
                             {/* Status Indicator Glow */}
-                            <div className={`absolute top-0 left-0 right-0 h-1 ${isGreat ? 'bg-[#00ff88] shadow-[0_0_10px_rgba(0,255,136,0.8)]' : isWarn ? 'bg-[#ffaa00] shadow-[0_0_10px_rgba(255,170,0,0.8)]' : 'bg-[#ff003c] shadow-[0_0_10px_rgba(255,0,60,0.8)]'}`} />
+                            <div className={`absolute top-0 left-0 right-0 h-1 ${isGreat ? 'bg-[#00FFDE] shadow-[0_0_10px_rgba(0,255,222,0.8)]' : isWarn ? 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]' : 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]'}`} />
                             
                             <div className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">{host}</div>
-                            <div className={`text-3xl font-black font-mono tracking-tighter ${isGreat ? 'text-[#00ff88]' : isWarn ? 'text-[#ffaa00]' : 'text-[#ff003c]'}`}>
+                            <div className={`text-3xl font-black font-mono tracking-tighter ${isGreat ? 'text-[#00FFDE]' : isWarn ? 'text-[#FF003C]' : 'text-[#FF003C]'}`}>
                                 {isOk ? `${result.ms}ms` : 'FAIL'}
                             </div>
                             
@@ -162,7 +162,7 @@ function DiagnosticsTab() {
                             {isOk && (
                                 <div className="flex items-end justify-center gap-1 mt-4 h-6 opacity-30 group-hover:opacity-100 transition-opacity">
                                     {[1,2,3,4,5].map(bar => (
-                                        <div key={bar} className={`w-1.5 rounded-full ${isGreat ? 'bg-[#00ff88]' : isWarn ? 'bg-[#ffaa00]' : 'bg-[#ff003c]'}`} style={{ height: `${Math.max(10, Math.random() * 100)}%` }}></div>
+                                        <div key={bar} className={`w-1.5 rounded-full ${isGreat ? 'bg-[#00FFDE]' : isWarn ? 'bg-[#FF003C]' : 'bg-[#FF003C]'}`} style={{ height: `${Math.max(10, Math.random() * 100)}%` }}></div>
                                     ))}
                                 </div>
                             )}
@@ -189,12 +189,12 @@ export function Network() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Network Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00ff88]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#FF003C]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                     <div className="flex-1 text-center md:text-left">
@@ -229,11 +229,11 @@ export function Network() {
             </div>
 
             {tab === 'dns' ? (
-                <div className="card-premium rounded-[2rem] p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl mt-6 shadow-xl">
+                <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
                     <DnsTab />
                 </div>
             ) : tab === 'diagnostics' ? (
-                <div className="card-premium rounded-[2rem] p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl mt-6 shadow-xl">
+                <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
                     <DiagnosticsTab />
                 </div>
             ) : (
