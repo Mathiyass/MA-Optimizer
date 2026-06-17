@@ -5,7 +5,7 @@ import * as fs from 'fs'
 
 // IPC handler imports
 import './ipc/admin'
-import './ipc/logger'
+import { logger } from './ipc/logger'
 import './ipc/registry'
 import './ipc/backup'
 import './ipc/powerplan'
@@ -20,6 +20,8 @@ import './ipc/repair'
 import './ipc/advanced'
 import './ipc/driverUpdater'
 import { startSystemStatsPolling, stopSystemStatsPolling } from './ipc/systeminfo'
+
+const isDev = process.env.NODE_ENV === 'development'
 
 // 🔧 FIX: Added global exception handler, styled native dialog cannot take CSS colors but we make it clear it's an error.
 process.on('uncaughtException', (error) => {
@@ -56,9 +58,8 @@ async function isAdmin(): Promise<boolean> {
 
 async function ensureAdmin() {
     if (!(await isAdmin())) {
-        const isDev = process.env.NODE_ENV === 'development'
         if (isDev) {
-            console.warn('[Dev] Skipping admin elevation in development mode.')
+            logger.warn('[Dev] Skipping admin elevation in development mode.')
             return
         }
 
@@ -111,11 +112,11 @@ function createWindow() {
     app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
 
     mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
-        console.error(`Load failure: ${errorCode} - ${errorDescription}`);
+        logger.error(`Load failure: ${errorCode} - ${errorDescription}`);
     });
 
     mainWindow.webContents.on('render-process-gone', (_event, details) => {
-        console.error(`Renderer process gone: ${details.reason}`);
+        logger.error(`Renderer process gone: ${details.reason}`);
     });
 
     if (windowState.isMaximized) {
@@ -141,7 +142,6 @@ function createWindow() {
     mainWindow.on('move', saveWindowState)
     mainWindow.on('close', saveWindowState)
 
-    const isDev = process.env.NODE_ENV === 'development'
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173')
         mainWindow.webContents.openDevTools({ mode: 'detach' })
@@ -151,14 +151,18 @@ function createWindow() {
 
 
     mainWindow.once('ready-to-show', async () => {
-        console.log('[Diagnostic] ready-to-show event triggered.');
+        if (isDev) {
+            logger.info('[Diagnostic] ready-to-show event triggered.');
+        }
         mainWindow?.show()
         const admin = await isAdmin()
         mainWindow?.webContents.send('admin:status', admin)
     })
 
     mainWindow.on('closed', () => {
-        console.log('[Diagnostic] Window closed event triggered.');
+        if (isDev) {
+            logger.info('[Diagnostic] Window closed event triggered.');
+        }
         mainWindow = null
     })
 
@@ -194,19 +198,19 @@ ipcMain.handle('dialog:save', async (_, opts) => {
 ipcMain.handle('system:openPath', async (_, p: string) => {
     // 🔧 FIX: Validate paths being opened are legitimate to prevent directory traversal
     if (typeof p !== 'string' || p.includes('..')) {
-        console.warn(`[Security] Blocked invalid path opening attempt: ${p}`)
+        logger.warn(`[Security] Blocked invalid path opening attempt: ${p}`)
         return false
     }
 
     const normalizedPath = path.normalize(p)
     if (!path.isAbsolute(normalizedPath)) {
-        console.warn(`[Security] Blocked non-absolute path opening attempt: ${p}`)
+        logger.warn(`[Security] Blocked non-absolute path opening attempt: ${p}`)
         return false
     }
 
     const error = await shell.openPath(normalizedPath)
     if (error) {
-        console.error(`[System] Failed to open path: ${normalizedPath}. Error: ${error}`)
+        logger.error(`[System] Failed to open path: ${normalizedPath}. Error: ${error}`)
         return false
     }
     return true
@@ -222,7 +226,7 @@ const ALLOWED_TOOLS = [
 ipcMain.handle('system:runTool', async (_, cmd: string) => {
     try {
         if (!ALLOWED_TOOLS.includes(cmd)) {
-            console.warn(`[Security] Blocked unauthorized tool execution: ${cmd}`)
+            logger.warn(`[Security] Blocked unauthorized tool execution: ${cmd}`)
             return false
         }
         const { exec } = require('child_process')
@@ -238,7 +242,7 @@ ipcMain.handle('create-restore-point', async () => {
         await spawnPromise('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', "Checkpoint-Computer -Description 'MA Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'"])
         return { success: true }
     } catch (error: any) {
-        console.error('[Restore Point Error]:', error.message || error)
+        logger.error(`[Restore Point Error]: ${error.message || error}`)
         return { success: false, error: error.message || String(error) }
     }
 })
