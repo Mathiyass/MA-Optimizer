@@ -185,7 +185,7 @@ export function AppInstaller() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium AppInstaller Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -216,7 +216,7 @@ export function AppInstaller() {
                                 animate={{ scale: 1, opacity: 1 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={installSelected}
-                                className="group relative px-8 py-4 rounded-2xl bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 hover:bg-[#00e6c8] transition-all duration-300 shadow-[0_0_20px_rgba(0,255,222,0.4)] w-full"
+                                className="group relative px-8 py-4 rounded-2xl bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 hover:bg-[#00e6c8] transition-all duration-300 shadow-[0_0_20px_rgba(0,255,222,0.4)] w-full border"
                             >
                                 <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-black">
                                     <Download className="w-5 h-5" />
@@ -225,7 +225,7 @@ export function AppInstaller() {
                             </motion.button>
                         )}
                         <button onClick={upgradeAll}
-                            className="px-8 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-sm text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-3 font-black tracking-widest uppercase w-full">
+                            className="px-8 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-sm text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-3 font-black tracking-widest uppercase w-full border">
                             <ArrowUpCircle className="w-5 h-5" /> Update All
                         </button>
                     </div>
@@ -239,11 +239,11 @@ export function AppInstaller() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search winget packages..."
-                    className="w-full pl-12 pr-12 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/10 rounded-2xl text-[15px] font-medium text-white placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_20px_rgba(0,255,222,0.2)] transition-all"
+                    className="w-full pl-12 pr-12 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[15px] font-medium text-white placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_20px_rgba(0,255,222,0.2)] transition-all border"
                 />
                 {searching && <Loader2 className="absolute right-12 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-[var(--accent-cyan)]" />}
                 {search && (
-                    <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-1 rounded-2xl">
+                    <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-1 rounded-2xl border">
                         <X className="w-4 h-4" />
                     </button>
                 )}
@@ -272,7 +272,7 @@ export function AppInstaller() {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="p-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-[#00FFDE]/20 rounded-2xl space-y-2">
+                        <div className="p-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-[#00FFDE]/20 rounded-2xl space-y-2 border">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-semibold text-accent-cyan flex items-center gap-1.5">
                                     <Loader2 className={`w-3 h-3 ${processing ? 'animate-spin' : ''}`} />
@@ -385,12 +385,12 @@ export function AppInstaller() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="flex items-center gap-3 p-4 rounded-2xl border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl animate-shimmer">
-                                        <div className="w-4 h-4 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0"></div>
-                                        <div className="w-10 h-10 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0"></div>
+                                    <div key={i} className="flex items-center gap-3 p-4 rounded-2xl border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl animate-shimmer border">
+                                        <div className="w-4 h-4 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0 border"></div>
+                                        <div className="w-10 h-10 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0 border"></div>
                                         <div className="flex-1 space-y-2">
-                                            <div className="h-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl w-1/3"></div>
-                                            <div className="h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl w-1/2"></div>
+                                            <div className="h-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl w-1/3 border"></div>
+                                            <div className="h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl w-1/2 border"></div>
                                         </div>
                                     </div>
                                 ))}
@@ -508,7 +508,7 @@ function AppCard({
                 {selected && <Check className="w-4 h-4 text-black absolute pointer-events-none font-bold" />}
             </div>
             
-            <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 flex flex-shrink-0 items-center justify-center p-2.5 shadow-inner">
+            <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex flex-shrink-0 items-center justify-center p-2.5 shadow-inner border">
                 {imgSrc && !imgError ? (
                     <img key={imgSrc} src={imgSrc} alt={name} onError={handleImgError} className="w-full h-full object-contain rounded-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                 ) : (
@@ -519,20 +519,20 @@ function AppCard({
                 <div className="flex items-center gap-3">
                     <span className="text-white text-[15px] font-bold tracking-wide">{name}</span>
                     {installed && (
-                        <span className="text-[9px] border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] shadow-[0_0_8px_rgba(0,255,222,0.3)] px-2 py-0.5 rounded-2xl font-black uppercase tracking-widest">Installed</span>
+                        <span className="text-[9px] border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] shadow-[0_0_8px_rgba(0,255,222,0.3)] px-2 py-0.5 rounded-2xl font-black uppercase tracking-widest border">Installed</span>
                     )}
                     {isRemote && (
-                        <span className="text-[9px] bg-[#00FFDE]/15 text-[#00FFDE] px-2 py-0.5 rounded-2xl font-black uppercase tracking-widest border-[#00FFDE]/30 shadow-[0_0_8px_rgba(0,255,222,0.2)]">winget</span>
+                        <span className="text-[9px] bg-[#00FFDE]/15 text-[#00FFDE] px-2 py-0.5 rounded-2xl font-black uppercase tracking-widest border-[#00FFDE]/30 shadow-[0_0_8px_rgba(0,255,222,0.2)] border">winget</span>
                     )}
                 </div>
                 <div className="text-[var(--text-muted)] text-xs mt-1 flex items-center gap-3 font-medium">
                     <span className="truncate">{desc}</span>
-                    {version && <span className="text-[var(--accent-cyan)] shrink-0 font-mono tracking-widest bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl px-1.5 py-0.5 border-white/5">v{version}</span>}
+                    {version && <span className="text-[var(--accent-cyan)] shrink-0 font-mono tracking-widest bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl px-1.5 py-0.5 border">v{version}</span>}
                 </div>
             </div>
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                 {inQueue ? (
-                    <span className="px-3 py-1.5 text-xs text-[var(--accent-cyan)] font-bold flex items-center gap-2 bg-[var(--accent-cyan)]/10 rounded-2xl shadow-[0_0_15px_rgba(0,255,222,0.2)] border-[var(--accent-cyan)]/30">
+                    <span className="px-3 py-1.5 text-xs text-[var(--accent-cyan)] font-bold flex items-center gap-2 bg-[var(--accent-cyan)]/10 rounded-2xl shadow-[0_0_15px_rgba(0,255,222,0.2)] border-[var(--accent-cyan)]/30 border">
                         <Loader2 className="w-4 h-4 animate-spin" /> In queue
                     </span>
                 ) : installed ? (

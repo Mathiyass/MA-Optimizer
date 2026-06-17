@@ -185,7 +185,7 @@ export function Dashboard() {
             animate="show"
         >
             {/* Ultra-Premium Hero Section */}
-            <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl animate-float-complex">
+            <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl animate-float-complex border">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,255,222,0.15),transparent_50%)] pointer-events-none mix-blend-screen" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,255,222,0.15),transparent_50%)] pointer-events-none mix-blend-screen" />
                 <div className="absolute top-0 right-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20 pointer-events-none mix-blend-overlay"></div>
@@ -196,7 +196,7 @@ export function Dashboard() {
                             initial={{ opacity: 0, x: -30, filter: 'blur(10px)' }}
                             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.05)] text-[var(--accent-cyan)] text-[11px] font-black uppercase tracking-[0.2em] mb-6 shadow-[0_0_15px_rgba(0,255,222,0.2)] animate-pulse-glow"
+                            className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.05)] text-[var(--accent-cyan)] text-[11px] font-black uppercase tracking-[0.2em] mb-6 shadow-[0_0_15px_rgba(0,255,222,0.2)] animate-pulse-glow border"
                         >
                             <span className="relative flex h-2.5 w-2.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-cyan)] opacity-75"></span>
@@ -241,7 +241,7 @@ export function Dashboard() {
                                 {isOptimizing ? 'Optimizing Core...' : 'Quick Optimize'}
                             </motion.button>
 
-                            <div className="flex items-center gap-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 px-5 py-3 rounded-2xl backdrop-blur-md">
+                            <div className="flex items-center gap-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-5 py-3 rounded-2xl border">
                                 <div className="flex -space-x-3">
                                     {[1, 2, 3].map(i => (
                                         <div key={i} className={`w-10 h-10 rounded-full border-2 border-card-bg bg-[rgba(255,255,255,0.1)] flex items-center justify-center text-xs font-black text-white shadow-lg`}>#{i}</div>
@@ -277,7 +277,7 @@ export function Dashboard() {
                             </span>
                             <span className="text-[var(--text-muted)] text-sm font-mono">{optProgress}%</span>
                         </div>
-                        <div className="w-full h-3 bg-[var(--bg-deep)] border-[var(--border)] rounded-full overflow-visible relative">
+                        <div className="w-full h-3 bg-[var(--bg-deep)] border-[var(--border)] rounded-full overflow-visible relative border">
                             <motion.div
                                 className="absolute inset-y-0 left-0 bg-[#00FFDE] shadow-[0_0_15px_#00FFDE] rounded-full"
                                 animate={{ width: `${optProgress}%` }}
@@ -292,7 +292,7 @@ export function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <motion.div variants={item} className={`col-span-1 lg:col-span-2 ${premiumCardClass} hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]`}>
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 rounded-2xl bg-gradient-to-br from-[rgba(0,255,222,0.1)] to-transparent border-[var(--accent-cyan)]/30 shadow-[var(--glow-cyan)]">
+                        <div className="p-3 rounded-2xl bg-gradient-to-br from-[rgba(0,255,222,0.1)] to-transparent border-[var(--accent-cyan)]/30 shadow-[var(--glow-cyan)] border">
                             <Monitor className="w-6 h-6 text-[var(--accent-cyan)]" />
                         </div>
                         <div>
@@ -328,7 +328,7 @@ export function Dashboard() {
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)]">
+                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)] border">
                                     <HardDrive className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
                                 </div>
                                 <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Disk Storage I/O</span>
@@ -345,7 +345,7 @@ export function Dashboard() {
                                     <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(disk.writePerSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full">
+                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full border">
                                 <div className="absolute inset-0 flex overflow-visible pointer-events-none">
                                     <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE]" animate={{ width: `${Math.min((disk.readPerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
                                     <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE] opacity-40" animate={{ width: `${Math.min((disk.writePerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
@@ -363,7 +363,7 @@ export function Dashboard() {
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)]">
+                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)] border">
                                     <Wifi className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
                                 </div>
                                 <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Network Traffic</span>
@@ -380,7 +380,7 @@ export function Dashboard() {
                                     <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(net.txSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full">
+                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full border">
                                 <div className="absolute inset-0 flex overflow-visible pointer-events-none">
                                     <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE]" animate={{ width: `${Math.min((net.rxSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
                                     <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE] opacity-40" animate={{ width: `${Math.min((net.txSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
@@ -412,7 +412,7 @@ export function Dashboard() {
                         <div className="text-white font-black text-xl mb-2 tracking-tight">{c.label}</div>
                         <div className="text-[var(--text-muted)] text-sm leading-relaxed font-medium">{c.desc}</div>
                         
-                        <div className="absolute bottom-8 right-8 w-10 h-10 rounded-full bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 border-white/10">
+                        <div className="absolute bottom-8 right-8 w-10 h-10 rounded-full bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 border">
                             <ChevronRight className="w-5 h-5 text-[var(--accent-cyan)]" />
                         </div>
                     </motion.button>

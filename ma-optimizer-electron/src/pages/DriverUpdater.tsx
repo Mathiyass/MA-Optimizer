@@ -116,7 +116,7 @@ export function DriverUpdater() {
     return (
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Driver Updater Hero Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00FFDE]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
@@ -142,7 +142,7 @@ export function DriverUpdater() {
                             whileTap={{ scale: 0.95 }}
                             onClick={scanForUpdates}
                             disabled={scanning}
-                            className="group relative px-8 py-5 rounded-2xl bg-[#00FFDE]/10 border-[#00FFDE]/30 hover:border-[#00FFDE]/80 hover:bg-[#00FFDE]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(0,255,222,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
+                            className="group relative px-8 py-5 rounded-2xl bg-[#00FFDE]/10 border-[#00FFDE]/30 hover:border-[#00FFDE]/80 hover:bg-[#00FFDE]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(0,255,222,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px] border"
                         >
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#00FFDE] drop-shadow-[0_0_8px_rgba(0,255,222,0.8)]">
                                 {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <DownloadCloud className="w-5 h-5" />}
@@ -152,7 +152,7 @@ export function DriverUpdater() {
                         <button
                             onClick={backupDrivers}
                             disabled={backingUp}
-                            className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-50 border"
                         >
                             {backingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Export Drivers
                         </button>
@@ -172,7 +172,7 @@ export function DriverUpdater() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 key={u.UpdateID}
-                                className="p-6 bg-[rgba(255,0,60,0.05)] border-[#FF003C]/30 rounded-[1.5rem] flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md shadow-[0_0_20px_rgba(255,0,60,0.1)] card-premium"
+                                className="p-6 bg-[rgba(255,0,60,0.05)] border-[#FF003C]/30 rounded-[1.5rem] flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md shadow-[0_0_20px_rgba(255,0,60,0.1)] card-premium border"
                             >
                                 <div className="flex-1 w-full text-center md:text-left">
                                     <div className="font-bold text-white text-[15px] tracking-wide">{u.Title}</div>
@@ -181,7 +181,7 @@ export function DriverUpdater() {
                                 <button
                                     onClick={() => installUpdate(u.Title, u.UpdateID)}
                                     disabled={installing !== null}
-                                    className="w-full md:w-auto px-8 py-3 bg-[#FF003C]/10 border-[#FF003C]/40 text-[#FF003C] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#FF003C]/20 hover:border-[#FF003C]/60 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_15px_rgba(255,0,60,0.2)] shrink-0"
+                                    className="w-full md:w-auto px-8 py-3 bg-[#FF003C]/10 border-[#FF003C]/40 text-[#FF003C] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#FF003C]/20 hover:border-[#FF003C]/60 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-[0_0_15px_rgba(255,0,60,0.2)] shrink-0 border"
                                 >
                                     {installing === u.UpdateID ? (
                                         <>
@@ -207,9 +207,9 @@ export function DriverUpdater() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {drivers.map((d, i) => (
-                            <div key={i} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl p-6 rounded-[1.5rem] hover:border-white/20 transition-all duration-300 shadow-xl group">
+                            <div key={i} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl p-6 rounded-[1.5rem] hover:border-white/20 transition-all duration-300 shadow-xl group border">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 flex items-center justify-center shrink-0 text-[var(--accent-cyan)] group-hover:bg-[var(--accent-cyan)]/10 group-hover:border-[var(--accent-cyan)]/30 transition-colors shadow-inner">
+                                    <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center justify-center shrink-0 text-[var(--accent-cyan)] group-hover:bg-[var(--accent-cyan)]/10 group-hover:border-[var(--accent-cyan)]/30 transition-colors shadow-inner border">
                                         {getIconForClass(d.DeviceClass)}
                                     </div>
                                     <div className="min-w-0 flex-1">

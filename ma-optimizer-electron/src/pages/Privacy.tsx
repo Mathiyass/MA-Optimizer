@@ -58,7 +58,7 @@ export function Privacy() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Privacy Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -86,7 +86,7 @@ export function Privacy() {
                         <button
                             onClick={applyAllSafe}
                             disabled={optimizing}
-                            className="group relative px-8 py-5 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 hover:border-[#00FFDE]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl"
+                            className="group relative px-8 py-5 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[#00FFDE]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl border"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-[#00FFDE]/0 via-[#00FFDE]/10 to-[#00FFDE]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center gap-3 text-white group-hover:text-[#00FFDE] transition-colors">
@@ -112,7 +112,7 @@ export function Privacy() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="border-[#00FFDE]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl relative overflow-hidden"
+                        className="border-[#00FFDE]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl relative overflow-hidden border"
                     >
                         {/* Scanning beam effect */}
                         <motion.div 
@@ -127,12 +127,12 @@ export function Privacy() {
                                 <h3 className="text-2xl font-black text-white tracking-wide">Securing Privacy...</h3>
                             </div>
                             
-                            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-md">
+                            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl p-4 mb-6 border">
                                 <p className="text-[#00FFDE] font-mono text-xs mb-1 uppercase tracking-widest">Executing Payload</p>
                                 <p className="text-white text-sm truncate font-medium">{optCurrent}</p>
                             </div>
 
-                            <div className="w-full h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden border-white/5 shadow-inner">
+                            <div className="w-full h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border">
                                 <motion.div
                                     className="h-full bg-gradient-to-r from-[#00FFDE] to-[#00FFDE] shadow-[0_0_15px_rgba(0,255,222,0.5)]"
                                     initial={{ width: 0 }}

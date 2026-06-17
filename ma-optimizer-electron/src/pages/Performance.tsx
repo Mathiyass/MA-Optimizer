@@ -113,12 +113,12 @@ function ServicesTab() {
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                     placeholder="Filter services..."
-                    className="flex-1 px-3 py-2 bg-app-bg border-white/5 rounded-2xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-accent-cyan/40"
+                    className="flex-1 px-3 py-2 bg-app-bg border-white/5 rounded-2xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-accent-cyan/40 border"
                 />
-                <button onClick={applyAllRecommended} className="px-4 py-2 bg-accent-cyan/10 border-accent-cyan/30 rounded-2xl text-accent-cyan text-sm font-medium hover:bg-accent-cyan/20 transition-colors">
+                <button onClick={applyAllRecommended} className="px-4 py-2 bg-accent-cyan/10 border-accent-cyan/30 rounded-2xl text-accent-cyan text-sm font-medium hover:bg-accent-cyan/20 transition-colors border">
                     Apply All Recommended
                 </button>
-                <button onClick={refresh} className="p-2 border-white/5 rounded-2xl text-text-muted hover:text-text-primary transition-colors">
+                <button onClick={refresh} className="p-2 border-white/5 rounded-2xl text-text-muted hover:text-text-primary transition-colors border">
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
@@ -130,7 +130,7 @@ function ServicesTab() {
                     {recommendedServices.map(svc => {
                         const live = services.find(s => s.name === svc.name)
                         return (
-                            <div key={svc.name} className="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl">
+                            <div key={svc.name} className="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl border">
                                 <div className="flex-1 min-w-0">
                                     <span className="text-text-primary text-sm font-medium">{svc.displayName}</span>
                                     <span className="text-text-dim text-xs ml-2">({svc.name})</span>
@@ -147,14 +147,14 @@ function ServicesTab() {
                                     <div className="flex gap-1">
                                         <button
                                             onClick={() => toggleService(svc.name, live.status !== 'Running')}
-                                            className="px-2 py-1 text-xs border-white/5 rounded-2xl text-text-muted hover:text-text-primary transition-colors"
+                                            className="px-2 py-1 text-xs border-white/5 rounded-2xl text-text-muted hover:text-text-primary transition-colors border"
                                         >
                                             {live.status === 'Running' ? 'Stop' : 'Start'}
                                         </button>
                                         <select
                                             value={live.startType?.toLowerCase() || 'automatic'}
                                             onChange={e => setStartup(svc.name, e.target.value)}
-                                            className="px-2 py-1 text-xs bg-app-bg border-white/5 rounded-2xl text-text-muted outline-none"
+                                            className="px-2 py-1 text-xs bg-app-bg border-white/5 rounded-2xl text-text-muted outline-none border"
                                         >
                                             <option value="automatic">Auto</option>
                                             <option value="manual">Manual</option>
@@ -174,7 +174,7 @@ function ServicesTab() {
                     <h3 className="text-sm font-semibold text-text-primary">All Services ({filtered.length})</h3>
                     <div className="max-h-96 overflow-y-auto space-y-1">
                         {filtered.slice(0, 50).map(svc => (
-                            <div key={svc.name} className="flex items-center gap-3 px-3 py-2 bg-[rgba(255,255,255,0.01)] backdrop-blur-xl border-white/5 rounded-2xl text-xs">
+                            <div key={svc.name} className="flex items-center gap-3 px-3 py-2 bg-[rgba(255,255,255,0.01)] backdrop-blur-xl border-white/5 rounded-2xl text-xs border">
                                 <span className="text-text-primary font-medium flex-1 truncate">{svc.displayName || svc.name}</span>
                                 <span className={`px-1.5 py-0.5 rounded-2xl ${svc.status === 'Running' ? 'bg-success/10 text-success' : 'bg-card-border/50 text-text-dim'}`}>
                                     {svc.status}
@@ -225,7 +225,7 @@ export function Performance() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Performance Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -253,7 +253,7 @@ export function Performance() {
                         <button
                             onClick={applyAllSafe}
                             disabled={optimizing}
-                            className="group relative px-8 py-5 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl"
+                            className="group relative px-8 py-5 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl border"
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/0 via-[var(--accent-cyan)]/10 to-[var(--accent-cyan)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center gap-3 text-white group-hover:text-[var(--accent-cyan)] transition-colors">
@@ -270,7 +270,7 @@ export function Performance() {
             </div>
 
             {tab === 'services' ? (
-                <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 mt-6">
+                <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 mt-6 border">
                     <ServicesTab />
                 </div>
             ) : (
@@ -285,7 +285,7 @@ export function Performance() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-[var(--accent-cyan)]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] relative overflow-hidden"
+                        className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-[var(--accent-cyan)]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] relative overflow-hidden border"
                     >
                         {/* Scanning beam effect */}
                         <motion.div 
@@ -300,12 +300,12 @@ export function Performance() {
                                 <h3 className="text-2xl font-black text-white tracking-wide">Optimizing...</h3>
                             </div>
                             
-                            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-md">
+                            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl p-4 mb-6 border">
                                 <p className="text-[var(--accent-cyan)] font-mono text-xs mb-1 uppercase tracking-widest">Executing Payload</p>
                                 <p className="text-white text-sm truncate font-medium">{optCurrent}</p>
                             </div>
 
-                            <div className="w-full h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden border-white/5 shadow-inner">
+                            <div className="w-full h-3 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border">
                                 <motion.div
                                     className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.5)]"
                                     initial={{ width: 0 }}

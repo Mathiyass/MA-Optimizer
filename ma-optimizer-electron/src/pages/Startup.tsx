@@ -73,7 +73,7 @@ export function Startup() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Startup Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -102,13 +102,13 @@ export function Startup() {
                             whileTap={{ scale: 0.95 }}
                             onClick={disableAllNonEssential}
                             disabled={loading || items.length === 0}
-                            className="group relative px-8 py-5 rounded-2xl bg-[#FF003C]/10 border-[#FF003C]/30 hover:border-[#FF003C]/80 hover:bg-[#FF003C]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
+                            className="group relative px-8 py-5 rounded-2xl bg-[#FF003C]/10 border-[#FF003C]/30 hover:border-[#FF003C]/80 hover:bg-[#FF003C]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px] border"
                         >
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#FF003C] drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]">
                                 <ArrowDownCircle className="w-5 h-5" /> Auto-Disable Bloatware
                             </span>
                         </motion.button>
-                        <button onClick={load} className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2">
+                        <button onClick={load} className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2 border">
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
                         </button>
                     </div>
@@ -116,22 +116,22 @@ export function Startup() {
             </motion.div>
 
             {/* Search and Summary */}
-            <div className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+            <div className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl border">
                 <div className="flex-1 relative w-full">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-dim)]" />
                     <input
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
                         placeholder="Search startup payload..."
-                        className="w-full pl-14 pr-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all"
+                        className="w-full pl-14 pr-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all border"
                     />
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
-                    <div className="flex-1 md:flex-none px-6 py-4 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
+                    <div className="flex-1 md:flex-none px-6 py-4 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] rounded-2xl flex flex-col items-center justify-center min-w-[120px] border">
                         <span className="text-2xl font-black">{enabledCount}</span>
                         <span className="text-[10px] font-black uppercase tracking-widest mt-1">Active</span>
                     </div>
-                    <div className="flex-1 md:flex-none px-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
+                    <div className="flex-1 md:flex-none px-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] rounded-2xl flex flex-col items-center justify-center min-w-[120px] border">
                         <span className="text-2xl font-black text-white">{disabledCount}</span>
                         <span className="text-[10px] font-black uppercase tracking-widest mt-1">Disabled</span>
                     </div>
@@ -171,10 +171,10 @@ export function Startup() {
                                                 {impact.level} Impact
                                             </span>
                                         </div>
-                                        <div className="text-[var(--text-dim)] text-xs truncate mt-1.5 font-mono bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl border-white/5 inline-block max-w-full overflow-hidden">{item.path}</div>
+                                        <div className="text-[var(--text-dim)] text-xs truncate mt-1.5 font-mono bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl inline-block max-w-full overflow-hidden border">{item.path}</div>
                                         <div className="text-[var(--text-dim)] text-[10px] uppercase tracking-widest mt-2">{item.source}</div>
                                     </div>
-                                    <button onClick={() => remove(item.id)} className="p-3 text-[var(--text-dim)] hover:text-[#ff003c] transition-all rounded-2xl border-transparent hover:border-[#ff003c]/30 hover:bg-[#ff003c]/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0">
+                                    <button onClick={() => remove(item.id)} className="p-3 text-[var(--text-dim)] hover:text-[#ff003c] transition-all rounded-2xl border-transparent hover:border-[#ff003c]/30 hover:bg-[#ff003c]/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0 border">
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </motion.div>
