@@ -157,13 +157,13 @@ export function Repair() {
                                         onClick={() => run(a)}
                                         disabled={running !== null}
                                         className={`flex items-center gap-5 p-5 rounded-2xl border text-left transition-all duration-300 ${isRunning
-                                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_15px_rgba(0,255,222,0.1)]'
+                                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_15px_rgba(0,255,222,0.1)] border'
                                             : isCompleted
-                                                ? 'border-[#00FFDE]/30 bg-[#00FFDE]/10'
-                                                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-inner'
+                                                ? 'border-[#00FFDE]/30 bg-[#00FFDE]/10 border'
+                                                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
                                             } ${running !== null && !isRunning ? 'opacity-40 grayscale' : ''}`}
                                     >
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isRunning ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20' : isCompleted ? 'border-[#00FFDE]/30 bg-[#00FFDE]/20' : 'border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5'}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isRunning ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20 border' : isCompleted ? 'border-[#00FFDE]/30 bg-[#00FFDE]/20 border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border'}`}>
                                             {isRunning ? (
                                                 <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-cyan)]" />
                                             ) : isCompleted ? (

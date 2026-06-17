@@ -70,14 +70,14 @@ export function Gaming() {
             {/* Ultra-Premium Gaming Hero Section */}
             <motion.div
                 className={`relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl ${gameBoostOn
-                    ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_40px_rgba(0,255,222,0.2)]'
-                    : 'border-white/5'
+                    ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_40px_rgba(0,255,222,0.2)] border'
+                    : 'border-white/5 border'
                 }`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <div className={`absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[var(--accent-cyan)]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5'}`}></div>
-                <div className={`absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[#FF003C]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5'}`}></div>
+                <div className={`absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[var(--accent-cyan)]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border'}`}></div>
+                <div className={`absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none transition-all duration-700 ${gameBoostOn ? 'bg-[#FF003C]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border'}`}></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                     <div className="flex-1 text-center md:text-left">
@@ -104,8 +104,8 @@ export function Gaming() {
                             onClick={toggleGameBoost}
                             disabled={applying}
                             className={`w-32 h-32 rounded-full border-[6px] flex items-center justify-center transition-all duration-500 shadow-2xl relative group ${gameBoostOn
-                                ? 'border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.1)] shadow-[0_0_50px_rgba(0,255,222,0.4)]'
-                                : 'border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20'
+                                ? 'border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.1)] shadow-[0_0_50px_rgba(0,255,222,0.4)] border'
+                                : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 border'
                             } border`}
                         >
                             {applying ? (

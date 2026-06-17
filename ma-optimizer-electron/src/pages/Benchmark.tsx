@@ -154,7 +154,7 @@ export function Benchmark() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => runBench(b.id)}
                         disabled={running !== null}
-                        className={`relative overflow-hidden rounded-[2rem] border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-8 text-left transition-all duration-300 group shadow-xl ${running === b.id ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_20px_rgba(0,255,222,0.2)]' : 'border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5'} ${running !== null && running !== b.id ? 'opacity-40 grayscale' : ''}`}
+                        className={`relative overflow-hidden rounded-[2rem] border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-8 text-left transition-all duration-300 group shadow-xl ${running === b.id ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_20px_rgba(0,255,222,0.2)] border' : 'border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)] border'} ${running !== null && running !== b.id ? 'opacity-40 grayscale' : ''}`}
                     >
                         <div className={`absolute -right-10 -bottom-10 w-40 h-40 blur-[50px] rounded-full pointer-events-none bg-gradient-to-br ${b.color} opacity-10 group-hover:opacity-30 transition-opacity duration-500`}></div>
                         <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${b.color} flex items-center justify-center mb-6 shadow-lg relative z-10 border-white/20 border`}>

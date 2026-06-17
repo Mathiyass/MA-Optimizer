@@ -103,7 +103,7 @@ export function MaPowerPlan() {
                         </div>
 
                         <div className="flex items-center justify-center md:justify-start gap-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-4 rounded-2xl inline-flex border">
-                            <div className={`px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase border ${isActive ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/30 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/10'}`}>
+                            <div className={`px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase border ${isActive ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/30 shadow-[0_0_15px_rgba(0,255,222,0.2)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border'}`}>
                                 {isActive ? '● Active' : exists ? '⏸️ Standby' : '❌ Unconfigured'}
                             </div>
                             {activePlan && <div className="text-[var(--text-secondary)] text-sm font-bold tracking-wide">Profile: <span className="text-white">{activePlan.name}</span></div>}
@@ -115,8 +115,8 @@ export function MaPowerPlan() {
                     <div className="flex flex-col items-center justify-center gap-4 w-full md:w-auto min-w-[240px]">
                         <motion.button whileTap={{ scale: 0.95 }} onClick={isActive ? deactivate : activate} disabled={loading}
                             className={`group relative px-8 py-5 rounded-2xl transition-all duration-500 w-full overflow-hidden shadow-xl border ${isActive
-                                ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 hover:border-[#ff003c]/50 hover:bg-[rgba(255,0,60,0.1)]'
-                                : 'bg-gradient-to-r from-[var(--accent-violet)] to-[#ff003c] border-white/20 hover:shadow-[0_0_30px_rgba(255,0,60,0.4)]'
+                                ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[#ff003c]/50 hover:bg-[rgba(255,0,60,0.1)] border'
+                                : 'bg-gradient-to-r from-[var(--accent-violet)] to-[#ff003c] border-white/20 hover:shadow-[0_0_30px_rgba(255,0,60,0.4)] border'
                                 } ${loading ? 'opacity-50 cursor-wait' : ''}`}>
                             {!isActive && <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-500"></div>}
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-white">
@@ -203,7 +203,7 @@ export function MaPowerPlan() {
                 <h3 className="text-white text-xl font-black tracking-wide mb-6">System Power Plans</h3>
                 <div className="space-y-3">
                     {allPlans.map(p => (
-                        <div key={p.guid} className={`flex items-center justify-between px-6 py-4 rounded-2xl border transition-all duration-300 ${p.active ? 'border-[var(--accent-violet)]/50 bg-[var(--accent-violet)]/10 shadow-[0_0_15px_rgba(0,255,222,0.15)]' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20'}`}>
+                        <div key={p.guid} className={`flex items-center justify-between px-6 py-4 rounded-2xl border transition-all duration-300 ${p.active ? 'border-[var(--accent-violet)]/50 bg-[var(--accent-violet)]/10 shadow-[0_0_15px_rgba(0,255,222,0.15)] border' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 border'}`}>
                             <div>
                                 <span className="text-white text-[15px] font-bold tracking-wide">{p.name}</span>
                                 {p.active && <span className="ml-3 text-[#FF003C] text-[10px] font-black tracking-widest uppercase border-[var(--accent-violet)]/30 px-2 py-0.5 rounded-2xl bg-[var(--accent-violet)]/20 shadow-[0_0_8px_rgba(0,255,222,0.4)] border">● Active</span>}

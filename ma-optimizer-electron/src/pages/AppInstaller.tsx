@@ -253,11 +253,11 @@ export function AppInstaller() {
             {!isSearching && (
                 <div className="flex gap-2 justify-center flex-wrap">
                     <button onClick={() => setCategory('all')}
-                        className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === 'all' ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/5 hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
+                        className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === 'all' ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/5 hover:bg-[rgba(255,255,255,0.05)] hover:text-white border'
                             }`}>All</button>
                     {appCategories.map(c => (
                         <button key={c.id} onClick={() => setCategory(c.id)}
-                            className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === c.id ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/5 hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
+                            className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === c.id ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/5 hover:bg-[rgba(255,255,255,0.05)] hover:text-white border'
                                 }`}>{c.label}</button>
                     ))}
                 </div>
@@ -286,10 +286,10 @@ export function AppInstaller() {
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {queue.map(q => (
-                                    <div key={`${q.id}-${q.action}`} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-2xl text-xs ${q.status === 'running' ? 'bg-accent-cyan/10 text-accent-cyan border-[#00FFDE]/20' :
+                                    <div key={`${q.id}-${q.action}`} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-2xl text-xs ${q.status === 'running' ? 'bg-accent-cyan/10 text-accent-cyan border-[#00FFDE]/20 border' :
                                         q.status === 'done' ? 'bg-success/10 text-success border-success/20' :
                                             q.status === 'error' ? 'bg-danger/10 text-danger border-danger/20' :
-                                                'bg-app-bg text-text-muted border-white/5'
+                                                'bg-app-bg text-text-muted border-white/5 border'
                                         }`}>
                                         {q.status === 'running' && <Loader2 className="w-3 h-3 animate-spin" />}
                                         {q.status === 'done' && <CheckCircle2 className="w-3 h-3" />}
@@ -494,8 +494,8 @@ function AppCard({
             initial={false}
             whileHover={{ y: -2, scale: 1.01 }}
             className={`flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 group card-premium backdrop-blur-xl ${selected
-                ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/5 shadow-[0_0_20px_rgba(0,255,222,0.15)]'
-                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:shadow-xl'
+                ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/5 shadow-[0_0_20px_rgba(0,255,222,0.15)] border'
+                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:shadow-xl border'
                 }`}
         >
             <div className="relative flex items-center justify-center">

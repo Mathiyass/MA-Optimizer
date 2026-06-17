@@ -116,7 +116,7 @@ function BloatwareTab() {
                         const key = app.fullName || app.name
                         return (
                             <label key={key}
-                                className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 card-premium ${selected.has(key) ? 'border-[#ff003c]/40 bg-[#ff003c]/10 shadow-[0_0_15px_rgba(255,0,60,0.15)]' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20'
+                                className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 card-premium ${selected.has(key) ? 'border-[#ff003c]/40 bg-[#ff003c]/10 shadow-[0_0_15px_rgba(255,0,60,0.15)] border' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 border'
                                     }`}>
                                 <div className="relative flex items-center justify-center">
                                     <input
@@ -125,7 +125,7 @@ function BloatwareTab() {
                                         onChange={() => toggleApp(key)}
                                         className="peer sr-only"
                                     />
-                                    <div className={`w-6 h-6 rounded-2xl border flex items-center justify-center transition-all ${selected.has(key) ? 'bg-[#ff003c] border-[#ff003c]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/20 peer-hover:border-white/40'}`}>
+                                    <div className={`w-6 h-6 rounded-2xl border flex items-center justify-center transition-all ${selected.has(key) ? 'bg-[#ff003c] border-[#ff003c] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 peer-hover:border-white/40 border'}`}>
                                         {selected.has(key) && <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                                     </div>
                                 </div>
@@ -183,12 +183,12 @@ function FeaturesTab() {
                     <div key={f.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[1.5rem] card-premium hover:border-white/10 transition-all gap-4 border">
                         <div className="flex flex-col gap-1.5">
                             <span className="text-white text-[15px] font-bold tracking-wide">{f.name}</span>
-                            <span className={`self-start text-[10px] px-2.5 py-1 rounded-2xl font-black uppercase tracking-widest border ${isEnabled ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-dim)] border-white/10'
+                            <span className={`self-start text-[10px] px-2.5 py-1 rounded-2xl font-black uppercase tracking-widest border ${isEnabled ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/20 border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-dim)] border'
                                 }`}>{f.state}</span>
                         </div>
                         <button
                             onClick={() => toggleFeature(f.name, !isEnabled)}
-                            className={`px-6 py-3 border rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${isEnabled ? 'border-[#ff003c]/30 text-[#ff003c] bg-[#ff003c]/10 hover:bg-[#ff003c]/20 hover:border-[#ff003c]/50' : 'border-[#00FFDE]/30 text-[#00FFDE] bg-[#00FFDE]/10 hover:bg-[#00FFDE]/20 hover:border-[#00FFDE]/50'}`}
+                            className={`px-6 py-3 border rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${isEnabled ? 'border-[#ff003c]/30 text-[#ff003c] bg-[#ff003c]/10 hover:bg-[#ff003c]/20 hover:border-[#ff003c]/50 border' : 'border-[#00FFDE]/30 text-[#00FFDE] bg-[#00FFDE]/10 hover:bg-[#00FFDE]/20 hover:border-[#00FFDE]/50 border'}`}
                         >
                             {isEnabled ? 'Disable' : 'Enable'}
                         </button>

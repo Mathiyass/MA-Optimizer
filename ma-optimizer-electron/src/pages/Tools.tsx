@@ -108,7 +108,7 @@ export function Tools() {
                 <div className="flex flex-wrap gap-3 justify-center w-full xl:w-auto">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
+                        className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] hover:text-white hover:border-white/30 border'}`}
                     >
                         All Classes
                     </button>
@@ -118,7 +118,7 @@ export function Tools() {
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                                className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeCategory === cat ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
+                                className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeCategory === cat ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] hover:text-white hover:border-white/30 border'}`}
                             >
                                 <CatIcon className="w-4 h-4" />{cat}
                             </button>
@@ -144,7 +144,7 @@ export function Tools() {
                             onClick={() => launch(t.cmd)}
                             whileHover={{ scale: 1.02, y: -4 }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex flex-col items-center text-center gap-4 p-8 rounded-[2rem] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl hover:bg-[rgba(255,255,255,0.03)] hover:border-white/20 transition-all duration-300 group card-premium shadow-xl relative overflow-hidden border"
+                            className="flex flex-col items-center text-center gap-4 p-8 rounded-[2rem] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl hover:bg-[rgba(255,255,255,0.05)] hover:border-white/20 transition-all duration-300 group card-premium shadow-xl relative overflow-hidden border"
                         >
                             <div className={`absolute -right-8 -top-8 w-32 h-32 blur-[40px] rounded-full pointer-events-none bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-30 transition-opacity duration-500`}></div>
                             <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow relative z-10 border-white/20 border`}>

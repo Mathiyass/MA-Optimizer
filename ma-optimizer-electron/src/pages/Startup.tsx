@@ -9,9 +9,9 @@ const mediumImpact = ['adobe', 'cortana', 'nvidia', 'realtek', 'logitech', 'raze
 
 function getImpact(name: string): { level: 'High' | 'Medium' | 'Low'; color: string } {
     const lower = name.toLowerCase()
-    if (highImpact.some(h => lower.includes(h))) return { level: 'High', color: 'text-[#ff003c] bg-[#ff003c]/10 border-[#ff003c]/30' }
-    if (mediumImpact.some(m => lower.includes(m))) return { level: 'Medium', color: 'text-[#FF003C] bg-[#FF003C]/10 border-[#FF003C]/30' }
-    return { level: 'Low', color: 'text-[#00FFDE] bg-[#00FFDE]/10 border-[#00FFDE]/30' }
+    if (highImpact.some(h => lower.includes(h))) return { level: 'High', color: 'text-[#ff003c] bg-[#ff003c]/10 border-[#ff003c]/30 border' }
+    if (mediumImpact.some(m => lower.includes(m))) return { level: 'Medium', color: 'text-[#FF003C] bg-[#FF003C]/10 border-[#FF003C]/30 border' }
+    return { level: 'Low', color: 'text-[#00FFDE] bg-[#00FFDE]/10 border-[#00FFDE]/30 border' }
 }
 
 export function Startup() {
@@ -148,13 +148,13 @@ export function Startup() {
                                 <motion.div
                                     key={item.id}
                                     variants={itemAnim}
-                                    className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-[2rem] border transition-all duration-300 card-premium ${item.enabled ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-[var(--accent-cyan)]/20 shadow-lg' : 'bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 opacity-60 grayscale'}`}
+                                    className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-[2rem] border transition-all duration-300 card-premium ${item.enabled ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-[var(--accent-cyan)]/20 shadow-lg border' : 'bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 opacity-60 grayscale border'}`}
                                 >
                                     {/* Custom Apple-style Glow Toggle */}
                                     <div className="shrink-0 flex items-center justify-center">
                                         <button
                                             onClick={() => toggle(item.id, !item.enabled)}
-                                            className={`relative w-14 h-8 rounded-full transition-all duration-300 outline-none flex items-center px-1 border ${item.enabled ? 'bg-[#00FFDE]/20 border-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.3)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10'}`}
+                                            className={`relative w-14 h-8 rounded-full transition-all duration-300 outline-none flex items-center px-1 border ${item.enabled ? 'bg-[#00FFDE]/20 border-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.3)] border' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border'}`}
                                         >
                                             <motion.div
                                                 className={`w-6 h-6 rounded-full shadow-md ${item.enabled ? 'bg-[#00FFDE] drop-shadow-[0_0_8px_rgba(0,255,222,0.8)]' : 'bg-[var(--text-dim)]'}`}

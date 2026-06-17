@@ -65,8 +65,8 @@ function DnsTab() {
                         key={i}
                         onClick={() => setSelectedDns(i)}
                         className={`p-5 rounded-2xl border text-left transition-all duration-300 group ${selectedDns === i
-                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)]'
-                            : 'border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner'
+                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)] border'
+                            : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
                             }`}
                     >
                         <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">

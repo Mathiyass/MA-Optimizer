@@ -98,7 +98,7 @@ function HealthGauge({ score }: { score: number }) {
 }
 
 export function Dashboard() {
-    const premiumCardClass = "bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)]"
+    const premiumCardClass = "bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] border"
     
     const cpu = useSystemStore(s => s.cpu)
     const ram = useSystemStore(s => s.ram)
