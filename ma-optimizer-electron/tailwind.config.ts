@@ -5,7 +5,7 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                'app-bg': '#020205',
+                'app-bg': '#0d0f1a',
                 'sidebar-bg': 'rgba(10, 10, 15, 0.55)',
                 'card-bg': 'rgba(18, 20, 31, 0.5)',
                 'card-border': 'rgba(255, 255, 255, 0.06)',
