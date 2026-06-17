@@ -248,8 +248,8 @@ contextBridge.exposeInMainWorld('api', {
             validate([name, enable], ['string', 'boolean'])
             return ipcRenderer.invoke('advanced:toggleFeature', name, enable)
         },
-        runBcdedit: (args: string) => {
-            validate([args], ['string'])
+        runBcdedit: (args: string[]) => {
+            validate([args], ['array'])
             return ipcRenderer.invoke('advanced:bcdedit', args)
         },
         enableGodMode: () => ipcRenderer.invoke('advanced:godMode'),
