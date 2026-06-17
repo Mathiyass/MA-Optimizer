@@ -109,7 +109,7 @@ export interface WindowApi {
         removeApps: (names: string[]) => Promise<{ removed: number; total: number }>
         getWindowsFeatures: () => Promise<Array<{ name: string; enabled: boolean }>>
         toggleFeature: (name: string, enable: boolean) => Promise<boolean>
-        runBcdedit: (args: string) => Promise<string | null>
+        runBcdedit: (args: string[]) => Promise<string | null>
         enableGodMode: () => Promise<boolean>
         changeComputerName: (name: string) => Promise<boolean>
     }

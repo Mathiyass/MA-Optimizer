@@ -86,17 +86,31 @@ ipcMain.handle('advanced:toggleFeature', async (_, name: string, enable: boolean
 })
 
 // BCDedit
-ipcMain.handle('advanced:bcdedit', async (_, args: string) => {
+ipcMain.handle('advanced:bcdedit', async (_, args: string[]) => {
     try {
-        // Since bcdedit doesn't have a stable list of subcommands I can whitelist,
-        // and it is a string from renderer, I should at least use spawnSync to avoid shell injection.
-        // But bcdedit args can be multiple.
-        const argArray = String(args).split(' ').filter(a => a.trim())
-        const { stdout } = spawnSyncChecked('bcdedit', argArray, {
+        if (!Array.isArray(args) || args.length === 0) {
+            throw new Error('Invalid arguments: expected non-empty array')
+        }
+
+        // Restrict to informational subcommands only to prevent unauthorized system changes
+        const allowedSubcommands = ['/enum', '/v', '/get']
+        if (!allowedSubcommands.includes(args[0].toLowerCase())) {
+            throw new Error(`Unauthorized bcdedit subcommand: ${args[0]}`)
+        }
+
+        // Regex to ensure arguments only contain safe characters
+        const safeRegex = /^[a-zA-Z0-9\s\/\-\{\}\.]+$/
+        for (const arg of args) {
+            if (!safeRegex.test(arg)) {
+                throw new Error(`Invalid characters in argument: ${arg}`)
+            }
+        }
+
+        const { stdout } = spawnSyncChecked('bcdedit', args, {
             encoding: 'utf-8', timeout: 10000,
         })
         const result = stdout.trim()
-        sendLog(`[Advanced] bcdedit ${args}`)
+        sendLog(`[Advanced] bcdedit ${args.join(' ')}`)
         return result
     } catch (e: any) {
         sendError(`bcdedit failed: ${e.message}`)
