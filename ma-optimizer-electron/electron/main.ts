@@ -1,25 +1,33 @@
-import { spawnPromise } from './ipc/utils'
 import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
 
+const isDev = process.env.NODE_ENV === 'development'
+
+// 🔧 FIX: app.setPath('userData', ...) and app.commandLine.appendSwitch must be called before any IPC handler imports
+// to ensure that custom user data paths (used by logger) and Chromium switches are applied correctly.
+app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
+app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
+
 // IPC handler imports
-import './ipc/admin'
-import './ipc/logger'
-import './ipc/registry'
-import './ipc/backup'
-import './ipc/powerplan'
-import './ipc/services'
-import './ipc/network'
-import './ipc/systeminfo'
-import './ipc/cleaner'
-import './ipc/startup'
-import './ipc/winget'
-import './ipc/benchmark'
-import './ipc/repair'
-import './ipc/advanced'
-import './ipc/driverUpdater'
-import { startSystemStatsPolling, stopSystemStatsPolling } from './ipc/systeminfo'
+require('./ipc/admin')
+require('./ipc/logger')
+require('./ipc/registry')
+require('./ipc/backup')
+require('./ipc/powerplan')
+require('./ipc/services')
+require('./ipc/network')
+require('./ipc/systeminfo')
+require('./ipc/cleaner')
+require('./ipc/startup')
+require('./ipc/winget')
+require('./ipc/benchmark')
+require('./ipc/repair')
+require('./ipc/advanced')
+require('./ipc/driverUpdater')
+
+const { startSystemStatsPolling, stopSystemStatsPolling } = require('./ipc/systeminfo')
+const { spawnPromise } = require('./ipc/utils')
 
 // 🔧 FIX: Added global exception handler, styled native dialog cannot take CSS colors but we make it clear it's an error.
 process.on('uncaughtException', (error) => {
@@ -56,7 +64,6 @@ async function isAdmin(): Promise<boolean> {
 
 async function ensureAdmin() {
     if (!(await isAdmin())) {
-        const isDev = process.env.NODE_ENV === 'development'
         if (isDev) {
             console.warn('[Dev] Skipping admin elevation in development mode.')
             return
@@ -107,9 +114,6 @@ function createWindow() {
         titleBarStyle: 'hidden',
     })
 
-    // 🔧 FIX: Enable V8 Code Cache for faster cold starts
-    app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
-
     mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
         console.error(`Load failure: ${errorCode} - ${errorDescription}`);
     });
@@ -141,7 +145,6 @@ function createWindow() {
     mainWindow.on('move', saveWindowState)
     mainWindow.on('close', saveWindowState)
 
-    const isDev = process.env.NODE_ENV === 'development'
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173')
         mainWindow.webContents.openDevTools({ mode: 'detach' })
@@ -307,9 +310,6 @@ try {
 app.whenReady().then(async () => {
     // 🔧 FIX: Add CSP headers via session.defaultSession
     const { session } = require('electron')
-
-    // 🔧 FIX: Suppress noisy Chromium devtools autofill warnings
-    app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
 
     session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
         callback({
