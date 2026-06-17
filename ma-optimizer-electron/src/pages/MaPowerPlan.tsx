@@ -18,7 +18,7 @@ function PowerMeter({ active }: { active: boolean }) {
                         className="w-1.5 rounded-full"
                         style={{
                             background: isLit
-                                ? i < bars * 0.4 ? '#00ff88' : i < bars * 0.7 ? '#ffd700' : '#ff4444'
+                                ? i < bars * 0.4 ? '#00FFDE' : i < bars * 0.7 ? '#FF003C' : '#ff4444'
                                 : '#21262d',
                         }}
                         initial={{ height: 0 }}
@@ -36,9 +36,9 @@ export function MaPowerPlan() {
     const addNotification = useAppStore(s => s.addNotification)
 
     const profiles = [
-        { id: 'performance', label: 'Max Performance', desc: 'All cores unlocked, no throttle', icon: '🔥', gradient: 'from-red-500 to-orange-500' },
-        { id: 'balanced', label: 'Balanced', desc: 'Moderate parking, some sleep', icon: '⚖️', gradient: 'from-cyan-500 to-blue-500' },
-        { id: 'battery', label: 'Battery Saver', desc: 'Aggressive parking, sleep enabled', icon: '🔋', gradient: 'from-green-500 to-emerald-500' },
+        { id: 'performance', label: 'Max Performance', desc: 'All cores unlocked, no throttle', icon: '🔥', gradient: 'from-[#FF003C] to-[#FF003C]/50' },
+        { id: 'balanced', label: 'Balanced', desc: 'Moderate parking, some sleep', icon: '⚖️', gradient: 'from-[#00FFDE] to-[#00FFDE]/50' },
+        { id: 'battery', label: 'Battery Saver', desc: 'Aggressive parking, sleep enabled', icon: '🔋', gradient: 'from-[#00FFDE] to-[#00FFDE]/50' },
     ]
 
     const handleExport = async () => {
@@ -65,7 +65,7 @@ export function MaPowerPlan() {
         <motion.div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10" variants={container} initial={false} animate="show">
             {/* Ultra-Premium Power Plan Hero Section */}
             <motion.div variants={item}
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
             >
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-violet)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#ff003c]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
@@ -92,7 +92,7 @@ export function MaPowerPlan() {
                             </div>
                         </div>
 
-                        <p className="text-[var(--accent-violet)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                        <p className="text-[#FF003C] text-sm uppercase tracking-[0.3em] font-black mb-8">
                             ★ Flagship Hardware Control
                         </p>
                         
@@ -102,8 +102,8 @@ export function MaPowerPlan() {
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-center md:justify-start gap-4 bg-black/40 p-4 rounded-2xl border border-white/5 inline-flex backdrop-blur-md">
-                            <div className={`px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase border ${isActive ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30 shadow-[0_0_15px_rgba(0,255,136,0.2)]' : 'bg-white/5 text-[var(--text-muted)] border-white/10'}`}>
+                        <div className="flex items-center justify-center md:justify-start gap-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-4 rounded-2xl border-white/5 inline-flex backdrop-blur-md">
+                            <div className={`px-4 py-2 rounded-2xl text-xs font-black tracking-widest uppercase border ${isActive ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/30 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-muted)] border-white/10'}`}>
                                 {isActive ? '● Active' : exists ? '⏸️ Standby' : '❌ Unconfigured'}
                             </div>
                             {activePlan && <div className="text-[var(--text-secondary)] text-sm font-bold tracking-wide">Profile: <span className="text-white">{activePlan.name}</span></div>}
@@ -115,7 +115,7 @@ export function MaPowerPlan() {
                     <div className="flex flex-col items-center justify-center gap-4 w-full md:w-auto min-w-[240px]">
                         <motion.button whileTap={{ scale: 0.95 }} onClick={isActive ? deactivate : activate} disabled={loading}
                             className={`group relative px-8 py-5 rounded-2xl transition-all duration-500 w-full overflow-hidden shadow-xl border ${isActive
-                                ? 'bg-white/5 border-white/10 hover:border-[#ff003c]/50 hover:bg-[rgba(255,0,60,0.1)]'
+                                ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 hover:border-[#ff003c]/50 hover:bg-[rgba(255,0,60,0.1)]'
                                 : 'bg-gradient-to-r from-[var(--accent-violet)] to-[#ff003c] border-white/20 hover:shadow-[0_0_30px_rgba(255,0,60,0.4)]'
                                 } ${loading ? 'opacity-50 cursor-wait' : ''}`}>
                             {!isActive && <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-500"></div>}
@@ -125,7 +125,7 @@ export function MaPowerPlan() {
                         </motion.button>
                         
                         {exists && (
-                            <button onClick={deletePlan} className="text-[#ff003c] text-xs font-bold tracking-widest uppercase hover:text-white transition-colors flex items-center gap-2 px-4 py-2 bg-[#ff003c]/5 rounded-xl border border-[#ff003c]/20 hover:bg-[#ff003c]/20 w-full justify-center">
+                            <button onClick={deletePlan} className="text-[#ff003c] text-xs font-bold tracking-widest uppercase hover:text-white transition-colors flex items-center gap-2 px-4 py-2 bg-[#ff003c]/5 rounded-2xl border-[#ff003c]/20 hover:bg-[#ff003c]/20 w-full justify-center">
                                 <Trash2 className="w-4 h-4" /> Purge Plan
                             </button>
                         )}
@@ -141,9 +141,9 @@ export function MaPowerPlan() {
                     { icon: Timer, label: 'Timer 0.5ms', desc: 'Low-latency timer' },
                     { icon: Battery, label: 'No Sleep States', desc: 'C-states disabled' },
                 ].map((f, i) => (
-                    <div key={i} className="card-premium bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 text-center hover:border-[var(--accent-violet)]/30 hover:shadow-[0_0_20px_rgba(204,0,255,0.1)] transition-all duration-300">
-                        <div className="w-12 h-12 rounded-2xl bg-black/40 border border-white/10 mx-auto mb-4 flex items-center justify-center shadow-inner">
-                            <f.icon className="w-6 h-6 text-[var(--accent-violet)] drop-shadow-[0_0_10px_rgba(204,0,255,0.5)]" />
+                    <div key={i} className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-[2rem] p-6 text-center hover:border-[var(--accent-violet)]/30 hover:shadow-[0_0_20px_rgba(0,255,222,0.1)] transition-all duration-300">
+                        <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 mx-auto mb-4 flex items-center justify-center shadow-inner">
+                            <f.icon className="w-6 h-6 text-[#FF003C] drop-shadow-[0_0_10px_rgba(0,255,222,0.5)]" />
                         </div>
                         <div className="text-white text-sm font-black tracking-wide mb-1">{f.label}</div>
                         <div className="text-[var(--text-muted)] text-xs font-medium">{f.desc}</div>
@@ -162,7 +162,7 @@ export function MaPowerPlan() {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => applyProfile(p.id)}
                             disabled={!exists || loading}
-                            className="relative overflow-hidden text-left p-6 rounded-[2rem] border transition-all duration-300 disabled:opacity-40 group bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border-white/5 hover:border-[var(--accent-violet)]/40 hover:shadow-[0_0_30px_rgba(204,0,255,0.15)]"
+                            className="relative overflow-hidden text-left p-6 rounded-[2rem] border transition-all duration-300 disabled:opacity-40 group bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 hover:border-[var(--accent-violet)]/40 hover:shadow-[0_0_30px_rgba(0,255,222,0.15)]"
                         >
                             <div className={`absolute -right-10 -top-10 w-32 h-32 blur-[60px] rounded-full pointer-events-none bg-gradient-to-br ${p.gradient} opacity-20 group-hover:opacity-40 transition-opacity duration-500`}></div>
                             <div className="text-3xl mb-4 relative z-10 drop-shadow-xl">{p.icon}</div>
@@ -175,7 +175,7 @@ export function MaPowerPlan() {
 
             {/* Reports & Tools */}
             <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
+                <div className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
                     <h3 className="text-white text-lg font-black tracking-wide mb-6 flex items-center gap-3"><FileText className="w-5 h-5 text-[var(--accent-cyan)]" />System Reports</h3>
                     <div className="space-y-2">
                         {[
@@ -183,34 +183,34 @@ export function MaPowerPlan() {
                             { label: 'Battery Report', fn: () => window.api?.powerPlan.generateBatteryReport() },
                             { label: 'Sleep Study', fn: () => window.api?.powerPlan.generateSleepStudy() },
                         ].map(r => (
-                            <button key={r.label} onClick={r.fn} className="w-full text-left px-5 py-4 rounded-xl text-sm font-bold text-[var(--text-secondary)] bg-black/40 border border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex justify-between items-center group">
+                            <button key={r.label} onClick={r.fn} className="w-full text-left px-5 py-4 rounded-2xl text-sm font-bold text-[var(--text-secondary)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex justify-between items-center group">
                                 {r.label} <span className="text-[var(--text-dim)] group-hover:text-[var(--accent-cyan)] transition-colors">→</span>
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
+                <div className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
                     <h3 className="text-white text-lg font-black tracking-wide mb-6 flex items-center gap-3"><Download className="w-5 h-5 text-[var(--accent-cyan)]" />Import / Export</h3>
                     <div className="space-y-2">
-                        <button onClick={handleExport} className="w-full text-left px-5 py-4 rounded-xl text-sm font-bold text-[var(--text-secondary)] bg-black/40 border border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex items-center gap-3"><Upload className="w-4 h-4" />Export Profile</button>
-                        <button onClick={handleImport} className="w-full text-left px-5 py-4 rounded-xl text-sm font-bold text-[var(--text-secondary)] bg-black/40 border border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex items-center gap-3"><Download className="w-4 h-4" />Import Profile</button>
+                        <button onClick={handleExport} className="w-full text-left px-5 py-4 rounded-2xl text-sm font-bold text-[var(--text-secondary)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex items-center gap-3"><Upload className="w-4 h-4" />Export Profile</button>
+                        <button onClick={handleImport} className="w-full text-left px-5 py-4 rounded-2xl text-sm font-bold text-[var(--text-secondary)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(0,255,222,0.05)] hover:text-white transition-all duration-300 flex items-center gap-3"><Download className="w-4 h-4" />Import Profile</button>
                     </div>
                 </div>
             </motion.div>
 
             {/* All Plans */}
-            <motion.div variants={item} className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
+            <motion.div variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
                 <h3 className="text-white text-xl font-black tracking-wide mb-6">System Power Plans</h3>
                 <div className="space-y-3">
                     {allPlans.map(p => (
-                        <div key={p.guid} className={`flex items-center justify-between px-6 py-4 rounded-2xl border transition-all duration-300 ${p.active ? 'border-[var(--accent-violet)]/50 bg-[var(--accent-violet)]/10 shadow-[0_0_15px_rgba(204,0,255,0.15)]' : 'border-white/5 bg-black/40 hover:border-white/20'}`}>
+                        <div key={p.guid} className={`flex items-center justify-between px-6 py-4 rounded-2xl border transition-all duration-300 ${p.active ? 'border-[var(--accent-violet)]/50 bg-[var(--accent-violet)]/10 shadow-[0_0_15px_rgba(0,255,222,0.15)]' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20'}`}>
                             <div>
                                 <span className="text-white text-[15px] font-bold tracking-wide">{p.name}</span>
-                                {p.active && <span className="ml-3 text-[var(--accent-violet)] text-[10px] font-black tracking-widest uppercase border border-[var(--accent-violet)]/30 px-2 py-0.5 rounded-md bg-[var(--accent-violet)]/20 shadow-[0_0_8px_rgba(204,0,255,0.4)]">● Active</span>}
+                                {p.active && <span className="ml-3 text-[#FF003C] text-[10px] font-black tracking-widest uppercase border-[var(--accent-violet)]/30 px-2 py-0.5 rounded-2xl bg-[var(--accent-violet)]/20 shadow-[0_0_8px_rgba(0,255,222,0.4)]">● Active</span>}
                                 <div className="text-[var(--text-dim)] text-xs mt-1 font-mono tracking-wider">{p.guid}</div>
                             </div>
                             {!p.active && (
-                                <button onClick={() => activateByGuid(p.guid)} className="px-5 py-2.5 text-xs font-black tracking-widest uppercase bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 hover:border-[var(--accent-cyan)]/50 hover:text-[var(--accent-cyan)] hover:shadow-[0_0_15px_rgba(0,255,222,0.2)] text-white transition-all">
+                                <button onClick={() => activateByGuid(p.guid)} className="px-5 py-2.5 text-xs font-black tracking-widest uppercase bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl border-white/10 hover:bg-[rgba(255,255,255,0.05)] hover:border-[var(--accent-cyan)]/50 hover:text-[var(--accent-cyan)] hover:shadow-[0_0_15px_rgba(0,255,222,0.2)] text-white transition-all">
                                     Activate
                                 </button>
                             )}

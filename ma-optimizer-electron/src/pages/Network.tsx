@@ -66,7 +66,7 @@ function DnsTab() {
                         onClick={() => setSelectedDns(i)}
                         className={`p-5 rounded-2xl border text-left transition-all duration-300 group ${selectedDns === i
                             ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)]'
-                            : 'border-white/10 bg-black/40 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner'
+                            : 'border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner'
                             }`}
                     >
                         <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">
@@ -87,7 +87,7 @@ function DnsTab() {
                         <select
                             value={selectedAdapter}
                             onChange={e => setSelectedAdapter(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 bg-black/60 border border-white/10 rounded-2xl text-[15px] text-white font-medium outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all appearance-none cursor-pointer"
+                            className="w-full pl-12 pr-4 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-[15px] text-white font-medium outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all appearance-none cursor-pointer"
                         >
                             {adapters.map(a => <option key={a} value={a}>{a}</option>)}
                         </select>
@@ -95,7 +95,7 @@ function DnsTab() {
                     <button
                         onClick={applyDns}
                         disabled={selectedDns === null}
-                        className="px-8 py-4 bg-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap"
+                        className="px-8 py-4 bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap"
                     >
                         Override DNS
                     </button>
@@ -136,7 +136,7 @@ function DiagnosticsTab() {
                     <h3 className="text-white text-lg font-black tracking-wide">Live Latency Monitor</h3>
                     <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Real-time ping testing to major backbone servers</p>
                 </div>
-                <button onClick={runPingTests} disabled={testing} className="p-3 border border-white/10 bg-white/5 rounded-xl text-[var(--text-secondary)] hover:text-white hover:border-[var(--accent-cyan)]/50 transition-all hover:bg-[rgba(0,255,222,0.1)] shadow-md">
+                <button onClick={runPingTests} disabled={testing} className="p-3 border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[var(--text-secondary)] hover:text-white hover:border-[var(--accent-cyan)]/50 transition-all hover:bg-[rgba(0,255,222,0.1)] shadow-md">
                     <RefreshCw className={`w-5 h-5 ${testing ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} />
                 </button>
             </div>
@@ -149,7 +149,7 @@ function DiagnosticsTab() {
                     const isBad = result.ms >= 80 || !isOk;
                     
                     return (
-                        <div key={host} className="p-5 bg-black/40 border border-white/10 rounded-2xl text-center relative overflow-hidden shadow-inner group hover:border-white/20 transition-all duration-300">
+                        <div key={host} className="p-5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-center relative overflow-hidden shadow-inner group hover:border-white/20 transition-all duration-300">
                             {/* Status Indicator Glow */}
                             <div className={`absolute top-0 left-0 right-0 h-1 ${isGreat ? 'bg-[#00FFDE] shadow-[0_0_10px_rgba(0,255,222,0.8)]' : isWarn ? 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]' : 'bg-[#FF003C] shadow-[0_0_10px_rgba(255,0,60,0.8)]'}`} />
                             
@@ -189,7 +189,7 @@ export function Network() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Network Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -216,7 +216,7 @@ export function Network() {
                     <div className="flex flex-wrap items-center justify-center gap-4 max-w-sm">
                         {quickActions.map((a, i) => (
                             <button key={i} onClick={a.fn}
-                                className="flex-1 min-w-[140px] px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-black tracking-widest uppercase text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-2 shadow-xl text-center">
+                                className="flex-1 min-w-[140px] px-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-xs font-black tracking-widest uppercase text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-2 shadow-xl text-center">
                                 {a.label}
                             </button>
                         ))}
@@ -229,11 +229,11 @@ export function Network() {
             </div>
 
             {tab === 'dns' ? (
-                <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
+                <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
                     <DnsTab />
                 </div>
             ) : tab === 'diagnostics' ? (
-                <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
+                <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6">
                     <DiagnosticsTab />
                 </div>
             ) : (

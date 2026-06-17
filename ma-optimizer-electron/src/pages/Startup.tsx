@@ -10,8 +10,8 @@ const mediumImpact = ['adobe', 'cortana', 'nvidia', 'realtek', 'logitech', 'raze
 function getImpact(name: string): { level: 'High' | 'Medium' | 'Low'; color: string } {
     const lower = name.toLowerCase()
     if (highImpact.some(h => lower.includes(h))) return { level: 'High', color: 'text-[#ff003c] bg-[#ff003c]/10 border-[#ff003c]/30' }
-    if (mediumImpact.some(m => lower.includes(m))) return { level: 'Medium', color: 'text-[#ffaa00] bg-[#ffaa00]/10 border-[#ffaa00]/30' }
-    return { level: 'Low', color: 'text-[#00ff88] bg-[#00ff88]/10 border-[#00ff88]/30' }
+    if (mediumImpact.some(m => lower.includes(m))) return { level: 'Medium', color: 'text-[#FF003C] bg-[#FF003C]/10 border-[#FF003C]/30' }
+    return { level: 'Low', color: 'text-[#00FFDE] bg-[#00FFDE]/10 border-[#00FFDE]/30' }
 }
 
 export function Startup() {
@@ -73,12 +73,12 @@ export function Startup() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Startup Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#ffaa00]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#FF003C]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                     <div className="flex-1 text-center md:text-left">
@@ -102,13 +102,13 @@ export function Startup() {
                             whileTap={{ scale: 0.95 }}
                             onClick={disableAllNonEssential}
                             disabled={loading || items.length === 0}
-                            className="group relative px-8 py-5 rounded-2xl bg-[#ffaa00]/10 border border-[#ffaa00]/30 hover:border-[#ffaa00]/80 hover:bg-[#ffaa00]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,170,0,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
+                            className="group relative px-8 py-5 rounded-2xl bg-[#FF003C]/10 border-[#FF003C]/30 hover:border-[#FF003C]/80 hover:bg-[#FF003C]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
                         >
-                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#ffaa00] drop-shadow-[0_0_8px_rgba(255,170,0,0.8)]">
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#FF003C] drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]">
                                 <ArrowDownCircle className="w-5 h-5" /> Auto-Disable Bloatware
                             </span>
                         </motion.button>
-                        <button onClick={load} className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-black tracking-widest uppercase hover:bg-white/10 transition-colors w-full flex items-center justify-center gap-2">
+                        <button onClick={load} className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2">
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
                         </button>
                     </div>
@@ -116,22 +116,22 @@ export function Startup() {
             </motion.div>
 
             {/* Search and Summary */}
-            <div className="card-premium bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+            <div className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl">
                 <div className="flex-1 relative w-full">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-dim)]" />
                     <input
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
                         placeholder="Search startup payload..."
-                        className="w-full pl-14 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all"
+                        className="w-full pl-14 pr-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all"
                     />
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
-                    <div className="flex-1 md:flex-none px-6 py-4 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
+                    <div className="flex-1 md:flex-none px-6 py-4 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
                         <span className="text-2xl font-black">{enabledCount}</span>
                         <span className="text-[10px] font-black uppercase tracking-widest mt-1">Active</span>
                     </div>
-                    <div className="flex-1 md:flex-none px-6 py-4 bg-white/5 border border-white/10 text-[var(--text-muted)] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
+                    <div className="flex-1 md:flex-none px-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
                         <span className="text-2xl font-black text-white">{disabledCount}</span>
                         <span className="text-[10px] font-black uppercase tracking-widest mt-1">Disabled</span>
                     </div>
@@ -148,16 +148,16 @@ export function Startup() {
                                 <motion.div
                                     key={item.id}
                                     variants={itemAnim}
-                                    className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-[2rem] border transition-all duration-300 card-premium ${item.enabled ? 'bg-[rgba(15,17,26,0.8)] border-[var(--accent-cyan)]/20 shadow-lg' : 'bg-black/20 border-white/5 opacity-60 grayscale'}`}
+                                    className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-[2rem] border transition-all duration-300 card-premium ${item.enabled ? 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-[var(--accent-cyan)]/20 shadow-lg' : 'bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 opacity-60 grayscale'}`}
                                 >
                                     {/* Custom Apple-style Glow Toggle */}
                                     <div className="shrink-0 flex items-center justify-center">
                                         <button
                                             onClick={() => toggle(item.id, !item.enabled)}
-                                            className={`relative w-14 h-8 rounded-full transition-all duration-300 outline-none flex items-center px-1 border ${item.enabled ? 'bg-[#00ff88]/20 border-[#00ff88]/50 shadow-[0_0_15px_rgba(0,255,136,0.3)]' : 'bg-black/60 border-white/10'}`}
+                                            className={`relative w-14 h-8 rounded-full transition-all duration-300 outline-none flex items-center px-1 border ${item.enabled ? 'bg-[#00FFDE]/20 border-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.3)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10'}`}
                                         >
                                             <motion.div
-                                                className={`w-6 h-6 rounded-full shadow-md ${item.enabled ? 'bg-[#00ff88] drop-shadow-[0_0_8px_rgba(0,255,136,0.8)]' : 'bg-[var(--text-dim)]'}`}
+                                                className={`w-6 h-6 rounded-full shadow-md ${item.enabled ? 'bg-[#00FFDE] drop-shadow-[0_0_8px_rgba(0,255,222,0.8)]' : 'bg-[var(--text-dim)]'}`}
                                                 animate={{ x: item.enabled ? 24 : 0 }}
                                                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                                             />
@@ -167,14 +167,14 @@ export function Startup() {
                                     <div className="flex-1 min-w-0 text-center sm:text-left w-full">
                                         <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-3 mb-1">
                                             <span className={`text-[17px] font-bold tracking-wide ${item.enabled ? 'text-white' : 'text-[var(--text-muted)]'}`}>{item.name}</span>
-                                            <span className={`text-[10px] px-2.5 py-1 rounded-md font-black uppercase tracking-widest border ${impact.color}`}>
+                                            <span className={`text-[10px] px-2.5 py-1 rounded-2xl font-black uppercase tracking-widest border ${impact.color}`}>
                                                 {impact.level} Impact
                                             </span>
                                         </div>
-                                        <div className="text-[var(--text-dim)] text-xs truncate mt-1.5 font-mono bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 inline-block max-w-full overflow-hidden">{item.path}</div>
+                                        <div className="text-[var(--text-dim)] text-xs truncate mt-1.5 font-mono bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl border-white/5 inline-block max-w-full overflow-hidden">{item.path}</div>
                                         <div className="text-[var(--text-dim)] text-[10px] uppercase tracking-widest mt-2">{item.source}</div>
                                     </div>
-                                    <button onClick={() => remove(item.id)} className="p-3 text-[var(--text-dim)] hover:text-[#ff003c] transition-all rounded-xl border border-transparent hover:border-[#ff003c]/30 hover:bg-[#ff003c]/10 bg-black/40 shrink-0">
+                                    <button onClick={() => remove(item.id)} className="p-3 text-[var(--text-dim)] hover:text-[#ff003c] transition-all rounded-2xl border-transparent hover:border-[#ff003c]/30 hover:bg-[#ff003c]/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shrink-0">
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </motion.div>

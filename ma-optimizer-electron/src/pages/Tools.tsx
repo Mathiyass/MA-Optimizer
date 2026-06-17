@@ -38,11 +38,11 @@ const tools: Tool[] = [
 ]
 
 const categoryColors: Record<string, string> = {
-    'System': 'from-cyan-500 to-blue-500',
-    'Terminal': 'from-violet-500 to-purple-500',
-    'Network': 'from-orange-500 to-amber-500',
-    'Storage': 'from-green-500 to-emerald-500',
-    'Diagnostics': 'from-rose-500 to-pink-500',
+    'System': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Terminal': 'from-[#FF003C] to-[#FF003C]/50',
+    'Network': 'from-[#FF003C] to-[#00FFDE]',
+    'Storage': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Diagnostics': 'from-[#FF003C] to-[#00FFDE]/50',
 }
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -71,7 +71,7 @@ export function Tools() {
     return (
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Tools Hero Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5">
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#ff003c]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
@@ -95,20 +95,20 @@ export function Tools() {
             </div>
 
             {/* Search + Category filters */}
-            <div className="card-premium bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 flex flex-col xl:flex-row items-center gap-6 shadow-xl">
+            <div className="card-premium bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-[2rem] p-6 flex flex-col xl:flex-row items-center gap-6 shadow-xl">
                 <div className="relative w-full xl:w-auto xl:flex-1">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-dim)]" />
                     <input
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
                         placeholder="Search payload index..."
-                        className="w-full pl-14 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all"
+                        className="w-full pl-14 pr-6 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-[15px] text-white placeholder:text-[var(--text-dim)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_15px_rgba(0,255,222,0.2)] transition-all"
                     />
                 </div>
                 <div className="flex flex-wrap gap-3 justify-center w-full xl:w-auto">
                     <button
                         onClick={() => setActiveCategory(null)}
-                        className={`px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-black/40 border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
+                        className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
                     >
                         All Classes
                     </button>
@@ -118,7 +118,7 @@ export function Tools() {
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                                className={`px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeCategory === cat ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-black/40 border border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
+                                className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeCategory === cat ? 'bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30 shadow-[0_0_10px_rgba(0,255,222,0.1)]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 text-[var(--text-muted)] hover:text-white hover:border-white/30'}`}
                             >
                                 <CatIcon className="w-4 h-4" />{cat}
                             </button>
@@ -136,7 +136,7 @@ export function Tools() {
                 key={`${activeCategory}-${filter}`}
             >
                 {filtered.map(t => {
-                    const gradient = categoryColors[t.category] || 'from-gray-500 to-gray-600'
+                    const gradient = categoryColors[t.category] || 'from-[rgba(255,255,255,0.2)] to-[rgba(255,255,255,0.1)]'
                     return (
                         <motion.button
                             key={t.cmd}
@@ -144,16 +144,16 @@ export function Tools() {
                             onClick={() => launch(t.cmd)}
                             whileHover={{ scale: 1.02, y: -4 }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex flex-col items-center text-center gap-4 p-8 rounded-[2rem] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl hover:bg-[rgba(15,17,26,0.8)] hover:border-white/20 transition-all duration-300 group card-premium shadow-xl relative overflow-hidden"
+                            className="flex flex-col items-center text-center gap-4 p-8 rounded-[2rem] border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl hover:bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 transition-all duration-300 group card-premium shadow-xl relative overflow-hidden"
                         >
                             <div className={`absolute -right-8 -top-8 w-32 h-32 blur-[40px] rounded-full pointer-events-none bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-30 transition-opacity duration-500`}></div>
-                            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow relative z-10 border border-white/20`}>
+                            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow relative z-10 border-white/20`}>
                                 <t.icon className="w-8 h-8 text-white drop-shadow-md" />
                             </div>
                             <div className="w-full relative z-10 flex flex-col items-center">
                                 <div className="text-white text-[15px] font-black tracking-wide mb-2">{t.label}</div>
                                 <div className="text-[var(--text-muted)] text-[11px] font-medium leading-relaxed">{t.desc}</div>
-                                <div className="mt-4 px-3 py-1 bg-black/40 border border-white/10 rounded-lg text-[var(--accent-cyan)] font-mono text-[10px] tracking-widest">{t.cmd}</div>
+                                <div className="mt-4 px-3 py-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 rounded-2xl text-[var(--accent-cyan)] font-mono text-[10px] tracking-widest">{t.cmd}</div>
                             </div>
                         </motion.button>
                     )

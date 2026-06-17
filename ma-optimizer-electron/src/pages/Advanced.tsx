@@ -87,22 +87,22 @@ function BloatwareTab() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-4 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/5 rounded-2xl p-4 shadow-lg">
+            <div className="flex flex-wrap items-center gap-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-2xl p-4 shadow-lg">
                 <button onClick={removeSelected} disabled={selected.size === 0 || removing}
-                    className="px-6 py-2.5 bg-[#ff003c]/10 border border-[#ff003c]/30 rounded-xl text-[#ff003c] text-sm font-black tracking-widest uppercase hover:bg-[#ff003c]/20 hover:border-[#ff003c]/60 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(255,0,60,0.1)]">
+                    className="px-6 py-2.5 bg-[#ff003c]/10 border-[#ff003c]/30 rounded-2xl text-[#ff003c] text-sm font-black tracking-widest uppercase hover:bg-[#ff003c]/20 hover:border-[#ff003c]/60 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(255,0,60,0.1)]">
                     {removing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     {removing ? 'Removing...' : `Remove Selected (${selected.size})`}
                 </button>
                 <div className="h-8 w-px bg-white/10 mx-2 hidden sm:block"></div>
                 <button onClick={() => setSelected(new Set(apps.map(a => a.fullName || a.name)))}
-                    className="px-4 py-2.5 border border-white/10 bg-white/5 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-all uppercase tracking-wider">
+                    className="px-4 py-2.5 border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-xs font-bold text-[var(--text-muted)] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all uppercase tracking-wider">
                     Select All
                 </button>
                 <button onClick={() => setSelected(new Set())}
-                    className="px-4 py-2.5 border border-white/10 bg-white/5 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-all uppercase tracking-wider">
+                    className="px-4 py-2.5 border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-xs font-bold text-[var(--text-muted)] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all uppercase tracking-wider">
                     Deselect All
                 </button>
-                <button onClick={refresh} className="ml-auto p-2.5 border border-white/10 bg-white/5 rounded-xl text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                <button onClick={refresh} className="ml-auto p-2.5 border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[var(--text-muted)] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> <span className="hidden sm:inline">Refresh</span>
                 </button>
             </div>
@@ -116,7 +116,7 @@ function BloatwareTab() {
                         const key = app.fullName || app.name
                         return (
                             <label key={key}
-                                className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 card-premium ${selected.has(key) ? 'border-[#ff003c]/40 bg-[#ff003c]/10 shadow-[0_0_15px_rgba(255,0,60,0.15)]' : 'border-white/5 bg-[rgba(15,17,26,0.6)] hover:border-white/20'
+                                className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 card-premium ${selected.has(key) ? 'border-[#ff003c]/40 bg-[#ff003c]/10 shadow-[0_0_15px_rgba(255,0,60,0.15)]' : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20'
                                     }`}>
                                 <div className="relative flex items-center justify-center">
                                     <input
@@ -125,14 +125,14 @@ function BloatwareTab() {
                                         onChange={() => toggleApp(key)}
                                         className="peer sr-only"
                                     />
-                                    <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${selected.has(key) ? 'bg-[#ff003c] border-[#ff003c]' : 'bg-black/40 border-white/20 peer-hover:border-white/40'}`}>
+                                    <div className={`w-6 h-6 rounded-2xl border flex items-center justify-center transition-all ${selected.has(key) ? 'bg-[#ff003c] border-[#ff003c]' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/20 peer-hover:border-white/40'}`}>
                                         {selected.has(key) && <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                                     </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <span className={`text-[15px] font-bold truncate block ${selected.has(key) ? 'text-white' : 'text-[var(--text-muted)]'}`}>{app.name}</span>
                                 </div>
-                                {isSafe && <span className="text-[#00ff88] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-[#00ff88]/10 border border-[#00ff88]/20 rounded-md shrink-0">Safe</span>}
+                                {isSafe && <span className="text-[#00FFDE] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-[#00FFDE]/10 border-[#00FFDE]/20 rounded-2xl shrink-0">Safe</span>}
                             </label>
                         )
                     })}
@@ -180,15 +180,15 @@ function FeaturesTab() {
             {features.filter(f => knownFeatures.some(k => f.name?.includes(k)) || features.length <= 20).slice(0, 20).map(f => {
                 const isEnabled = f.state?.includes('Enable')
                 return (
-                    <div key={f.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/5 rounded-[1.5rem] card-premium hover:border-white/10 transition-all gap-4">
+                    <div key={f.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl border-white/5 rounded-[1.5rem] card-premium hover:border-white/10 transition-all gap-4">
                         <div className="flex flex-col gap-1.5">
                             <span className="text-white text-[15px] font-bold tracking-wide">{f.name}</span>
-                            <span className={`self-start text-[10px] px-2.5 py-1 rounded-md font-black uppercase tracking-widest border ${isEnabled ? 'bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/20' : 'bg-black/40 text-[var(--text-dim)] border-white/10'
+                            <span className={`self-start text-[10px] px-2.5 py-1 rounded-2xl font-black uppercase tracking-widest border ${isEnabled ? 'bg-[#00FFDE]/10 text-[#00FFDE] border-[#00FFDE]/20' : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-[var(--text-dim)] border-white/10'
                                 }`}>{f.state}</span>
                         </div>
                         <button
                             onClick={() => toggleFeature(f.name, !isEnabled)}
-                            className={`px-6 py-3 border rounded-xl text-xs font-black uppercase tracking-widest transition-all ${isEnabled ? 'border-[#ff003c]/30 text-[#ff003c] bg-[#ff003c]/10 hover:bg-[#ff003c]/20 hover:border-[#ff003c]/50' : 'border-[#00ff88]/30 text-[#00ff88] bg-[#00ff88]/10 hover:bg-[#00ff88]/20 hover:border-[#00ff88]/50'}`}
+                            className={`px-6 py-3 border rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${isEnabled ? 'border-[#ff003c]/30 text-[#ff003c] bg-[#ff003c]/10 hover:bg-[#ff003c]/20 hover:border-[#ff003c]/50' : 'border-[#00FFDE]/30 text-[#00FFDE] bg-[#00FFDE]/10 hover:bg-[#00FFDE]/20 hover:border-[#00FFDE]/50'}`}
                         >
                             {isEnabled ? 'Disable' : 'Enable'}
                         </button>
@@ -207,7 +207,7 @@ export function Advanced() {
     return (
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Advanced Hero Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5">
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-violet)]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 

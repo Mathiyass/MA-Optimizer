@@ -33,10 +33,10 @@ const actions: RepairAction[] = [
 ]
 
 const categoryColors: Record<string, string> = {
-    'System Files': 'from-cyan-500 to-blue-500',
-    'Network': 'from-orange-500 to-amber-500',
-    'Storage': 'from-green-500 to-emerald-500',
-    'Misc': 'from-violet-500 to-purple-500',
+    'System Files': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Network': 'from-[#FF003C] to-[#00FFDE]',
+    'Storage': 'from-[#00FFDE] to-[#00FFDE]/50',
+    'Misc': 'from-[#FF003C] to-[#FF003C]/50',
 }
 
 export function Repair() {
@@ -78,10 +78,10 @@ export function Repair() {
         <motion.div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10" variants={container} initial={false} animate="show">
             {/* Ultra-Premium Repair Hero Section */}
             <motion.div variants={item}
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
             >
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00ff88]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00FFDE]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                     <div className="flex-1 text-center md:text-left">
@@ -105,9 +105,9 @@ export function Repair() {
                             whileTap={{ scale: 0.95 }}
                             onClick={createRP}
                             disabled={running === 'rp'}
-                            className="group relative px-8 py-5 rounded-2xl bg-[#00ff88]/10 border border-[#00ff88]/30 hover:border-[#00ff88]/80 hover:bg-[#00ff88]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(0,255,136,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
+                            className="group relative px-8 py-5 rounded-2xl bg-[#00FFDE]/10 border-[#00FFDE]/30 hover:border-[#00FFDE]/80 hover:bg-[#00FFDE]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(0,255,222,0.15)] disabled:opacity-50 disabled:cursor-not-allowed min-w-[240px]"
                         >
-                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#00ff88] drop-shadow-[0_0_8px_rgba(0,255,136,0.8)]">
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#00FFDE] drop-shadow-[0_0_8px_rgba(0,255,222,0.8)]">
                                 {running === 'rp' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
                                 {running === 'rp' ? 'Creating...' : 'Create Restore Point'}
                             </span>
@@ -121,7 +121,7 @@ export function Repair() {
                 <motion.div
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="card-premium bg-[rgba(0,255,222,0.05)] border border-[var(--accent-cyan)]/30 rounded-[2rem] p-8 flex items-center gap-6 shadow-[0_0_30px_rgba(0,255,222,0.1)] relative overflow-hidden backdrop-blur-xl"
+                    className="card-premium bg-[rgba(0,255,222,0.05)] border-[var(--accent-cyan)]/30 rounded-[2rem] p-8 flex items-center gap-6 shadow-[0_0_30px_rgba(0,255,222,0.1)] relative overflow-hidden backdrop-blur-xl"
                 >
                     <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-[var(--accent-cyan)] to-transparent"></div>
                     <Loader2 className="w-8 h-8 animate-spin text-[var(--accent-cyan)] shrink-0 drop-shadow-[0_0_10px_rgba(0,255,222,0.8)]" />
@@ -132,8 +132,8 @@ export function Repair() {
                             Estimated duration: {actions.find(a => a.id === running)?.estimatedTime}
                         </div>
                     </div>
-                    <div className="w-48 h-2 bg-black/60 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                        <div className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00ff88] rounded-full animate-shimmer" style={{ width: '60%' }} />
+                    <div className="w-48 h-2 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden border-white/5 shadow-inner">
+                        <div className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE] rounded-full animate-shimmer" style={{ width: '60%' }} />
                     </div>
                 </motion.div>
             )}
@@ -141,9 +141,9 @@ export function Repair() {
             {/* Grouped actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                 {categories.map(category => (
-                    <motion.div key={category} variants={item} className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
+                    <motion.div key={category} variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-8 shadow-xl">
                         <h3 className="text-white text-xl font-black tracking-wide flex items-center gap-3 mb-6">
-                            <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${categoryColors[category] || 'from-gray-500 to-gray-600'} shadow-[0_0_10px_rgba(255,255,255,0.3)]`} />
+                            <div className={`w-3 h-3 rounded-full bg-gradient-to-br ${categoryColors[category] || 'from-[rgba(255,255,255,0.2)] to-[rgba(255,255,255,0.1)]'} shadow-[0_0_10px_rgba(255,255,255,0.3)]`} />
                             {category}
                         </h3>
                         <div className="grid grid-cols-1 gap-4">
@@ -159,15 +159,15 @@ export function Repair() {
                                         className={`flex items-center gap-5 p-5 rounded-2xl border text-left transition-all duration-300 ${isRunning
                                             ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_15px_rgba(0,255,222,0.1)]'
                                             : isCompleted
-                                                ? 'border-[#00ff88]/30 bg-[#00ff88]/10'
-                                                : 'border-white/5 bg-black/40 hover:border-white/20 hover:bg-black/60 shadow-inner'
+                                                ? 'border-[#00FFDE]/30 bg-[#00FFDE]/10'
+                                                : 'border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-inner'
                                             } ${running !== null && !isRunning ? 'opacity-40 grayscale' : ''}`}
                                     >
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${isRunning ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20' : isCompleted ? 'border-[#00ff88]/30 bg-[#00ff88]/20' : 'border-white/10 bg-white/5'}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isRunning ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20' : isCompleted ? 'border-[#00FFDE]/30 bg-[#00FFDE]/20' : 'border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5'}`}>
                                             {isRunning ? (
                                                 <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-cyan)]" />
                                             ) : isCompleted ? (
-                                                <CheckCircle2 className="w-6 h-6 text-[#00ff88]" />
+                                                <CheckCircle2 className="w-6 h-6 text-[#00FFDE]" />
                                             ) : (
                                                 <a.icon className="w-6 h-6 text-[var(--accent-cyan)]" />
                                             )}
@@ -176,7 +176,7 @@ export function Repair() {
                                             <div className="text-white text-[15px] font-bold tracking-wide">{a.label}</div>
                                             <div className="text-[var(--text-muted)] text-xs mt-1 font-medium">{a.desc}</div>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[var(--text-dim)] bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 whitespace-nowrap">
+                                        <div className="flex items-center gap-1.5 text-[var(--text-dim)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl border-white/5 whitespace-nowrap">
                                             <Clock className="w-3.5 h-3.5" />
                                             <span className="text-[11px] font-black tracking-widest uppercase">{a.estimatedTime}</span>
                                         </div>

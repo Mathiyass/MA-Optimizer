@@ -182,7 +182,7 @@ export function Cleaner() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Cleaner Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -208,7 +208,7 @@ export function Cleaner() {
                     
                     <div className="flex flex-col items-center justify-center gap-4">
                         <motion.button whileTap={{ scale: 0.95 }} onClick={scan} disabled={scanning}
-                            className="group relative px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-300 w-full overflow-hidden shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="group relative px-8 py-4 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-white/10 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-300 w-full overflow-hidden shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
                             <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/0 via-[var(--accent-cyan)]/10 to-[var(--accent-cyan)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                             <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-white group-hover:text-[var(--accent-cyan)] transition-colors">
                                 {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
@@ -218,7 +218,7 @@ export function Cleaner() {
 
                         {scanResults.length > 0 && (
                             <motion.button whileTap={{ scale: 0.95 }} onClick={clean} disabled={cleaning || selected.size === 0}
-                                className="group relative px-8 py-4 rounded-2xl bg-[#ff003c]/10 border border-[#ff003c]/30 hover:border-[#ff003c]/80 hover:bg-[#ff003c]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
+                                className="group relative px-8 py-4 rounded-2xl bg-[#ff003c]/10 border-[#ff003c]/30 hover:border-[#ff003c]/80 hover:bg-[#ff003c]/20 transition-all duration-300 w-full overflow-hidden shadow-[0_0_30px_rgba(255,0,60,0.2)] disabled:opacity-50 disabled:cursor-not-allowed">
                                 <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-[#ff003c] drop-shadow-[0_0_8px_rgba(255,0,60,0.8)]">
                                     {cleaning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                                     {cleaning ? 'Erasing Data...' : `Clean ${fmt(totalSelected)}`}
@@ -233,9 +233,9 @@ export function Cleaner() {
 
             {/* Total waste bar */}
             {scanResults.length > 0 && !scanning && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-8 relative overflow-hidden shadow-xl mt-6">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-8 relative overflow-hidden shadow-xl mt-6">
                     {lastCleaned > 0 && (
-                        <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="absolute right-8 top-6 flex items-center gap-2 text-[#00ff88] bg-[#00ff88]/10 px-4 py-2 rounded-xl border border-[#00ff88]/30 shadow-[0_0_15px_rgba(0,255,136,0.2)]">
+                        <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="absolute right-8 top-6 flex items-center gap-2 text-[#00FFDE] bg-[#00FFDE]/10 px-4 py-2 rounded-2xl border-[#00FFDE]/30 shadow-[0_0_15px_rgba(0,255,222,0.2)]">
                             <Check className="w-4 h-4" />
                             <span className="text-xs font-black uppercase tracking-widest">Cleaned {fmt(lastCleaned)}</span>
                         </motion.div>
@@ -244,9 +244,9 @@ export function Cleaner() {
                         <span className="text-[var(--text-muted)] text-sm font-black uppercase tracking-[0.2em]">Total Junk Identified</span>
                         <span className="text-[#ff003c] text-3xl font-black tracking-tight drop-shadow-[0_0_15px_rgba(255,0,60,0.5)]">{fmt(totalFound)}</span>
                     </div>
-                    <div className="w-full h-4 bg-black/60 rounded-full overflow-hidden shadow-inner border border-white/5">
+                    <div className="w-full h-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner border-white/5">
                         <motion.div
-                            className="h-full rounded-full bg-gradient-to-r from-[#ff003c] via-[#ff6a00] to-[#ff003c]"
+                            className="h-full rounded-full bg-gradient-to-r from-[#ff003c] via-[#FF003C] to-[#ff003c]"
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((totalSelected / (totalFound || 1)) * 100, 100)}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -263,8 +263,8 @@ export function Cleaner() {
                 <motion.div className="space-y-6 mt-6" variants={container} initial={false} animate="show">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* System Categories */}
-                        <motion.div variants={itemMotion} className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-0 overflow-hidden shadow-xl">
-                            <div className="px-8 py-6 border-b border-white/10 bg-black/40 flex items-center gap-4">
+                        <motion.div variants={itemMotion} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-0 overflow-hidden shadow-xl">
+                            <div className="px-8 py-6 border-b border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center gap-4">
                                 <HardDrive className="w-6 h-6 text-[var(--accent-cyan)]" />
                                 <h3 className="text-white text-lg font-black tracking-wide">System Repositories</h3>
                             </div>
@@ -281,8 +281,8 @@ export function Cleaner() {
                                     const groupSize = groupItems.reduce((a, c) => a + c.size, 0)
 
                                     return (
-                                        <div key={groupName} className="rounded-xl bg-black/20 border border-white/5 overflow-hidden mb-2 shadow-inner">
-                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
+                                        <div key={groupName} className="rounded-2xl bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 overflow-hidden mb-2 shadow-inner">
+                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.05)] cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
                                                 {isExpanded ? <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />}
                                                 <div className="relative flex items-center justify-center">
                                                     <input
@@ -290,23 +290,23 @@ export function Cleaner() {
                                                         checked={allSelected}
                                                         ref={input => { if (input) input.indeterminate = someSelected }}
                                                         onChange={(e) => { e.stopPropagation(); toggle('grp', groupItems.map(r => r.id)) }}
-                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-md checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] indeterminate:bg-[var(--accent-cyan)]/50 indeterminate:border-[var(--accent-cyan)]/50 cursor-pointer transition-all"
+                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-2xl checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] indeterminate:bg-[var(--accent-cyan)]/50 indeterminate:border-[var(--accent-cyan)]/50 cursor-pointer transition-all"
                                                     />
                                                     {allSelected && <Check className="w-3.5 h-3.5 text-black absolute pointer-events-none font-bold" />}
                                                 </div>
                                                 <span className="text-white text-[15px] font-bold tracking-wide flex-1">{groupName}</span>
-                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-black/40 px-2 py-1 rounded-md border border-white/5">{fmt(groupSize)}</span>
+                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-2 py-1 rounded-2xl border-white/5">{fmt(groupSize)}</span>
                                             </div>
                                             <AnimatePresence>
                                                 {isExpanded && (
                                                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-black/40 border-t border-white/5">
+                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-t border-white/5">
                                                             {groupItems.map(c => {
                                                                 const CatIcon = categoryIcons[c.id] || File
                                                                 return (
-                                                                    <label key={c.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-white/5 rounded-lg px-3 transition-colors group">
+                                                                    <label key={c.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] rounded-2xl px-3 transition-colors group">
                                                                         <div className="relative flex items-center justify-center">
-                                                                            <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded md checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] cursor-pointer transition-all" />
+                                                                            <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded-2xl md checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] cursor-pointer transition-all" />
                                                                             {selected.has(c.id) && <Check className="w-3 h-3 text-black absolute pointer-events-none font-bold" />}
                                                                         </div>
                                                                         <CatIcon className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-cyan)] transition-colors" />
@@ -326,8 +326,8 @@ export function Cleaner() {
                         </motion.div>
 
                         {/* Browser Categories */}
-                        <motion.div variants={itemMotion} className="card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl rounded-[2rem] p-0 overflow-hidden shadow-xl">
-                            <div className="px-8 py-6 border-b border-white/10 bg-black/40 flex items-center gap-4">
+                        <motion.div variants={itemMotion} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 backdrop-blur-xl rounded-[2rem] p-0 overflow-hidden shadow-xl">
+                            <div className="px-8 py-6 border-b border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center gap-4">
                                 <Globe className="w-6 h-6 text-[#ff003c]" />
                                 <h3 className="text-white text-lg font-black tracking-wide">Web Browsers</h3>
                             </div>
@@ -341,8 +341,8 @@ export function Cleaner() {
                                     const someSelected = childIds.some((id: string) => selected.has(id)) && !allSelected
 
                                     return (
-                                        <div key={b.id} className="rounded-xl bg-black/20 border border-white/5 overflow-hidden mb-2 shadow-inner">
-                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
+                                        <div key={b.id} className="rounded-2xl bg-[rgba(255,255,255,0.01)] backdrop-blur-3xl border-white/5 overflow-hidden mb-2 shadow-inner">
+                                            <div className="flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.05)] cursor-pointer transition-colors" onClick={() => toggleExpand(groupKey)}>
                                                 {isExpanded ? <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />}
                                                 <div className="relative flex items-center justify-center">
                                                     <input
@@ -350,24 +350,24 @@ export function Cleaner() {
                                                         checked={allSelected}
                                                         ref={input => { if (input) input.indeterminate = someSelected }}
                                                         onChange={(e) => { e.stopPropagation(); toggle('grp', childIds) }}
-                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-md checked:bg-[#ff003c] checked:border-[#ff003c] indeterminate:bg-[#ff003c]/50 indeterminate:border-[#ff003c]/50 cursor-pointer transition-all"
+                                                        className="appearance-none w-5 h-5 border-2 border-white/20 rounded-2xl checked:bg-[#ff003c] checked:border-[#ff003c] indeterminate:bg-[#ff003c]/50 indeterminate:border-[#ff003c]/50 cursor-pointer transition-all"
                                                     />
                                                     {allSelected && <Check className="w-3.5 h-3.5 text-white absolute pointer-events-none font-bold" />}
                                                 </div>
                                                 <Globe className="w-4 h-4 text-[var(--text-dim)]" />
                                                 <span className="text-white text-[15px] font-bold tracking-wide flex-1">{b.name}</span>
-                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-black/40 px-2 py-1 rounded-md border border-white/5">{fmt(b.size)}</span>
+                                                <span className="text-[11px] font-black tracking-widest uppercase text-[var(--text-muted)] bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-2 py-1 rounded-2xl border-white/5">{fmt(b.size)}</span>
                                             </div>
                                             <AnimatePresence>
                                                 {isExpanded && (
                                                     <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
-                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-black/40 border-t border-white/5">
+                                                        <div className="pl-12 pr-4 py-2 space-y-1 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 border-t border-white/5">
                                                             {b.items.map((item: any) => {
                                                                 const itemId = `${groupKey}_${item.id}`
                                                                 return (
-                                                                    <label key={item.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-white/5 rounded-lg px-3 transition-colors group">
+                                                                    <label key={item.id} className="flex items-center gap-4 py-2 cursor-pointer hover:bg-[rgba(255,255,255,0.05)] rounded-2xl px-3 transition-colors group">
                                                                         <div className="relative flex items-center justify-center">
-                                                                            <input type="checkbox" checked={selected.has(itemId)} onChange={() => toggle(itemId)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded md checked:bg-[#ff003c] checked:border-[#ff003c] cursor-pointer transition-all" />
+                                                                            <input type="checkbox" checked={selected.has(itemId)} onChange={() => toggle(itemId)} className="appearance-none w-4 h-4 border-2 border-white/20 rounded-2xl md checked:bg-[#ff003c] checked:border-[#ff003c] cursor-pointer transition-all" />
                                                                             {selected.has(itemId) && <Check className="w-3 h-3 text-white absolute pointer-events-none font-bold" />}
                                                                         </div>
                                                                         <span className="text-[var(--text-secondary)] text-sm flex-1 font-medium group-hover:text-white transition-colors">{item.name}</span>
@@ -395,7 +395,7 @@ export function Cleaner() {
                         variants={itemMotion}
                         onClick={() => window.api?.cleaner.emptyRecycleBin()}
                         whileTap={{ scale: 0.98 }}
-                        className="px-4 py-2.5 bg-card-bg border border-card-border rounded-xl text-sm text-text-muted hover:text-[var(--accent-red)] transition-all flex items-center gap-2 hover-lift w-full sm:w-auto mt-4"
+                        className="px-4 py-2.5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-sm text-text-muted hover:text-[#FF003C] transition-all flex items-center gap-2 hover-lift w-full sm:w-auto mt-4"
                     >
                         <Recycle className="w-4 h-4" />Empty Recycle Bin
                     </motion.button>
