@@ -48,7 +48,7 @@ export function About() {
                     </motion.div>
                     <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[var(--accent-cyan)] to-[#00FFDE] mb-2 tracking-tighter drop-shadow-lg">MA-Optimizer</h1>
                     <div className="flex items-center gap-4 mb-6">
-                        <span className="px-3 py-1 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] rounded-2xl text-xs font-black uppercase tracking-widest border">Version 7.1.0</span>
+                        <span className="px-3 py-1 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] rounded-2xl text-xs font-black uppercase tracking-widest border">Version 10.0</span>
                         <span className="px-3 py-1 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] rounded-2xl text-xs font-black uppercase tracking-widest border">Stable</span>
                     </div>
                     <p className="text-[var(--text-muted)] text-lg max-w-2xl mx-auto leading-relaxed font-medium">
@@ -81,7 +81,7 @@ export function About() {
                             <Github className="w-4 h-4" /> Repository
                             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity absolute right-4" />
                         </a>
-                        <a href="https://mathiyass.github.io/MAportfolio/" target="_blank" rel="noopener noreferrer"
+                        <a href="https://maportfolio.mathishaangirasass.workers.dev/" target="_blank" rel="noopener noreferrer"
                             className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 rounded-2xl text-xs font-black uppercase tracking-widest text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/20 hover:border-[var(--accent-cyan)]/60 transition-all group shadow-[0_0_15px_rgba(0,255,222,0.1)] border">
                             <Globe className="w-4 h-4" /> Portfolio
                             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity absolute right-4" />
@@ -147,7 +147,7 @@ export function About() {
                         <div className="space-y-6">
                             <div className="relative pl-6 border-l-2 border-[var(--accent-cyan)]/50">
                                 <div className="absolute left-[-6px] top-1.5 w-2.5 h-2.5 bg-[var(--accent-cyan)] rounded-full shadow-[0_0_10px_rgba(0,255,222,0.8)]" />
-                                <div className="text-white text-[15px] font-black tracking-wide flex items-center gap-3">v7.1.0 <span className="bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-2xl border-[var(--accent-cyan)]/30 border">Latest</span></div>
+                                <div className="text-white text-[15px] font-black tracking-wide flex items-center gap-3">v10.0 <span className="bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-2xl border-[var(--accent-cyan)]/30 border">Latest</span></div>
                                 <ul className="text-[var(--text-muted)] text-[13px] font-medium space-y-1.5 mt-3 list-disc pl-4 marker:text-[var(--accent-cyan)]/50">
                                     <li>Complete Electron rewrite with React 18 + TypeScript</li>
                                     <li>Ultra-Premium Glassmorphism UI redesign</li>

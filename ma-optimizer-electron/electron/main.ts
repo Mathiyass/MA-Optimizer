@@ -165,10 +165,22 @@ function createWindow() {
         mainWindow = null
     })
 
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        shell.openExternal(url)
+    mainWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
         return { action: 'deny' }
     })
+
+    // Capture renderer logs
+    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+        console.log(`[Renderer] ${message} (${sourceId}:${line})`);
+    });
+
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:5173')
+        mainWindow.webContents.openDevTools({ mode: 'detach' })
+    } else {
+        mainWindow.loadFile(path.join(__dirname, '../../dist-vite/index.html'))
+    }
 }
 
 // Window control IPC
