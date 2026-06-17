@@ -1,32 +1,54 @@
-### Task 1: Update Tailwind Configuration and Base Styles
+### Task 1: Dependencies & Global CSS
 
 **Files:**
-- Modify: `tailwind.config.ts`
+- Modify: `package.json`
 - Modify: `src/index.css`
 
 **Interfaces:**
-- Consumes: N/A
-- Produces: Tailwind theme values `accent-cyan` (`#00FFDE`) and `accent-violet` / `accent-crimson` (`#FF003C`) available for the rest of the application.
+- Produces: CSS utility classes (`aurora-layer`, `glass-shell`, `magnetic-dock`)
 
-- [ ] **Step 1: Check existing Tailwind config**
-Run: `cat tailwind.config.ts`
-Expected: Outputs the current config so you know what needs replacing.
-
-- [ ] **Step 2: Update tailwind.config.ts**
-Modify the `colors` object to strictly set:
-```typescript
-                'accent-cyan': '#00FFDE',
-                'accent-violet': '#FF003C', // Overriding violet to crimson for backward compat without breaking classes
-                'danger': '#FF003C',
-```
-Update shadows to match these new intense colors.
-
-- [ ] **Step 3: Verify the build does not break**
-Run: `npm run typecheck`
-Expected: PASS
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 1: Install recharts**
 ```bash
-git add tailwind.config.ts
-git commit -m "style: update tailwind config with Crimson-Cyan glass tokens"
+npm install recharts
+```
+
+- [ ] **Step 2: Update `index.css` for Aurora & Glass**
+```css
+/* Add to src/index.css */
+@keyframes aurora-shift {
+  0% { background-position: 50% 50%, 50% 50%; }
+  50% { background-position: 100% 50%, 0% 50%; }
+  100% { background-position: 50% 50%, 50% 50%; }
+}
+
+.aurora-layer {
+  position: fixed;
+  inset: -50%;
+  background-image: 
+    radial-gradient(ellipse at 100% 0%, rgba(0, 255, 222, 0.05) 20%, transparent 60%),
+    radial-gradient(ellipse at 0% 100%, rgba(255, 0, 60, 0.05) 20%, transparent 60%);
+  background-size: 200% 200%;
+  animation: aurora-shift 20s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.glass-shell {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.magnetic-dock {
+  background: rgba(10, 15, 25, 0.4);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+```
+
+- [ ] **Step 3: Commit**
+```bash
+git add package.json package-lock.json src/index.css
+git commit -m "feat: setup UI overhaul dependencies and global CSS"
 ```

@@ -1,32 +1,47 @@
-### Task 2: Core Layout Updates (App, Sidebar, Header, StatusBar)
+### Task 2: Floating Dock Navigation (Sidebar)
 
 **Files:**
-- Modify: `src/App.tsx`
 - Modify: `src/components/layout/Sidebar.tsx`
-- Modify: `src/components/layout/Header.tsx`
-- Modify: `src/components/layout/StatusBar.tsx`
+- Modify: `src/components/layout/Header.tsx` (to match styling)
+- Modify: `src/App.tsx` (to inject `.aurora-layer`)
 
 **Interfaces:**
-- Consumes: Tailwind tokens from Task 1 (`accent-cyan`=#00FFDE, `accent-violet`=#FF003C).
+- Consumes: `.magnetic-dock`, `.glass-shell`
+- Produces: Floating sidebar UI.
 
-- [ ] **Step 1: Update App.tsx ambient background**
-Modify `App.tsx` to replace any solid backgrounds with translucent ones, and add floating ambient orbs behind the main content area (e.g. `blur-[100px] rounded-full absolute` using `#00FFDE` and `#FF003C`).
+- [ ] **Step 1: Inject Aurora Layer in App.tsx**
+Modify `src/App.tsx` to include the aurora background before the flex container:
+```tsx
+        <div className="h-screen w-screen flex bg-[#0d0f1a] text-white overflow-hidden relative selection:bg-[var(--accent-cyan)] selection:text-black">
+            <div className="aurora-layer" />
+            <MemoizedSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+```
 
-- [ ] **Step 2: Update Sidebar.tsx**
-Change the main sidebar background from `bg-[rgba(10,12,20,0.85)]` to `bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl`.
-Ensure active tabs use intense glows (`shadow-[0_0_15px_rgba(0,255,222,0.4)]`).
-Update text sizing and tracking for a premium feel.
+- [ ] **Step 2: Update Sidebar Layout**
+In `src/components/layout/Sidebar.tsx`, wrap the main sidebar in the floating dock style:
+```tsx
+        <div className="w-64 h-full flex flex-col magnetic-dock relative z-20">
+```
+Update navigation buttons to use sleek hover effects:
+```tsx
+        <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            className={`w-full flex items-center gap-3 px-6 py-3.5 transition-all duration-300 group relative
+                ${isActive 
+                    ? 'text-[#00FFDE] bg-[rgba(0,255,222,0.05)]' 
+                    : 'text-[var(--text-secondary)] hover:text-white hover:bg-white/5'}`}
+        >
+            {isActive && (
+                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00FFDE] shadow-[0_0_10px_#00FFDE]" />
+            )}
+            <item.icon className="w-5 h-5" />
+            <span className="text-[13px] font-bold uppercase tracking-widest">{item.label}</span>
+        </button>
+```
 
-- [ ] **Step 3: Update Header.tsx and StatusBar.tsx**
-Apply the new `backdrop-blur-3xl` and `border-white/5` paradigm.
-Remove any conflicting solid background colors. Use the new `#00FFDE` and `#FF003C` variables where appropriate (e.g., status indicators).
-
-- [ ] **Step 4: Build check**
-Run: `npm run typecheck`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 3: Commit**
 ```bash
-git add src/App.tsx src/components/layout/Sidebar.tsx src/components/layout/Header.tsx src/components/layout/StatusBar.tsx
-git commit -m "style: apply crimson-cyan glassmorphism to core layout shell"
+git add src/App.tsx src/components/layout/Sidebar.tsx
+git commit -m "ui: redesign sidebar as floating magnetic dock"
 ```

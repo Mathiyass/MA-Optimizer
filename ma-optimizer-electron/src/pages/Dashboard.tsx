@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { AreaChart, Area, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { motion } from 'framer-motion'
 import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2 } from 'lucide-react'
 import { useSystemStore } from '../store/systemStore'
@@ -76,16 +76,27 @@ export function Dashboard() {
     
     const cpu = useSystemStore(s => s.cpu)
     const ram = useSystemStore(s => s.ram)
+    const disk = useSystemStore(s => s.disk)
+    const network = useSystemStore(s => s.network)
     const setPage = useAppStore(s => s.setPage)
     const addNotification = useAppStore(s => s.addNotification)
     const applied = useSettingsStore(s => Object.values(s.appliedTweaks).filter(Boolean).length)
-    const [cpuHistory, setCpuHistory] = useState<{ time: string, load: number }[]>([])
+    const [telemetryHistory, setTelemetryHistory] = useState<{ time: string, cpu: number, ram: number, diskR: number, diskW: number, netRx: number, netTx: number }[]>([])
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCpuHistory(prev => {
+            setTelemetryHistory(prev => {
                 const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-                const next = [...prev, { time: now, load: useSystemStore.getState().cpu }]
+                const s = useSystemStore.getState()
+                const next = [...prev, { 
+                    time: now, 
+                    cpu: s.cpu, 
+                    ram: s.ram.percent, 
+                    diskR: s.disk.readPerSec, 
+                    diskW: s.disk.writePerSec,
+                    netRx: s.network.rxSec,
+                    netTx: s.network.txSec
+                }]
                 if (next.length > 60) next.shift()
                 return next
             })
@@ -270,17 +281,36 @@ export function Dashboard() {
 
                 {/* Center: Live Wave Chart */}
                 <motion.div variants={item} className={`flex-1 ${premiumCardClass} flex flex-col`}>
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50 mb-6">Core Telemetry</h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Core Telemetry</h3>
+                        <div className="flex gap-4">
+                            <span className="text-[10px] uppercase tracking-widest text-[#00FFDE] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00FFDE]"></div> CPU</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[#FF003C] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FF003C]"></div> RAM</span>
+                        </div>
+                    </div>
                     <div className="flex-1 min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={cpuHistory}>
+                            <AreaChart data={telemetryHistory} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#00FFDE" stopOpacity={0.3}/>
                                         <stop offset="95%" stopColor="#00FFDE" stopOpacity={0}/>
                                     </linearGradient>
+                                    <linearGradient id="colorRam" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#FF003C" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#FF003C" stopOpacity={0}/>
+                                    </linearGradient>
                                 </defs>
-                                <Area type="monotone" dataKey="load" stroke="#00FFDE" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" isAnimationActive={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                <XAxis dataKey="time" hide={true} />
+                                <YAxis hide={false} domain={[0, 100]} stroke="rgba(255,255,255,0.2)" fontSize={10} tickFormatter={(val) => `${val}%`} />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: 'rgba(15, 17, 26, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', backdropFilter: 'blur(10px)' }}
+                                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                    labelStyle={{ display: 'none' }}
+                                />
+                                <Area type="monotone" dataKey="cpu" stroke="#00FFDE" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" isAnimationActive={false} name="CPU Load" />
+                                <Area type="monotone" dataKey="ram" stroke="#FF003C" strokeWidth={2} fillOpacity={1} fill="url(#colorRam)" isAnimationActive={false} name="RAM Usage" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -298,6 +328,99 @@ export function Dashboard() {
                         <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Memory Usage</h3>
                         <div className="text-4xl font-mono text-white tracking-tighter">{ram.percent.toFixed(1)}<span className="text-xl opacity-50">%</span></div>
                         <div className="text-[10px] uppercase tracking-widest text-white/50 mt-2 font-bold">{formatBytes(ram.used)} / {formatBytes(ram.total)}</div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Extended Telemetry Row */}
+            <div className="flex flex-col lg:flex-row gap-6 w-full pt-2">
+                {/* Network Chart */}
+                <motion.div variants={item} className={`flex-1 ${premiumCardClass} flex flex-col`}>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Network I/O</h3>
+                        <div className="flex gap-4">
+                            <span className="text-[10px] uppercase tracking-widest text-[#00FFDE] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00FFDE]"></div> Receive</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[#FF003C] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FF003C]"></div> Transmit</span>
+                        </div>
+                    </div>
+                    <div className="flex-1 min-h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={telemetryHistory}>
+                                <defs>
+                                    <linearGradient id="colorRx" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#00FFDE" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#00FFDE" stopOpacity={0}/>
+                                    </linearGradient>
+                                    <linearGradient id="colorTx" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#FF003C" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#FF003C" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: 'rgba(15, 17, 26, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', backdropFilter: 'blur(10px)' }}
+                                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                    labelStyle={{ display: 'none' }}
+                                    formatter={(value: number) => formatBytes(value) + '/s'}
+                                />
+                                <Area type="monotone" dataKey="netRx" stroke="#00FFDE" strokeWidth={2} fillOpacity={1} fill="url(#colorRx)" isAnimationActive={false} name="Receive" />
+                                <Area type="monotone" dataKey="netTx" stroke="#FF003C" strokeWidth={2} fillOpacity={1} fill="url(#colorTx)" isAnimationActive={false} name="Transmit" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-between mt-4 border-t border-white/5 pt-4">
+                        <div>
+                            <div className="text-[10px] uppercase tracking-widest text-[#00FFDE]/50 font-bold mb-1">Download Speed</div>
+                            <div className="text-xl font-mono text-[#00FFDE] tracking-tighter">{formatBytes(network.rxSec)}/s</div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-[10px] uppercase tracking-widest text-[#FF003C]/50 font-bold mb-1">Upload Speed</div>
+                            <div className="text-xl font-mono text-[#FF003C] tracking-tighter">{formatBytes(network.txSec)}/s</div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Disk Chart */}
+                <motion.div variants={item} className={`flex-1 ${premiumCardClass} flex flex-col`}>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Storage I/O</h3>
+                        <div className="flex gap-4">
+                            <span className="text-[10px] uppercase tracking-widest text-[#00FFDE] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00FFDE]"></div> Read</span>
+                            <span className="text-[10px] uppercase tracking-widest text-[#FF003C] font-bold flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#FF003C]"></div> Write</span>
+                        </div>
+                    </div>
+                    <div className="flex-1 min-h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={telemetryHistory}>
+                                <defs>
+                                    <linearGradient id="colorRead" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#00FFDE" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#00FFDE" stopOpacity={0}/>
+                                    </linearGradient>
+                                    <linearGradient id="colorWrite" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#FF003C" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#FF003C" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: 'rgba(15, 17, 26, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', backdropFilter: 'blur(10px)' }}
+                                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                    labelStyle={{ display: 'none' }}
+                                    formatter={(value: number) => formatBytes(value) + '/s'}
+                                />
+                                <Area type="monotone" dataKey="diskR" stroke="#00FFDE" strokeWidth={2} fillOpacity={1} fill="url(#colorRead)" isAnimationActive={false} name="Read" />
+                                <Area type="monotone" dataKey="diskW" stroke="#FF003C" strokeWidth={2} fillOpacity={1} fill="url(#colorWrite)" isAnimationActive={false} name="Write" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-between mt-4 border-t border-white/5 pt-4">
+                        <div>
+                            <div className="text-[10px] uppercase tracking-widest text-[#00FFDE]/50 font-bold mb-1">Read Speed</div>
+                            <div className="text-xl font-mono text-[#00FFDE] tracking-tighter">{formatBytes(disk.readPerSec)}/s</div>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-[10px] uppercase tracking-widest text-[#FF003C]/50 font-bold mb-1">Write Speed</div>
+                            <div className="text-xl font-mono text-[#FF003C] tracking-tighter">{formatBytes(disk.writePerSec)}/s</div>
+                        </div>
                     </div>
                 </motion.div>
             </div>
