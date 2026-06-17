@@ -82,13 +82,16 @@ export function Dashboard() {
     const [cpuHistory, setCpuHistory] = useState<{ time: string, load: number }[]>([])
 
     useEffect(() => {
-        setCpuHistory(prev => {
-            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-            const next = [...prev, { time: now, load: cpu }]
-            if (next.length > 60) next.shift()
-            return next
-        })
-    }, [cpu])
+        const interval = setInterval(() => {
+            setCpuHistory(prev => {
+                const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                const next = [...prev, { time: now, load: useSystemStore.getState().cpu }]
+                if (next.length > 60) next.shift()
+                return next
+            })
+        }, 1000)
+        return () => clearInterval(interval)
+    }, [])
 
     // Optimization Flow State
     const [isOptimizing, setIsOptimizing] = useState(false)
