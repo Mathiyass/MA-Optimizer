@@ -20,9 +20,9 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
 
     const borderColor = enabled
         ? risk === 'aggressive'
-            ? 'border-[#ff003c]/40 bg-[#ff003c]/[0.03] shadow-[0_0_30px_rgba(255,0,60,0.1)]'
-            : 'border-[var(--accent-cyan)]/40 bg-[var(--accent-cyan)]/[0.03] shadow-[0_0_30px_rgba(0,255,222,0.1)]'
-        : 'border-white/5 bg-[rgba(15,17,26,0.6)] hover:border-white/20'
+            ? 'border-[#ff003c]/40 bg-[#ff003c]/[0.03] shadow-[0_0_30px_rgba(255,0,60,0.1)] hover:border-[#FF003C] hover:shadow-[0_0_30px_rgba(255,0,60,0.3)]'
+            : 'border-[#00FFDE]/40 bg-[#00FFDE]/[0.03] shadow-[0_0_30px_rgba(0,255,222,0.1)] hover:border-[#00FFDE] hover:shadow-[0_0_30px_rgba(0,255,222,0.3)]'
+        : 'border-white/5 bg-[rgba(255,255,255,0.03)] hover:border-[#00FFDE] hover:bg-[rgba(255,255,255,0.05)] hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]'
 
     return (
         <motion.div
@@ -31,7 +31,7 @@ export function TweakCard({ title, description, risk, enabled, onChange, loading
             transition={{ duration: 0.3, ease: 'easeOut' }}
             whileHover={{ scale: 1.01, translateY: -2 }}
             className={`
-                relative p-5 rounded-2xl border transition-all duration-300 card-premium backdrop-blur-xl
+                relative p-5 rounded-3xl border transition-all duration-300 backdrop-blur-3xl
                 ${borderColor}
                 ${disabled ? 'opacity-50 pointer-events-none' : ''}
             `}

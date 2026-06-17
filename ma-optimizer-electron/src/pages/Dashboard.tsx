@@ -275,9 +275,9 @@ export function Dashboard() {
                             </span>
                             <span className="text-[var(--text-muted)] text-sm font-mono">{optProgress}%</span>
                         </div>
-                        <div className="w-full h-3 bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden relative">
+                        <div className="w-full h-3 bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-visible relative">
                             <motion.div
-                                className="absolute inset-y-0 left-0 bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
+                                className="absolute inset-y-0 left-0 bg-[#00FFDE] shadow-[0_0_15px_#00FFDE] rounded-full"
                                 animate={{ width: `${optProgress}%` }}
                                 transition={{ type: 'spring', stiffness: 50 }}
                             />
@@ -288,7 +288,7 @@ export function Dashboard() {
 
             {/* Telemetry and System Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <motion.div variants={item} className="col-span-1 lg:col-span-2 card-premium rounded-3xl p-8 transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                <motion.div variants={item} className="col-span-1 lg:col-span-2 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] hover:bg-[rgba(255,255,255,0.05)]">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="p-3 rounded-xl bg-gradient-to-br from-[rgba(0,255,222,0.1)] to-transparent border border-[var(--accent-cyan)]/30 shadow-[var(--glow-cyan)]">
                             <Monitor className="w-6 h-6 text-[var(--accent-cyan)]" />
@@ -314,15 +314,15 @@ export function Dashboard() {
                     </div>
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-3xl p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                <motion.div variants={item} className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] hover:bg-[rgba(255,255,255,0.05)]">
                     <RingGauge value={cpu} label="CPU" sublabel={`${cpu.toFixed(0)}% Load`} size={140} />
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-3xl p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                <motion.div variants={item} className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] hover:bg-[rgba(255,255,255,0.05)]">
                     <RingGauge value={ram.percent} label="RAM" sublabel={`${formatBytes(ram.used)} / ${formatBytes(ram.total)}`} size={140} />
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-3xl p-8 space-y-8 flex flex-col justify-center border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                <motion.div variants={item} className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 space-y-8 flex flex-col justify-center transition-all hover:bg-[rgba(255,255,255,0.05)]">
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
@@ -336,20 +336,20 @@ export function Dashboard() {
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
                                     <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Read</span>
-                                    <span className="text-sm font-mono text-[var(--accent-cyan)] font-bold" style={{ textShadow: 'var(--glow-cyan)' }}>{formatBytes(disk.readPerSec)}/s</span>
+                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] font-bold">{formatBytes(disk.readPerSec)}/s</span>
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Write</span>
-                                    <span className="text-sm font-mono text-[var(--accent-cyan)] opacity-70 font-bold">{formatBytes(disk.writePerSec)}/s</span>
+                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(disk.writePerSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden flex">
+                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-visible flex">
                                 <motion.div
-                                    className="h-full bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
+                                    className="h-full bg-[#00FFDE] shadow-[0_0_15px_#00FFDE] rounded-full"
                                     animate={{ width: `${Math.min((disk.readPerSec / (100 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                                 <motion.div
-                                    className="h-full bg-[var(--accent-cyan)] opacity-40"
+                                    className="h-full bg-[#00FFDE] opacity-40 shadow-[0_0_15px_#00FFDE] rounded-full"
                                     animate={{ width: `${Math.min((disk.writePerSec / (100 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                             </div>
@@ -371,20 +371,20 @@ export function Dashboard() {
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
                                     <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Download</span>
-                                    <span className="text-sm font-mono text-[var(--accent-cyan)] font-bold" style={{ textShadow: 'var(--glow-cyan)' }}>{formatBytes(net.rxSec)}/s</span>
+                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] font-bold">{formatBytes(net.rxSec)}/s</span>
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Upload</span>
-                                    <span className="text-sm font-mono text-[var(--accent-cyan)] opacity-70 font-bold">{formatBytes(net.txSec)}/s</span>
+                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(net.txSec)}/s</span>
                                 </div>
                             </div>
-                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-hidden flex">
+                            <div className="h-1.5 w-full bg-[var(--bg-deep)] border border-[var(--border)] rounded-full overflow-visible flex">
                                 <motion.div
-                                    className="h-full bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]"
+                                    className="h-full bg-[#00FFDE] shadow-[0_0_15px_#00FFDE] rounded-full"
                                     animate={{ width: `${Math.min((net.rxSec / (50 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                                 <motion.div
-                                    className="h-full bg-[var(--accent-cyan)] opacity-40"
+                                    className="h-full bg-[#00FFDE] opacity-40 shadow-[0_0_15px_#00FFDE] rounded-full"
                                     animate={{ width: `${Math.min((net.txSec / (50 * 1024 * 1024)) * 100, 100)}%` }}
                                 />
                             </div>
@@ -400,7 +400,7 @@ export function Dashboard() {
                         onClick={() => setPage(c.page)}
                         whileHover={{ y: -6, scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`relative overflow-hidden rounded-[2rem] p-8 text-left group transition-all duration-300 card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl ${c.glow}`}
+                        className={`relative overflow-hidden rounded-[2.5rem] p-8 text-left group transition-all duration-300 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 ${c.glow}`}
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         

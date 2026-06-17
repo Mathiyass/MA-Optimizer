@@ -270,7 +270,7 @@ export function Performance() {
             </div>
 
             {tab === 'services' ? (
-                <div className="card-premium rounded-3xl p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl mt-6">
+                <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 mt-6">
                     <ServicesTab />
                 </div>
             ) : (
@@ -285,7 +285,7 @@ export function Performance() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="card-premium border border-[var(--accent-cyan)]/30 rounded-3xl p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] bg-[rgba(15,17,26,0.9)] relative overflow-hidden"
+                        className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/30 rounded-[2.5rem] p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] relative overflow-hidden"
                     >
                         {/* Scanning beam effect */}
                         <motion.div 
