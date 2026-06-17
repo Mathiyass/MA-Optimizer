@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, Trash2, Loader2, RefreshCw, Search, Package, CheckCircle2, XCircle, ArrowUpCircle, X, Globe } from 'lucide-react'
+import { Download, Trash2, Loader2, RefreshCw, Search, Package, CheckCircle2, XCircle, ArrowUpCircle, X, Globe, Check } from 'lucide-react'
 import { apps, appCategories } from '../data/apps'
 import { useAppStore } from '../store/appStore'
 import { useLogStore } from '../store/logStore'
@@ -182,47 +182,68 @@ export function AppInstaller() {
     )
 
     return (
-        <div className="space-y-5 max-w-6xl">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <Package className="w-6 h-6 text-accent-cyan" /> App Installer
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">Search & install apps via winget package manager</p>
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium AppInstaller Hero Section */}
+            <motion.div
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#cc00ff]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <Package className="w-12 h-12 text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            App Installer
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            Software Management
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Install, update, and remove applications instantly via the winget package manager. Maintain a clean software environment without bloated installers.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        {selected.size > 0 && (
+                            <motion.button
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={installSelected}
+                                className="group relative px-8 py-4 rounded-2xl bg-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50 hover:bg-[#00e6c8] transition-all duration-300 shadow-[0_0_20px_rgba(0,255,222,0.4)] w-full"
+                            >
+                                <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center justify-center gap-3 text-black">
+                                    <Download className="w-5 h-5" />
+                                    Install {selected.size} Apps
+                                </span>
+                            </motion.button>
+                        )}
+                        <button onClick={upgradeAll}
+                            className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-3 font-black tracking-widest uppercase w-full">
+                            <ArrowUpCircle className="w-5 h-5" /> Update All
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {selected.size > 0 && (
-                        <motion.button
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={installSelected}
-                            className="px-4 py-2 bg-accent-cyan text-black rounded-lg text-sm font-semibold flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,255,222,0.2)]"
-                        >
-                            <Download className="w-4 h-4" />
-                            Install {selected.size} Apps
-                        </motion.button>
-                    )}
-                    <button onClick={upgradeAll}
-                        className="px-4 py-2 bg-card-bg border border-card-border rounded-lg text-sm text-text-muted hover:text-text-primary transition-all flex items-center gap-1.5">
-                        <ArrowUpCircle className="w-3.5 h-3.5" /> Update All
-                    </button>
-                </div>
-            </div>
+            </motion.div>
 
             {/* Search bar */}
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim" />
+            <div className="relative max-w-2xl mx-auto w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
                 <input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search winget packages..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-card-bg border border-card-border rounded-xl text-sm text-text-primary placeholder:text-text-dim outline-none focus:border-[var(--accent-cyan)] focus:shadow-[var(--glow-cyan)] transition-all"
+                    className="w-full pl-12 pr-12 py-4 bg-[rgba(15,17,26,0.6)] backdrop-blur-xl border border-white/10 rounded-2xl text-[15px] font-medium text-white placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_20px_rgba(0,255,222,0.2)] transition-all"
                 />
-                {searching && <Loader2 className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[var(--accent-cyan)]" />}
+                {searching && <Loader2 className="absolute right-12 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-[var(--accent-cyan)]" />}
                 {search && (
-                    <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim hover:text-text-primary">
+                    <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors bg-white/5 p-1 rounded-md">
                         <X className="w-4 h-4" />
                     </button>
                 )}
@@ -230,13 +251,13 @@ export function AppInstaller() {
 
             {/* Category tabs - only show when not searching */}
             {!isSearching && (
-                <div className="flex gap-1 bg-card-bg border border-card-border rounded-xl p-1 overflow-x-auto">
+                <div className="flex gap-2 justify-center flex-wrap">
                     <button onClick={() => setCategory('all')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${category === 'all' ? 'bg-accent-cyan/15 text-accent-cyan' : 'text-text-muted hover:text-text-primary'
+                        className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === 'all' ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'
                             }`}>All</button>
                     {appCategories.map(c => (
                         <button key={c.id} onClick={() => setCategory(c.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${category === c.id ? 'bg-accent-cyan/15 text-accent-cyan' : 'text-text-muted hover:text-text-primary'
+                            className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border ${category === c.id ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-white/5 text-[var(--text-muted)] border-white/5 hover:bg-white/10 hover:text-white'
                                 }`}>{c.label}</button>
                     ))}
                 </div>
@@ -471,68 +492,70 @@ function AppCard({
     return (
         <motion.div
             initial={false}
-            whileHover={{ y: -1 }}
-            className={`flex items-center gap-3 p-4 rounded-xl border transition-all group ${selected
-                ? 'border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/5 shadow-[var(--glow-cyan)]'
-                : 'border-card-border bg-card-bg hover:border-white/10 hover:shadow-lg'
+            whileHover={{ y: -2, scale: 1.01 }}
+            className={`flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 group card-premium backdrop-blur-xl ${selected
+                ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/5 shadow-[0_0_20px_rgba(0,255,222,0.15)]'
+                : 'border-white/5 bg-[rgba(15,17,26,0.6)] hover:border-white/20 hover:shadow-xl'
                 }`}
         >
-            <input
-                type="checkbox"
-                checked={selected}
-                onChange={onToggle}
-                className="accent-[var(--accent-cyan)] w-4 h-4 shrink-0 cursor-pointer"
-            />
-            {/* 🔧 FIX: Display App Icon with robust fallback */}
-            <div className="w-10 h-10 rounded-xl bg-[var(--bg-deep)] border border-[var(--border)] flex flex-shrink-0 items-center justify-center p-2 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+            <div className="relative flex items-center justify-center">
+                <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={onToggle}
+                    className="appearance-none w-6 h-6 border-2 border-white/20 rounded-md checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] cursor-pointer transition-all"
+                />
+                {selected && <Check className="w-4 h-4 text-black absolute pointer-events-none font-bold" />}
+            </div>
+            
+            <div className="w-12 h-12 rounded-2xl bg-black/40 border border-white/10 flex flex-shrink-0 items-center justify-center p-2.5 shadow-inner">
                 {imgSrc && !imgError ? (
-                    <img key={imgSrc} src={imgSrc} alt={name} onError={handleImgError} className="w-full h-full object-contain rounded drop-shadow-md" />
+                    <img key={imgSrc} src={imgSrc} alt={name} onError={handleImgError} className="w-full h-full object-contain rounded drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                 ) : (
                     <Package className="w-6 h-6 text-[var(--accent-cyan)] opacity-70" />
                 )}
             </div>
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                    <span className="text-[var(--text-primary)] text-sm font-semibold">{name}</span>
+                <div className="flex items-center gap-3">
+                    <span className="text-white text-[15px] font-bold tracking-wide">{name}</span>
                     {installed && (
-                        <span className="text-[10px] border border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] shadow-[var(--glow-cyan)] px-1.5 py-0.5 rounded font-medium">Installed</span>
+                        <span className="text-[9px] border border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] shadow-[0_0_8px_rgba(0,255,222,0.3)] px-2 py-0.5 rounded-md font-black uppercase tracking-widest">Installed</span>
                     )}
                     {isRemote && (
-                        <span className="text-[10px] bg-purple-500/15 text-purple-400 px-1.5 py-0.5 rounded font-medium">winget</span>
+                        <span className="text-[9px] bg-[#cc00ff]/15 text-[#cc00ff] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border border-[#cc00ff]/30 shadow-[0_0_8px_rgba(204,0,255,0.2)]">winget</span>
                     )}
                 </div>
-                <div className="text-text-dim text-xs mt-0.5 flex items-center gap-2">
+                <div className="text-[var(--text-muted)] text-xs mt-1 flex items-center gap-3 font-medium">
                     <span className="truncate">{desc}</span>
-                    {version && <span className="text-[var(--accent-cyan)] shrink-0 font-mono tracking-widest bg-black/20 rounded px-1">v{version}</span>}
+                    {version && <span className="text-[var(--accent-cyan)] shrink-0 font-mono tracking-widest bg-black/40 rounded px-1.5 py-0.5 border border-white/5">v{version}</span>}
                 </div>
             </div>
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                 {inQueue ? (
-                    <span className="px-2 py-1 text-[10px] text-[var(--accent-cyan)] flex items-center gap-1 bg-[var(--accent-cyan)]/10 rounded-lg shadow-[var(--glow-cyan)]">
-                        <Loader2 className="w-3 h-3 animate-spin" /> In queue
+                    <span className="px-3 py-1.5 text-xs text-[var(--accent-cyan)] font-bold flex items-center gap-2 bg-[var(--accent-cyan)]/10 rounded-xl shadow-[0_0_15px_rgba(0,255,222,0.2)] border border-[var(--accent-cyan)]/30">
+                        <Loader2 className="w-4 h-4 animate-spin" /> In queue
                     </span>
                 ) : installed ? (
                     <>
-                        {/* 🔧 FIX: Enhanced semantic color styling for AppCard action buttons */}
                         <button onClick={onUpdate} title="Update App"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
-                                       border border-[var(--accent-cyan)] text-[var(--accent-cyan)]
-                                       hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)] transition-all">
-                            <ArrowUpCircle className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Update</span>
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase
+                                       border border-[var(--accent-cyan)] text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)]
+                                       hover:bg-[rgba(0,255,222,0.15)] hover:shadow-[0_0_20px_rgba(0,255,222,0.3)] transition-all">
+                            <ArrowUpCircle className="w-4 h-4" /> <span className="hidden sm:inline">Update</span>
                         </button>
                         <button onClick={confirmUninstall} title="Uninstall App"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
-                                       border border-[var(--accent-red)] text-[var(--accent-red)]
-                                       hover:bg-[var(--accent-red)]/10 hover:shadow-[var(--glow-red)] transition-all">
-                            <Trash2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Uninstall</span>
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase
+                                       border border-[#ff003c] text-[#ff003c] bg-[#ff003c]/5
+                                       hover:bg-[#ff003c]/15 hover:shadow-[0_0_20px_rgba(255,0,60,0.3)] transition-all">
+                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Uninstall</span>
                         </button>
                     </>
                 ) : (
                     <button onClick={onInstall} title="Install App"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
-                                   border border-[var(--accent-cyan)] text-[var(--accent-cyan)]
-                                   hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)] transition-all">
-                        <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Install</span>
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase
+                                   border border-[var(--accent-cyan)] text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)]
+                                   hover:bg-[rgba(0,255,222,0.15)] hover:shadow-[0_0_20px_rgba(0,255,222,0.3)] transition-all">
+                        <Download className="w-4 h-4" /> <span className="hidden sm:inline">Install</span>
                     </button>
                 )}
             </div>

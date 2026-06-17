@@ -24,7 +24,7 @@ export function usePowerPlan() {
             setIsActive(active)
             setExists(planExists)
             setActivePlan(current)
-            setAllPlans(plans)
+            setAllPlans(plans || [])
         } catch { }
     }, [])
 

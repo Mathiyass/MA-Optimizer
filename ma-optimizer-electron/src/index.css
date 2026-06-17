@@ -136,7 +136,35 @@ input::placeholder {
 .btn-destructive:hover {
   box-shadow: var(--glow-red);
   background: rgba(255, 0, 60, 0.08);
-  /* Re-validated to hex converted correctly */
+}
+
+.btn-ultra {
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 255, 222, 0.1), rgba(204, 0, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-ultra::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.4s ease;
+}
+
+.btn-ultra:hover::before {
+  left: 100%;
+}
+
+.btn-ultra:hover {
+  border-color: rgba(0, 255, 222, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 222, 0.4), inset 0 0 10px rgba(204, 0, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 /* ─── Selection Prevention ─── */
@@ -263,6 +291,25 @@ input::placeholder {
   animation: count-up 0.5s ease-out forwards;
 }
 
+@keyframes float-complex {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(1deg); }
+  75% { transform: translateY(8px) rotate(-1deg); }
+}
+
+.animate-float-complex {
+  animation: float-complex 6s ease-in-out infinite;
+}
+
+@keyframes hero-glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(0,255,222,0.3)); }
+  50% { filter: drop-shadow(0 0 40px rgba(204,0,255,0.5)); }
+}
+
+.animate-hero-glow {
+  animation: hero-glow 4s ease-in-out infinite;
+}
+
 /* Fade Scale In */
 @keyframes fade-scale-in {
   from {
@@ -381,7 +428,18 @@ input::placeholder {
 }
 
 .text-gradient-mixed {
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-red));
+  background: linear-gradient(135deg, var(--accent-cyan), #cc00ff, var(--accent-red));
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-ultra {
+  background: linear-gradient(to right, #00FFDE, #0088ff, #cc00ff, #FF003C);
+  background-size: 300% 300%;
+  animation: gradient-shift 6s ease infinite;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

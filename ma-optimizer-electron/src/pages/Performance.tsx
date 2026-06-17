@@ -222,54 +222,99 @@ export function Performance() {
     }
 
     return (
-        <div className="space-y-6 max-w-5xl">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-                        <Zap className="w-6 h-6 text-accent-cyan" /> Performance
-                    </h2>
-                    <p className="text-text-muted text-sm mt-1">Optimize system speed, responsiveness, and resource usage</p>
+        <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
+            {/* Ultra-Premium Performance Hero Section */}
+            <motion.div
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
+                <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-blue-500/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="flex-1 text-center md:text-left">
+                        <motion.h2 className="text-5xl lg:text-6xl font-black mb-4 tracking-tight text-white flex items-center justify-center md:justify-start gap-4">
+                            <Zap className="w-12 h-12 text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                            Performance
+                        </motion.h2>
+                        <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
+                            System Wide Optimization
+                        </p>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <p className="text-[var(--text-secondary)] max-w-xl font-medium leading-relaxed">
+                                Finely tune your system's underlying behavior. Manage services, visual effects, and hardware scheduling to achieve the perfect balance of latency and throughput.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center">
+                        <button
+                            onClick={applyAllSafe}
+                            disabled={optimizing}
+                            className="group relative px-8 py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all duration-500 overflow-hidden shadow-xl"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/0 via-[var(--accent-cyan)]/10 to-[var(--accent-cyan)]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                            <span className="relative z-10 font-black tracking-widest uppercase text-sm flex items-center gap-3 text-white group-hover:text-[var(--accent-cyan)] transition-colors">
+                                {optimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                                {optimizing ? 'Optimizing...' : 'Apply Safe Tweaks'}
+                            </span>
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={applyAllSafe}
-                    className="px-4 py-2 bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg text-accent-cyan text-sm font-medium hover:bg-accent-cyan/20 transition-colors"
-                >
-                    ⚡ Apply All Safe Tweaks
-                </button>
+            </motion.div>
+
+            <div className="mt-8">
+                <TabGroup tabs={tabs} active={tab} onChange={setTab} />
             </div>
 
-            <TabGroup tabs={tabs} active={tab} onChange={setTab} />
-
             {tab === 'services' ? (
-                <ServicesTab />
+                <div className="card-premium rounded-3xl p-8 border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl mt-6">
+                    <ServicesTab />
+                </div>
             ) : (
-                <div className="grid gap-3">
+                <div className="grid gap-4 mt-6">
                     {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
-                    {items.length === 0 && <div className="text-text-dim text-center py-8">No tweaks in this category</div>}
+                    {items.length === 0 && <div className="text-[var(--text-muted)] text-center py-12 font-bold tracking-widest uppercase">No tweaks in this category</div>}
                 </div>
             )}
 
             {optimizing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,12,20,0.85)] backdrop-blur-3xl">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-card-bg border border-accent-cyan/30 rounded-2xl p-6 w-[400px] shadow-2xl shadow-accent-cyan/10"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="card-premium border border-[var(--accent-cyan)]/30 rounded-3xl p-10 w-[500px] shadow-[0_0_50px_rgba(0,255,222,0.15)] bg-[rgba(15,17,26,0.9)] relative overflow-hidden"
                     >
-                        <div className="flex items-center gap-3 mb-4">
-                            <Loader2 className="w-6 h-6 text-accent-cyan animate-spin" />
-                            <h3 className="text-lg font-bold text-text-primary">Optimizing Performance...</h3>
+                        {/* Scanning beam effect */}
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--accent-cyan)]/10 to-transparent h-[200%]"
+                            animate={{ top: ['-100%', '100%'] }}
+                            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        />
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-8 justify-center">
+                                <Loader2 className="w-10 h-10 text-[var(--accent-cyan)] animate-spin drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]" />
+                                <h3 className="text-2xl font-black text-white tracking-wide">Optimizing...</h3>
+                            </div>
+                            
+                            <div className="bg-black/40 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-md">
+                                <p className="text-[var(--accent-cyan)] font-mono text-xs mb-1 uppercase tracking-widest">Executing Payload</p>
+                                <p className="text-white text-sm truncate font-medium">{optCurrent}</p>
+                            </div>
+
+                            <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00aaff] shadow-[0_0_15px_rgba(0,255,222,0.5)]"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${optProgress}%` }}
+                                    transition={{ duration: 0.2 }}
+                                />
+                            </div>
+                            <div className="text-right text-[var(--accent-cyan)] font-black text-xs mt-3 tracking-widest">{optProgress}% COMPLETE</div>
                         </div>
-                        <p className="text-text-muted text-sm mb-4 truncate">Applying: {optCurrent}</p>
-                        <div className="w-full h-2 bg-app-bg rounded-full overflow-hidden">
-                            <motion.div
-                                className="h-full bg-accent-cyan"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${optProgress}%` }}
-                                transition={{ duration: 0.2 }}
-                            />
-                        </div>
-                        <div className="text-right text-text-dim text-xs mt-2">{optProgress}%</div>
                     </motion.div>
                 </div>
             )}

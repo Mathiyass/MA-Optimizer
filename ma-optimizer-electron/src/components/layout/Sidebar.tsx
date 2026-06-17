@@ -56,7 +56,7 @@ export function Sidebar() {
                 </motion.div>
                 <div className="z-10 flex flex-col">
                     <h1 className="text-white font-black text-xl tracking-tight leading-none text-gradient-ultra pb-1 drop-shadow-[0_0_8px_rgba(0,255,222,0.3)]">MA-Optimizer</h1>
-                    <span className="text-[var(--accent-cyan)] text-[9px] tracking-[0.3em] uppercase font-black bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/20 px-2 py-0.5 rounded shadow-[0_0_10px_rgba(0,255,222,0.1)] self-start mt-1">PRO EDITION</span>
+                    <span className="text-[var(--accent-cyan)] text-[9px] tracking-[0.3em] uppercase font-black bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/20 px-2 py-0.5 rounded-2xl shadow-[0_0_10px_rgba(0,255,222,0.1)] self-start mt-1">PRO EDITION</span>
                 </div>
             </div>
 
@@ -74,7 +74,7 @@ export function Sidebar() {
                             whileHover={{ x: 4 }}
                             whileTap={{ scale: 0.98 }}
                             className={`
-                                relative w-[92%] mx-auto flex items-center gap-4 px-5 py-3.5 rounded-xl text-left transition-all duration-300 group overflow-hidden
+                                relative w-[92%] mx-auto flex items-center gap-4 px-5 py-3.5 rounded-2xl text-left transition-all duration-300 group overflow-hidden
                                 ${active
                                     ? 'bg-[rgba(255,255,255,0.08)] text-white shadow-[0_0_15px_rgba(0,255,222,0.4)] border border-white/10'
                                     : 'text-[var(--text-secondary)] border border-transparent hover:bg-white/5 hover:text-white'
@@ -82,23 +82,23 @@ export function Sidebar() {
                             `}
                         >
                             {active && (
-                                <motion.div 
-                                    layoutId="activeTabIndicator"
-                                    className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/20 to-transparent opacity-60"
-                                    initial={false}
-                                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                />
-                            )}
-                            {active && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-3/4 bg-[var(--accent-cyan)] rounded-r-full shadow-[0_0_15px_var(--accent-cyan)]" />
+                                <>
+                                    <motion.div 
+                                        layoutId="activeTabIndicator"
+                                        className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/20 to-transparent opacity-60"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                                    />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-3/4 bg-[var(--accent-cyan)] rounded-r-full shadow-[0_0_15px_var(--accent-cyan)]" />
+                                </>
                             )}
 
                             <Icon className={`w-5 h-5 shrink-0 z-10 transition-all duration-300 ${active ? 'text-[var(--accent-cyan)] drop-shadow-[0_0_8px_var(--accent-cyan)] scale-110' : 'opacity-70 group-hover:opacity-100 group-hover:text-[var(--accent-cyan)] group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)] group-hover:scale-110'}`} />
                             <span className={`text-[11px] font-bold tracking-[0.2em] uppercase truncate z-10 ${active ? 'text-white' : 'group-hover:text-white'}`}>{item.label}</span>
 
                             {item.badge && (
-                                <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded border shadow-lg ${isViolet
-                                    ? 'bg-[#cc00ff]/20 text-[#e066ff] border-[#cc00ff]/40 shadow-[0_0_10px_rgba(204,0,255,0.3)]'
+                                <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded-2xl border shadow-lg ${isViolet
+                                    ? 'bg-[#FF003C]/20 text-[#FF003C] border-[#FF003C]/40 shadow-[0_0_10px_rgba(255,0,60,0.3)]'
                                     : 'bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/40 shadow-[0_0_10px_rgba(0,255,222,0.3)]'
                                     }`}>
                                     {item.badge}

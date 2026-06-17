@@ -80,5 +80,8 @@
     "portable": {
       "requestExecutionLevel": "admin"
     }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
   }
 }

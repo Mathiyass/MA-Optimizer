@@ -177,50 +177,90 @@ export function Dashboard() {
 
     return (
         <motion.div
-            className="space-y-6 max-w-6xl"
+            className="space-y-8 max-w-[90rem] mx-auto w-full"
             variants={container}
             initial={false}
             animate="show"
         >
-            {/* Hero */}
-            <motion.div variants={item} className="relative overflow-hidden rounded-3xl p-10 shadow-2xl glass hover-lift">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,255,222,0.08),transparent_50%)] pointer-events-none" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,0,60,0.05),transparent_50%)] pointer-events-none" />
-                <div className="relative z-10 flex items-center justify-between gap-12">
-                    <div className="flex-1">
+            {/* Ultra-Premium Hero Section */}
+            <motion.div variants={item} className="relative overflow-hidden rounded-[2.5rem] p-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 bg-[rgba(15,17,26,0.7)] backdrop-blur-3xl animate-float-complex">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(0,255,222,0.15),transparent_50%)] pointer-events-none mix-blend-screen" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(204,0,255,0.15),transparent_50%)] pointer-events-none mix-blend-screen" />
+                <div className="absolute top-0 right-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+                
+                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
+                    <div className="flex-1 flex flex-col justify-center">
                         <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[rgba(0,255,222,0.05)] text-[var(--accent-cyan)] text-[10px] font-bold uppercase tracking-widest mb-4 shadow-[var(--glow-cyan)]"
+                            initial={{ opacity: 0, x: -30, filter: 'blur(10px)' }}
+                            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.05)] text-[var(--accent-cyan)] text-[11px] font-black uppercase tracking-[0.2em] mb-6 shadow-[0_0_15px_rgba(0,255,222,0.2)] animate-pulse-glow"
                         >
-                            <Activity className="w-3 h-3" /> System Ready
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-cyan)] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--accent-cyan)]"></span>
+                            </span>
+                            System Analytics Active
                         </motion.div>
-                        <h1 className="text-4xl font-extrabold text-[var(--text-primary)] mb-4 tracking-tight">
-                            Optimize your <span className="text-gradient-mixed">Windows Experience</span>
-                        </h1>
-                        <p className="text-text-muted text-base max-w-lg mb-8 leading-relaxed">MA-Optimizer is the definitive tool for power users. Enhance system speed, reduce latency, and reclaim your privacy with a single click.</p>
+                        
+                        <motion.h1 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.1 }}
+                            className="text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight leading-[1.1]"
+                        >
+                            Unleash the power of <br/>
+                            <span className="text-gradient-ultra">MA-Optimizer</span>
+                        </motion.h1>
+                        
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="text-text-muted text-lg max-w-xl mb-10 leading-relaxed font-medium"
+                        >
+                            Experience unparalleled system tuning. Enhance processing speed, minimize latency, and fortify your digital privacy with our next-generation optimization engine.
+                        </motion.p>
 
-                        <div className="flex items-center gap-4">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="flex flex-wrap items-center gap-6"
+                        >
                             <motion.button
-                                whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(0,255,222,0.3)' }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={runOptimizeAll}
                                 disabled={isOptimizing}
-                                className="px-8 py-4 rounded-2xl font-bold text-base flex items-center gap-3 disabled:opacity-50 btn-primary bg-[var(--bg-surface)]"
+                                className="px-10 py-5 text-lg font-black flex items-center gap-4 disabled:opacity-50 btn-ultra uppercase tracking-wider"
                             >
-                                {isOptimizing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-                                {isOptimizing ? 'Optimizing...' : 'One-Click Optimize'}
+                                {isOptimizing ? <Loader2 className="w-6 h-6 animate-spin" /> : <Zap className="w-6 h-6 drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />}
+                                {isOptimizing ? 'Optimizing Core...' : 'Quick Optimize'}
                             </motion.button>
 
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-card-bg bg-card-border flex items-center justify-center text-[10px] font-bold text-text-dim`}>#{i}</div>
-                                ))}
+                            <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-5 py-3 rounded-2xl backdrop-blur-md">
+                                <div className="flex -space-x-3">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className={`w-10 h-10 rounded-full border-2 border-card-bg bg-[rgba(255,255,255,0.1)] flex items-center justify-center text-xs font-black text-white shadow-lg`}>#{i}</div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[var(--accent-cyan)] text-xs font-black tracking-widest">50K+ USERS</span>
+                                    <span className="text-text-muted text-[10px] uppercase tracking-wider">Trusted globally</span>
+                                </div>
                             </div>
-                            <span className="text-text-dim text-xs font-medium">Trusted by 50k+ users</span>
-                        </div>
+                        </motion.div>
                     </div>
-                    <HealthGauge score={healthScore} />
+                    
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        transition={{ duration: 1, type: "spring", bounce: 0.4 }}
+                        className="relative animate-hero-glow z-20"
+                    >
+                        <HealthGauge score={healthScore} />
+                    </motion.div>
                 </div>
 
                 {isOptimizing && (
@@ -246,14 +286,17 @@ export function Dashboard() {
                 )}
             </motion.div>
 
-            {/* Rest of the dashboard... */}
-            <div className="grid grid-cols-5 gap-6">
-                <motion.div variants={item} className="col-span-2 card-premium rounded-2xl p-6 transition-colors">
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="p-2 rounded-lg bg-[rgba(0,255,222,0.05)] border border-[var(--border)] shadow-[var(--glow-cyan)]">
-                            <Monitor className="w-4 h-4 text-[var(--accent-cyan)]" />
+            {/* Telemetry and System Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <motion.div variants={item} className="col-span-1 lg:col-span-2 card-premium rounded-3xl p-8 transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-[rgba(0,255,222,0.1)] to-transparent border border-[var(--accent-cyan)]/30 shadow-[var(--glow-cyan)]">
+                            <Monitor className="w-6 h-6 text-[var(--accent-cyan)]" />
                         </div>
-                        <span className="text-[var(--text-primary)] text-sm font-bold">System Specification</span>
+                        <div>
+                            <h3 className="text-white text-lg font-black tracking-wide">System Specification</h3>
+                            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">Hardware Info</p>
+                        </div>
                     </div>
                     <div className="space-y-3">
                         {[
@@ -271,15 +314,15 @@ export function Dashboard() {
                     </div>
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-2xl p-6 flex items-center justify-center group transition-colors">
-                    <RingGauge value={cpu} label="CPU" sublabel={`${cpu.toFixed(0)}% Load`} size={120} />
+                <motion.div variants={item} className="card-premium rounded-3xl p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <RingGauge value={cpu} label="CPU" sublabel={`${cpu.toFixed(0)}% Load`} size={140} />
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-2xl p-6 flex items-center justify-center group transition-colors">
-                    <RingGauge value={ram.percent} label="RAM" sublabel={`${formatBytes(ram.used)} / ${formatBytes(ram.total)}`} size={120} />
+                <motion.div variants={item} className="card-premium rounded-3xl p-8 flex flex-col items-center justify-center group transition-all hover:shadow-[0_0_30px_rgba(0,255,222,0.1)] border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
+                    <RingGauge value={ram.percent} label="RAM" sublabel={`${formatBytes(ram.used)} / ${formatBytes(ram.total)}`} size={140} />
                 </motion.div>
 
-                <motion.div variants={item} className="card-premium rounded-2xl p-6 space-y-6">
+                <motion.div variants={item} className="card-premium rounded-3xl p-8 space-y-8 flex flex-col justify-center border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl">
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-2">
@@ -350,21 +393,25 @@ export function Dashboard() {
                 </motion.div>
             </div>
 
-            <motion.div variants={item} className="grid grid-cols-4 gap-6">
+            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
                 {quickCards.map((c, i) => (
                     <motion.button
                         key={i}
                         onClick={() => setPage(c.page)}
-                        whileHover={{ y: -4 }}
-                        className={`relative overflow-hidden rounded-2xl p-6 text-left group transition-all hover-lift card-premium ${c.glow}`}
+                        whileHover={{ y: -6, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`relative overflow-hidden rounded-[2rem] p-8 text-left group transition-all duration-300 card-premium border border-white/5 bg-[rgba(15,17,26,0.6)] backdrop-blur-2xl ${c.glow}`}
                     >
-                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                            <c.icon className="w-6 h-6 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                        
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                            <c.icon className="w-7 h-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
                         </div>
-                        <div className="text-[var(--text-primary)] font-bold text-sm mb-1">{c.label}</div>
-                        <div className="text-[var(--text-secondary)] text-xs leading-relaxed">{c.desc}</div>
-                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ChevronRight className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        <div className="text-white font-black text-xl mb-2 tracking-tight">{c.label}</div>
+                        <div className="text-[var(--text-muted)] text-sm leading-relaxed font-medium">{c.desc}</div>
+                        
+                        <div className="absolute bottom-8 right-8 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 border border-white/10">
+                            <ChevronRight className="w-5 h-5 text-[var(--accent-cyan)]" />
                         </div>
                     </motion.button>
                 ))}
