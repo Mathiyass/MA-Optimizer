@@ -52,14 +52,18 @@ export function Header() {
     }
 
     return (
-        <header className="h-12 glass-panel flex items-center shrink-0 select-none z-20" style={{ WebkitAppRegion: 'drag' } as any}>
+        <header className="h-16 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-b border-white/5 flex items-center shrink-0 select-none z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)] relative overflow-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
+            {/* Ambient Background Glows */}
+            <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
+            <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#cc00ff]/5 to-transparent pointer-events-none" />
+
             {/* Left section */}
-            <div className="flex items-center gap-2 pl-4" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <div className="flex items-center gap-2 pl-6 relative z-10" style={{ WebkitAppRegion: 'no-drag' } as any}>
                 {/* Admin badge */}
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border ${isAdmin ? 'bg-success/10 border-success/20 text-success shadow-[0_0_10px_rgba(0,255,136,0.1)]' : 'bg-danger/10 border-danger/20 text-danger shadow-[0_0_10px_rgba(255,68,68,0.1)]'
+                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border transition-all ${isAdmin ? 'bg-[rgba(0,255,222,0.1)] border-[#00FFDE]/40 text-[#00FFDE] shadow-[0_0_15px_rgba(0,255,222,0.2)]' : 'bg-[rgba(255,0,60,0.1)] border-[#FF003C]/40 text-[#FF003C] shadow-[0_0_15px_rgba(255,0,60,0.2)]'
                     }`}>
-                    <UserCog className="w-3 h-3" />
-                    {isAdmin ? 'Admin Mode' : 'Standard User'}
+                    <UserCog className="w-4 h-4" />
+                    {isAdmin ? 'Admin Privileges Active' : 'Standard Mode'}
                 </div>
             </div>
 
@@ -67,39 +71,39 @@ export function Header() {
             <div className="flex-1" />
 
             {/* Right section */}
-            <div className="flex items-center gap-1 pr-1" style={{ WebkitAppRegion: 'no-drag' } as any}>
+            <div className="flex items-center gap-2 pr-2 relative z-10" style={{ WebkitAppRegion: 'no-drag' } as any}>
 
                 {/* 🛡️ Create Restore Point Button */}
                 <button
                     onClick={handleRestorePoint}
                     disabled={restoreStatus === 'loading'}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-all text-xs font-semibold mr-2
-                        ${restoreStatus === 'idle' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/10 hover:shadow-[var(--glow-cyan)]' : ''}
-                        ${restoreStatus === 'loading' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] opacity-80' : ''}
-                        ${restoreStatus === 'success' ? 'border border-[var(--accent-cyan)] text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 shadow-[var(--glow-cyan)]' : ''}
-                        ${restoreStatus === 'error' ? 'border border-[var(--accent-red)] text-[var(--accent-red)] bg-[var(--accent-red)]/10 shadow-[var(--glow-red)]' : ''}
+                    className={`flex items-center gap-2 px-5 py-2 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase mr-3
+                        ${restoreStatus === 'idle' ? 'border border-[var(--accent-cyan)]/50 text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)] hover:bg-[rgba(0,255,222,0.15)] hover:shadow-[0_0_20px_rgba(0,255,222,0.3)] hover:border-[var(--accent-cyan)]' : ''}
+                        ${restoreStatus === 'loading' ? 'border border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] bg-[rgba(0,255,222,0.05)] opacity-80' : ''}
+                        ${restoreStatus === 'success' ? 'border border-[var(--accent-cyan)] text-black bg-[var(--accent-cyan)] shadow-[0_0_20px_rgba(0,255,222,0.4)]' : ''}
+                        ${restoreStatus === 'error' ? 'border border-[#ff003c] text-white bg-[#ff003c] shadow-[0_0_20px_rgba(255,0,60,0.4)]' : ''}
                     `}
                 >
-                    {restoreStatus === 'idle' && <><span>🛡️ Create Restore Point</span></>}
-                    {restoreStatus === 'loading' && <><Loader className="w-3.5 h-3.5 animate-spin" /> <span>Creating...</span></>}
-                    {restoreStatus === 'success' && <><span>✓ Restore Point Created</span></>}
+                    {restoreStatus === 'idle' && <><span>🛡️ Restore Point</span></>}
+                    {restoreStatus === 'loading' && <><Loader className="w-4 h-4 animate-spin" /> <span>Creating...</span></>}
+                    {restoreStatus === 'success' && <><span>✓ Created</span></>}
                     {restoreStatus === 'error' && <><span>✕ Failed</span></>}
                 </button>
 
                 {/* Search */}
                 <button
                     onClick={() => setSearchOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all text-xs"
+                    className="flex items-center gap-2 px-4 py-2 text-[var(--text-secondary)] hover:text-white hover:bg-white/10 rounded-xl transition-all text-[11px] font-black tracking-widest uppercase border border-transparent hover:border-white/10 group"
                 >
-                    <Search className="w-3.5 h-3.5" />
+                    <Search className="w-4 h-4 group-hover:text-[var(--accent-cyan)] transition-colors" />
                     <span>Search</span>
-                    <kbd className="ml-1 px-1.5 py-0.5 bg-card-bg border border-card-border rounded text-[10px]">Ctrl+K</kbd>
+                    <kbd className="ml-1 px-2 py-0.5 bg-black/60 border border-white/10 rounded text-[9px] uppercase tracking-widest text-[var(--accent-cyan)] shadow-inner">Ctrl+K</kbd>
                 </button>
 
                 {/* Profiles */}
                 <button
                     onClick={() => setProfilesOpen(true)}
-                    className="px-3 py-1.5 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all text-xs"
+                    className="px-4 py-2 text-[var(--text-secondary)] hover:text-white hover:bg-white/10 rounded-xl transition-all text-[11px] font-black tracking-widest uppercase border border-transparent hover:border-white/10 mx-1"
                 >
                     Profiles
                 </button>
@@ -108,28 +112,30 @@ export function Header() {
                 <button
                     onClick={handleUndo}
                     title="Undo last change (Ctrl+Z)"
-                    className="p-2 text-text-dim hover:text-[var(--text-primary)] hover:bg-white/5 rounded transition-all"
+                    className="p-2 text-[var(--text-secondary)] hover:text-[var(--accent-cyan)] hover:bg-[rgba(0,255,222,0.1)] rounded-xl transition-all mx-1 group"
                 >
-                    <Undo2 className="w-4 h-4" />
+                    <Undo2 className="w-5 h-5 group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)] transition-all" />
                 </button>
 
+                <div className="w-px h-8 bg-white/10 mx-3" />
+
                 {/* Window controls */}
-                <div className="flex items-center ml-2">
+                <div className="flex items-center gap-1">
                     <button
                         onClick={() => window.api?.window.minimize()}
-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-white/10 transition-colors"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/10 hover:text-white transition-colors"
                     >
                         <Minus className="w-4 h-4" />
                     </button>
                     <button
                         onClick={() => window.api?.window.maximize()}
-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-white/10 transition-colors"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/10 hover:text-white transition-colors"
                     >
                         <Square className="w-3.5 h-3.5" />
                     </button>
                     <button
                         onClick={() => window.api?.window.close()}
-                        className="w-11 h-8 flex items-center justify-center text-text-muted hover:bg-[var(--accent-red)] hover:text-white transition-colors"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--text-secondary)] hover:bg-[#ff003c] hover:text-white hover:shadow-[0_0_15px_rgba(255,0,60,0.5)] transition-all"
                     >
                         <X className="w-4 h-4" />
                     </button>

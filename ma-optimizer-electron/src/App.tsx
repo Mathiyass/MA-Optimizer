@@ -143,10 +143,12 @@ export default function App() {
     const PageComponent = pages[currentPage] || Dashboard
 
     return (
-        <div className="flex h-screen bg-app-bg overflow-hidden font-sans select-none relative">
+        <div className="flex h-screen bg-transparent overflow-hidden font-sans select-none relative">
             {/* Ambient Aurora Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="aurora-bg"></div>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl">
+                <div className="absolute top-[15%] left-[20%] w-[40vw] h-[40vw] bg-[#00FFDE] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
+                <div className="absolute bottom-[15%] right-[20%] w-[40vw] h-[40vw] bg-[#FF003C] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
+                <div className="aurora-bg opacity-40"></div>
             </div>
 
             <div className="flex h-full w-full relative z-10">

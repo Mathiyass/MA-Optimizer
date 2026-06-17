@@ -28,11 +28,11 @@ export function StatusBar() {
     const logOpen = useAppStore((s) => s.logOpen)
     const setLogOpen = useAppStore((s) => s.setLogOpen)
 
-    const cpuColor = cpu > 80 ? '#ff4444' : cpu > 60 ? '#ffd700' : '#00ff88'
-    const ramColor = ram.percent > 85 ? '#ff4444' : ram.percent > 60 ? '#ffd700' : '#00ff88'
+    const cpuColor = cpu > 80 ? '#FF003C' : cpu > 60 ? '#ffd700' : '#00FFDE'
+    const ramColor = ram.percent > 85 ? '#FF003C' : ram.percent > 60 ? '#ffd700' : '#00FFDE'
 
     return (
-        <footer className="h-8 glass-panel flex items-center px-4 shrink-0 select-none text-[11px] z-20">
+        <footer className="h-8 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-t border-white/5 flex items-center px-4 shrink-0 select-none text-[11px] z-20">
             {/* System stats */}
             <div className="flex items-center gap-5 flex-1">
                 <div className="flex items-center gap-1.5 text-text-muted">
