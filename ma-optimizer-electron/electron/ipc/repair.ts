@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron'
 import * as fs from 'fs'
 import { execSync, spawn, spawnSync } from 'child_process'
 import { sendLog, sendError } from './logger'
-import { escapePS, spawnSyncChecked } from './utils'
+import { escapePS, spawnSyncChecked, execPromise } from './utils'
 
 function streamCommand(cmd: string, args: string[], win: BrowserWindow | null): Promise<string> {
     return new Promise((resolve) => {
@@ -153,7 +153,7 @@ Start-Service msiserver -ErrorAction SilentlyContinue
 // wsreset
 ipcMain.handle('repair:wsreset', async () => {
     try {
-        execSync('wsreset.exe', { timeout: 30000, windowsHide: true })
+        await execPromise('wsreset.exe', { timeout: 30000, windowsHide: true })
         sendLog('[Repair] Windows Store reset complete')
         return true
     } catch { return false }
@@ -212,7 +212,7 @@ ipcMain.handle('repair:chkdsk', async (_, drive: string) => {
 // Memory diagnostic
 ipcMain.handle('repair:memdiag', async () => {
     try {
-        execSync('mdsched.exe', { timeout: 5000, windowsHide: false })
+        await execPromise('mdsched.exe', { timeout: 5000, windowsHide: false })
         sendLog('[Repair] Memory Diagnostic launched')
         return true
     } catch { return false }
