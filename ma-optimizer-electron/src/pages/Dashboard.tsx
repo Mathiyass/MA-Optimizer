@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { AreaChart, Area, ResponsiveContainer } from 'recharts'
 import { motion } from 'framer-motion'
 import { Zap, Shield, Cpu, HardDrive, Wifi, MemoryStick, Crown, Monitor, Clock, Activity, ChevronRight, RefreshCw, Loader2 } from 'lucide-react'
 import { RingGauge } from '../components/ui/RingGauge'
@@ -110,6 +111,16 @@ export function Dashboard() {
     const cleaned = useSettingsStore(s => s.totalCleaned)
     const [osInfo, setOsInfo] = useState<{ platform: string; distro: string; release: string; build: string; hostname: string; arch: string } | null>(null)
     const [uptime, setUptime] = useState(0)
+    const [cpuHistory, setCpuHistory] = useState<{ time: string, load: number }[]>([])
+
+    useEffect(() => {
+        setCpuHistory(prev => {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            const next = [...prev, { time: now, load: cpu }]
+            if (next.length > 60) next.shift()
+            return next
+        })
+    }, [cpu])
 
     // Optimization Flow State
     const [isOptimizing, setIsOptimizing] = useState(false)
@@ -289,108 +300,53 @@ export function Dashboard() {
             </motion.div>
 
             {/* Telemetry and System Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <motion.div variants={item} className={`col-span-1 lg:col-span-2 ${premiumCardClass} hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]`}>
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 rounded-2xl bg-gradient-to-br from-[rgba(0,255,222,0.1)] to-transparent border-[var(--accent-cyan)]/30 shadow-[var(--glow-cyan)] border">
-                            <Monitor className="w-6 h-6 text-[var(--accent-cyan)]" />
-                        </div>
-                        <div>
-                            <h3 className="text-white text-lg font-black tracking-wide">System Specification</h3>
-                            <p className="text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">Hardware Info</p>
-                        </div>
-                    </div>
-                    <div className="space-y-3">
-                        {[
-                            { label: 'Operating System', value: `${osInfo?.distro || 'Windows'} ${osInfo?.release || ''}`, icon: Shield },
-                            { label: 'System Build', value: osInfo?.build || '—', mono: true },
-                            { label: 'Hostname', value: osInfo?.hostname || '—' },
-                            { label: 'Architecture', value: osInfo?.arch || 'x64' },
-                            { label: 'System Uptime', value: formatUptime(uptime), icon: Clock },
-                        ].map((row, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs py-1 border-b border-[var(--border)] last:border-0">
-                                <span className="text-[var(--text-secondary)]">{row.label}</span>
-                                <span className={`text-[var(--text-primary)] font-semibold ${row.mono ? 'font-mono' : ''}`}>{row.value}</span>
-                            </div>
-                        ))}
+            <div className="flex flex-col xl:flex-row gap-6 w-full">
+                {/* Left Flank: Controls */}
+                <motion.div variants={item} className="w-full xl:w-72 flex flex-col gap-4">
+                    <div className={`${premiumCardClass} flex-1 flex flex-col justify-center`}>
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#00FFDE] mb-4">Quick Actions</h3>
+                        <button 
+                            onClick={runOptimizeAll}
+                            disabled={isOptimizing}
+                            className="w-full py-4 bg-[rgba(255,255,255,0.03)] hover:bg-[#00FFDE]/10 border border-white/5 hover:border-[#00FFDE]/50 text-[#00FFDE] text-xs font-bold uppercase tracking-widest rounded-xl transition-all mb-3 disabled:opacity-50">
+                            {isOptimizing ? 'Optimizing...' : 'Optimize System'}
+                        </button>
+                        <button className="w-full py-4 bg-[rgba(255,255,255,0.03)] hover:bg-[#FF003C]/10 border border-white/5 hover:border-[#FF003C]/50 text-[#FF003C] text-xs font-bold uppercase tracking-widest rounded-xl transition-all">
+                            Clear Memory
+                        </button>
                     </div>
                 </motion.div>
 
-                <motion.div variants={item} className={`${premiumCardClass} flex flex-col items-center justify-center group hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]`}>
-                    <RingGauge value={cpu} label="CPU" sublabel={`${cpu.toFixed(0)}% Load`} size={140} />
-                </motion.div>
-
-                <motion.div variants={item} className={`${premiumCardClass} flex flex-col items-center justify-center group hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]`}>
-                    <RingGauge value={ram.percent} label="RAM" sublabel={`${formatBytes(ram.used)} / ${formatBytes(ram.total)}`} size={140} />
-                </motion.div>
-
-                <motion.div variants={item} className={`${premiumCardClass} space-y-8 flex flex-col justify-center hover:shadow-[0_0_30px_rgba(0,255,222,0.1)]`}>
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)] border">
-                                    <HardDrive className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
-                                </div>
-                                <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Disk Storage I/O</span>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-end">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Read</span>
-                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] font-bold">{formatBytes(disk.readPerSec)}/s</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Write</span>
-                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(disk.writePerSec)}/s</span>
-                                </div>
-                            </div>
-                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full border">
-                                <div className="absolute inset-0 flex overflow-visible pointer-events-none">
-                                    <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE]" animate={{ width: `${Math.min((disk.readPerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
-                                    <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE] opacity-40" animate={{ width: `${Math.min((disk.writePerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
-                                </div>
-                                <div className="absolute inset-0 flex overflow-hidden rounded-full pointer-events-none">
-                                    <motion.div className="h-full bg-[#00FFDE]" animate={{ width: `${Math.min((disk.readPerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
-                                    <motion.div className="h-full bg-[#00FFDE] opacity-40" animate={{ width: `${Math.min((disk.writePerSec / (100 * 1024 * 1024)) * 100, 100)}%` }} />
-                                </div>
-                            </div>
-                        </div>
+                {/* Center: Live Wave Chart */}
+                <motion.div variants={item} className={`flex-1 ${premiumCardClass} flex flex-col`}>
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50 mb-6">Core Telemetry</h3>
+                    <div className="flex-1 min-h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={cpuHistory}>
+                                <defs>
+                                    <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#00FFDE" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#00FFDE" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <Area type="monotone" dataKey="load" stroke="#00FFDE" strokeWidth={2} fillOpacity={1} fill="url(#colorCpu)" isAnimationActive={false} />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
+                </motion.div>
 
-                    <div className="h-px bg-[var(--border)] opacity-50" />
-
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-2xl border-[var(--border)] bg-[rgba(0,255,222,0.05)] shadow-[var(--glow-cyan)] border">
-                                    <Wifi className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
-                                </div>
-                                <span className="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Network Traffic</span>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-end">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Download</span>
-                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] font-bold">{formatBytes(net.rxSec)}/s</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">Upload</span>
-                                    <span className="text-sm font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-70 font-bold">{formatBytes(net.txSec)}/s</span>
-                                </div>
-                            </div>
-                            <div className="relative h-1.5 w-full bg-[var(--bg-deep)] border-[var(--border)] rounded-full border">
-                                <div className="absolute inset-0 flex overflow-visible pointer-events-none">
-                                    <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE]" animate={{ width: `${Math.min((net.rxSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
-                                    <motion.div className="h-full bg-transparent shadow-[0_0_15px_#00FFDE] opacity-40" animate={{ width: `${Math.min((net.txSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
-                                </div>
-                                <div className="absolute inset-0 flex overflow-hidden rounded-full pointer-events-none">
-                                    <motion.div className="h-full bg-[#00FFDE]" animate={{ width: `${Math.min((net.rxSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
-                                    <motion.div className="h-full bg-[#00FFDE] opacity-40" animate={{ width: `${Math.min((net.txSec / (50 * 1024 * 1024)) * 100, 100)}%` }} />
-                                </div>
-                            </div>
-                        </div>
+                {/* Right Flank: Telemetry Numbers */}
+                <motion.div variants={item} className="w-full xl:w-80 flex flex-col gap-4">
+                    <div className={`${premiumCardClass} h-full flex flex-col justify-center`}>
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Realtime Load</h3>
+                        <div className="text-5xl font-mono text-[#00FFDE] tracking-tighter" style={{ textShadow: '0 0 20px rgba(0,255,222,0.3)' }}>{cpu.toFixed(1)}<span className="text-2xl opacity-50">%</span></div>
+                        <div className="text-[10px] uppercase tracking-widest text-[#00FFDE]/50 mt-2 font-bold">CPU Load</div>
+                        
+                        <div className="h-px bg-white/10 my-6" />
+                        
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50 mb-4">Memory Usage</h3>
+                        <div className="text-4xl font-mono text-white tracking-tighter">{ram.percent.toFixed(1)}<span className="text-xl opacity-50">%</span></div>
+                        <div className="text-[10px] uppercase tracking-widest text-white/50 mt-2 font-bold">{formatBytes(ram.used)} / {formatBytes(ram.total)}</div>
                     </div>
                 </motion.div>
             </div>
