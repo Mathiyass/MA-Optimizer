@@ -52,7 +52,7 @@ export function Header() {
     }
 
     return (
-        <header className="h-16 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-b border-white/5 flex items-center shrink-0 select-none z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)] relative overflow-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
+        <header className="h-16 glass-shell flex items-center shrink-0 select-none z-20 relative overflow-hidden" style={{ WebkitAppRegion: 'drag' } as any}>
             {/* Ambient Background Glows */}
             <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
             <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[var(--accent-violet)]/5 to-transparent pointer-events-none" />

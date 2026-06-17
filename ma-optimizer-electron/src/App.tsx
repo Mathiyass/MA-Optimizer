@@ -12,22 +12,21 @@ import { useAppStore } from './store/appStore'
 import { useLogStore } from './store/logStore'
 import { useSystemMonitor } from './hooks/useSystemMonitor'
 
-// Lazy loaded pages
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })))
-const MaPowerPlan = lazy(() => import('./pages/MaPowerPlan').then(m => ({ default: m.MaPowerPlan })))
-const Performance = lazy(() => import('./pages/Performance').then(m => ({ default: m.Performance })))
-const Network = lazy(() => import('./pages/Network').then(m => ({ default: m.Network })))
-const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })))
-const Gaming = lazy(() => import('./pages/Gaming').then(m => ({ default: m.Gaming })))
-const Cleaner = lazy(() => import('./pages/Cleaner').then(m => ({ default: m.Cleaner })))
-const Startup = lazy(() => import('./pages/Startup').then(m => ({ default: m.Startup })))
-const AppInstaller = lazy(() => import('./pages/AppInstaller').then(m => ({ default: m.AppInstaller })))
-const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools })))
-const Repair = lazy(() => import('./pages/Repair').then(m => ({ default: m.Repair })))
-const Advanced = lazy(() => import('./pages/Advanced').then(m => ({ default: m.Advanced })))
-const Benchmark = lazy(() => import('./pages/Benchmark').then(m => ({ default: m.Benchmark })))
-const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })))
-const DriverUpdater = lazy(() => import('./pages/DriverUpdater').then(m => ({ default: m.DriverUpdater })))
+import { Dashboard } from './pages/Dashboard'
+import { MaPowerPlan } from './pages/MaPowerPlan'
+import { Performance } from './pages/Performance'
+import { Network } from './pages/Network'
+import { Privacy } from './pages/Privacy'
+import { Gaming } from './pages/Gaming'
+import { Cleaner } from './pages/Cleaner'
+import { Startup } from './pages/Startup'
+import { AppInstaller } from './pages/AppInstaller'
+import { Tools } from './pages/Tools'
+import { Repair } from './pages/Repair'
+import { Advanced } from './pages/Advanced'
+import { Benchmark } from './pages/Benchmark'
+import { About } from './pages/About'
+import { DriverUpdater } from './pages/DriverUpdater'
 
 const pages: Record<string, React.ComponentType> = {
     dashboard: Dashboard,
@@ -143,13 +142,8 @@ export default function App() {
     const PageComponent = pages[currentPage] || Dashboard
 
     return (
-        <div className="flex h-screen bg-transparent overflow-hidden font-sans select-none relative">
-            {/* Ambient Aurora Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl">
-                <div className="absolute top-[15%] left-[20%] w-[40vw] h-[40vw] bg-[#00FFDE] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
-                <div className="absolute bottom-[15%] right-[20%] w-[40vw] h-[40vw] bg-[#FF003C] rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
-                <div className="aurora-bg opacity-40"></div>
-            </div>
+        <div className="h-screen w-screen flex bg-[#0d0f1a] text-white overflow-hidden relative selection:bg-[var(--accent-cyan)] selection:text-black font-sans select-none">
+            <div className="aurora-layer" />
 
             <div className="flex h-full w-full relative z-10">
                 <MemoizedSidebar />
@@ -160,20 +154,9 @@ export default function App() {
                     <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-card-border">
                         <div className="p-6 h-full">
                             <ErrorBoundary resetKey={currentPage}>
-                                <AnimatePresence mode="wait">
-                                    <motion.div
-                                        key={currentPage}
-                                        initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
-                                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                        exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
-                                        transition={{ duration: 0.3, ease: 'easeOut' }}
-                                        className="h-full"
-                                    >
-                                        <Suspense fallback={<LoadingFallback />}>
-                                            <PageComponent />
-                                        </Suspense>
-                                    </motion.div>
-                                </AnimatePresence>
+                                    <div key={currentPage} className="h-full animate-fade-in">
+                                        <PageComponent />
+                                    </div>
                             </ErrorBoundary>
                         </div>
                     </main>

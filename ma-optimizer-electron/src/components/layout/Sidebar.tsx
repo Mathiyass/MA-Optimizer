@@ -33,7 +33,7 @@ export function Sidebar() {
     const setPage = useAppStore((s) => s.setPage)
 
     return (
-        <aside className="w-[280px] h-full bg-[rgba(15,17,26,0.6)] backdrop-blur-3xl border-r border-white/5 flex flex-col overflow-hidden shrink-0 z-20 shadow-[20px_0_50px_rgba(0,0,0,0.5)] relative">
+        <aside className="w-64 h-full flex flex-col magnetic-dock relative z-20 shrink-0">
             {/* Ambient Background Glows */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[var(--accent-cyan)]/5 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[var(--accent-violet)]/5 to-transparent pointer-events-none" />
@@ -68,33 +68,19 @@ export function Sidebar() {
                     const Icon = item.icon
 
                     return (
-                        <motion.button
+                        <button
                             key={item.id}
                             onClick={() => setPage(item.id)}
-                            whileHover={{ x: 4 }}
-                            whileTap={{ scale: 0.98 }}
-                            className={`
-                                relative w-[92%] mx-auto flex items-center gap-4 px-5 py-3.5 rounded-2xl text-left transition-all duration-300 group overflow-hidden
-                                ${active
-                                    ? 'bg-[rgba(255,255,255,0.08)] text-white shadow-[0_0_15px_rgba(0,255,222,0.4)] border border-white/10'
-                                    : 'text-[var(--text-secondary)] border border-transparent hover:bg-white/5 hover:text-white'
-                                }
-                            `}
+                            className={`w-full flex items-center gap-3 px-6 py-3.5 transition-all duration-300 group relative
+                                ${active 
+                                    ? 'text-[#00FFDE] bg-[rgba(0,255,222,0.05)]' 
+                                    : 'text-[var(--text-secondary)] hover:text-white hover:bg-white/5'}`}
                         >
                             {active && (
-                                <>
-                                    <motion.div 
-                                        layoutId="activeTabIndicator"
-                                        className="absolute inset-0 bg-gradient-to-r from-[var(--accent-cyan)]/20 to-transparent opacity-60"
-                                        initial={false}
-                                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                    />
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-3/4 bg-[var(--accent-cyan)] rounded-r-full shadow-[0_0_15px_var(--accent-cyan)]" />
-                                </>
+                                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00FFDE] shadow-[0_0_10px_#00FFDE]" />
                             )}
-
-                            <Icon className={`w-5 h-5 shrink-0 z-10 transition-all duration-300 ${active ? 'text-[var(--accent-cyan)] drop-shadow-[0_0_8px_var(--accent-cyan)] scale-110' : 'opacity-70 group-hover:opacity-100 group-hover:text-[var(--accent-cyan)] group-hover:drop-shadow-[0_0_8px_rgba(0,255,222,0.5)] group-hover:scale-110'}`} />
-                            <span className={`text-[11px] font-bold tracking-[0.2em] uppercase truncate z-10 ${active ? 'text-white' : 'group-hover:text-white'}`}>{item.label}</span>
+                            <Icon className="w-5 h-5 shrink-0 z-10 transition-all duration-300" />
+                            <span className="text-[13px] font-bold uppercase tracking-widest truncate z-10">{item.label}</span>
 
                             {item.badge && (
                                 <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded-2xl border shadow-lg ${isViolet
@@ -104,7 +90,7 @@ export function Sidebar() {
                                     {item.badge}
                                 </span>
                             )}
-                        </motion.button>
+                        </button>
                     )
                 })}
             </nav>
@@ -112,7 +98,7 @@ export function Sidebar() {
             {/* Footer */}
             <div className="px-6 py-6 border-t border-white/5 bg-black/20 backdrop-blur-md relative z-10">
                 <a
-                    href="https://mathiyass.github.io/MAportfolio/"
+                    href="https://maportfolio.mathishaangirasass.workers.dev/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex flex-col items-center justify-center text-[var(--text-dim)] hover:text-[var(--accent-cyan)] transition-colors cursor-pointer group"
