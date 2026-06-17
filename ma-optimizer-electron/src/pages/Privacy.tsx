@@ -127,14 +127,14 @@ export function Privacy() {
                                 <h3 className="text-2xl font-black text-white tracking-wide">Securing Privacy...</h3>
                             </div>
                             
-                            <div className="bg-black/40 border border-white/10 rounded-xl p-4 mb-6 backdrop-blur-md">
+                            <div className="bg-black/40 border border-white/10 rounded-2xl p-4 mb-6 backdrop-blur-md">
                                 <p className="text-[#00FFDE] font-mono text-xs mb-1 uppercase tracking-widest">Executing Payload</p>
                                 <p className="text-white text-sm truncate font-medium">{optCurrent}</p>
                             </div>
 
                             <div className="w-full h-3 bg-black/60 rounded-full overflow-hidden border border-white/5 shadow-inner">
                                 <motion.div
-                                    className="h-full bg-gradient-to-r from-[#00FFDE] to-[#00aaff] shadow-[0_0_15px_rgba(0,255,222,0.5)]"
+                                    className="h-full bg-gradient-to-r from-[#00FFDE] to-[#00FFDE] shadow-[0_0_15px_rgba(0,255,222,0.5)]"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${optProgress}%` }}
                                     transition={{ duration: 0.2 }}

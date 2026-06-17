@@ -90,7 +90,7 @@ export function Gaming() {
                         
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                             {gpuInfo && (
-                                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
                                     <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${isNvidia ? 'bg-[#00FFDE] text-[#00FFDE]' : isAmd ? 'bg-[#FF003C] text-[#FF003C]' : 'bg-[var(--accent-cyan)] text-[var(--accent-cyan)]'}`} />
                                     <span className="text-white font-bold text-sm tracking-wide">{gpuInfo.model}</span>
                                     {gpuInfo.vram > 0 && <span className="text-[var(--text-muted)] text-xs font-black">{gpuInfo.vram} MB VRAM</span>}
@@ -158,7 +158,7 @@ export function Gaming() {
                     <div className="rounded-[2.5rem] p-8 border border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl">
                         <div className="flex justify-between items-start mb-4">
                             <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">Background Apps</span>
-                            <span className="text-xs font-black text-[#FF003C] tracking-wider bg-[#FF003C]/10 px-2 py-1 rounded-md">SUSPENDED</span>
+                            <span className="text-xs font-black text-[#FF003C] tracking-wider bg-[#FF003C]/10 px-2 py-1 rounded-2xl">SUSPENDED</span>
                         </div>
                         <div className="flex items-baseline gap-2 mb-4">
                             <span className="text-4xl font-black text-white">42</span>
