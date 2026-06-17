@@ -4,12 +4,12 @@ import { useAppStore, PageId } from '../../store/appStore'
 import {
     LayoutDashboard, Zap, Crown, Globe, ShieldCheck, Gamepad2,
     Trash2, Rocket, Package, Wrench, HeartPulse, SlidersHorizontal,
-    BarChart3, Info,
+    BarChart3, Info, LucideIcon,
 } from 'lucide-react'
 import logoVideo from '../../../img/logo.mp4'
 
 const navItems: Array<{
-    id: PageId; icon: any; label: string; accent?: string; badge?: string
+    id: PageId; icon: LucideIcon; label: string; accent?: string; badge?: string
 }> = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'performance', icon: Zap, label: 'CPU & Memory' },

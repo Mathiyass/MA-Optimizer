@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, Search, HardDrive, Globe, Recycle, Loader2, FileText, Image, File, Database, ChevronDown, ChevronRight, Check } from 'lucide-react'
+import { Trash2, Search, HardDrive, Globe, Recycle, Loader2, FileText, Image, File, Database, ChevronDown, ChevronRight, Check, LucideIcon } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
 
@@ -11,7 +11,7 @@ function fmt(b: number) {
     return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]
 }
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, LucideIcon> = {
     // Windows Explorer
     recent: File,
     thumbnails: Image,
