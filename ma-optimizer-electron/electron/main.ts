@@ -3,6 +3,10 @@ import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
 
+// 🔧 FIX: Global App Settings (Must be set BEFORE IPC imports to ensure correct paths and features)
+app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
+app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
+
 // IPC handler imports
 import './ipc/admin'
 import './ipc/logger'
@@ -107,9 +111,6 @@ function createWindow() {
         titleBarStyle: 'hidden',
     })
 
-    // 🔧 FIX: Enable V8 Code Cache for faster cold starts
-    app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
-
     mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
         console.error(`Load failure: ${errorCode} - ${errorDescription}`);
     });
@@ -117,10 +118,6 @@ function createWindow() {
     mainWindow.webContents.on('render-process-gone', (_event, details) => {
         console.error(`Renderer process gone: ${details.reason}`);
     });
-
-    if (windowState.isMaximized) {
-        mainWindow.maximize()
-    }
 
     const saveWindowState = () => {
         if (!mainWindow) return
@@ -152,6 +149,9 @@ function createWindow() {
 
     mainWindow.once('ready-to-show', async () => {
         console.log('[Diagnostic] ready-to-show event triggered.');
+        if (windowState.isMaximized) {
+            mainWindow?.maximize()
+        }
         mainWindow?.show()
         const admin = await isAdmin()
         mainWindow?.webContents.send('admin:status', admin)
@@ -307,9 +307,6 @@ try {
 app.whenReady().then(async () => {
     // 🔧 FIX: Add CSP headers via session.defaultSession
     const { session } = require('electron')
-
-    // 🔧 FIX: Suppress noisy Chromium devtools autofill warnings
-    app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
 
     session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
         callback({
