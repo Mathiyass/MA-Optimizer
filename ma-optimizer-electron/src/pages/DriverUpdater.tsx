@@ -152,7 +152,7 @@ export function DriverUpdater() {
                         <button
                             onClick={backupDrivers}
                             disabled={backingUp}
-                            className="px-6 py-3 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-50 border"
+                            className="px-6 py-3 rounded-2xl glass-shell text-white text-xs font-black tracking-widest uppercase hover:bg-[rgba(255,255,255,0.05)] transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {backingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Export Drivers
                         </button>
@@ -207,9 +207,9 @@ export function DriverUpdater() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {drivers.map((d, i) => (
-                            <div key={i} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl p-6 rounded-[1.5rem] hover:border-white/20 transition-all duration-300 shadow-xl group border">
+                            <div key={i} className="card-premium glass-shell p-6 rounded-[1.5rem] hover:border-white/20 transition-all duration-300 shadow-xl group">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 flex items-center justify-center shrink-0 text-[var(--accent-cyan)] group-hover:bg-[var(--accent-cyan)]/10 group-hover:border-[var(--accent-cyan)]/30 transition-colors shadow-inner border">
+                                    <div className="w-12 h-12 rounded-2xl glass-shell flex items-center justify-center shrink-0 text-[var(--accent-cyan)] group-hover:bg-[var(--accent-cyan)]/10 group-hover:border-[var(--accent-cyan)]/30 transition-colors shadow-inner">
                                         {getIconForClass(d.DeviceClass)}
                                     </div>
                                     <div className="min-w-0 flex-1">

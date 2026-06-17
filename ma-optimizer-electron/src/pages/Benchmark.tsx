@@ -11,7 +11,7 @@ function ScoreBar({ label, value, max, color }: { label: string; value: number; 
                 <span className="text-[var(--text-muted)] text-[11px] font-black uppercase tracking-widest">{label}</span>
                 <span className="text-white text-[13px] font-mono font-bold">{value?.toLocaleString()}</span>
             </div>
-            <div className="w-full h-2.5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden shadow-inner relative z-10 border">
+            <div className="w-full h-2.5 glass-shell rounded-full overflow-hidden shadow-inner relative z-10">
                 <motion.div
                     className="h-full rounded-full"
                     style={{ background: color }}
@@ -154,7 +154,7 @@ export function Benchmark() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => runBench(b.id)}
                         disabled={running !== null}
-                        className={`relative overflow-hidden rounded-[2rem] border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 p-8 text-left transition-all duration-300 group shadow-xl ${running === b.id ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_20px_rgba(0,255,222,0.2)] border' : 'border-white/5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)] border'} ${running !== null && running !== b.id ? 'opacity-40 grayscale' : ''}`}
+                        className={`relative overflow-hidden rounded-[2rem] glass-shell p-8 text-left transition-all duration-300 group shadow-xl ${running === b.id ? 'border-[var(--accent-cyan)]/50 shadow-[0_0_20px_rgba(0,255,222,0.2)] border' : 'hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)]'} ${running !== null && running !== b.id ? 'opacity-40 grayscale' : ''}`}
                     >
                         <div className={`absolute -right-10 -bottom-10 w-40 h-40 blur-[50px] rounded-full pointer-events-none bg-gradient-to-br ${b.color} opacity-10 group-hover:opacity-30 transition-opacity duration-500`}></div>
                         <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${b.color} flex items-center justify-center mb-6 shadow-lg relative z-10 border-white/20 border`}>
@@ -181,21 +181,21 @@ export function Benchmark() {
             {/* Detailed results */}
             <div className="grid grid-cols-1 gap-6">
                 {results?.cpu && (
-                    <motion.div variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-8 space-y-6 shadow-xl border">
-                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-3"><Cpu className="w-5 h-5 text-[var(--accent-cyan)] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" /> Processor Micro-Metrics</h3>
+                    <motion.div variants={item} className="card-premium glass-shell rounded-[2rem] p-8 space-y-6 shadow-xl">
+                        <h3 className="text-white text-xs font-black uppercase tracking-widest flex items-center gap-3"><Cpu className="w-5 h-5 text-[var(--accent-cyan)] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" /> Processor Micro-Metrics</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <ScoreBar label="Single-Thread Pipeline" value={results.cpu.singleThread?.score || 0} max={5000} color="#00FFDE" />
                             <ScoreBar label="Multi-Core Matrix" value={results.cpu.multiThread?.score || 0} max={50000} color="#ff003c" />
                         </div>
                         <div className="flex gap-4 pt-4 border-t border-white/5">
-                            <span className="text-[var(--text-dim)] text-[11px] font-black tracking-widest uppercase bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl border">Time: {results.cpu.singleThread?.time}ms</span>
-                            <span className="text-[var(--text-dim)] text-[11px] font-black tracking-widest uppercase bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 px-3 py-1.5 rounded-2xl border">Threads: {results.cpu.multiThread?.cores}</span>
+                            <span className="text-[var(--text-dim)] text-[11px] font-black tracking-widest uppercase glass-shell px-3 py-1.5 rounded-2xl">Time: {results.cpu.singleThread?.time}ms</span>
+                            <span className="text-[var(--text-dim)] text-[11px] font-black tracking-widest uppercase glass-shell px-3 py-1.5 rounded-2xl">Threads: {results.cpu.multiThread?.cores}</span>
                         </div>
                     </motion.div>
                 )}
                 {results?.memory && (
-                    <motion.div variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-8 space-y-6 shadow-xl border">
-                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-3"><MemoryStick className="w-5 h-5 text-[#FF003C] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" /> DIMM Bandwidth Profile</h3>
+                    <motion.div variants={item} className="card-premium glass-shell rounded-[2rem] p-8 space-y-6 shadow-xl">
+                        <h3 className="text-white text-xs font-black uppercase tracking-widest flex items-center gap-3"><MemoryStick className="w-5 h-5 text-[#FF003C] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" /> DIMM Bandwidth Profile</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <ScoreBar label="Sequential Read (MB/s)" value={results.memory.sequentialRead?.mbps || 0} max={100000} color="#00FFDE" />
                             <ScoreBar label="Sequential Write (MB/s)" value={results.memory.sequentialWrite?.mbps || 0} max={80000} color="#ff003c" />
@@ -204,8 +204,8 @@ export function Benchmark() {
                     </motion.div>
                 )}
                 {results?.disk && (
-                    <motion.div variants={item} className="card-premium border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl rounded-[2rem] p-8 space-y-6 shadow-xl border">
-                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-3"><HardDrive className="w-5 h-5 text-[#FF003C] drop-shadow-[0_0_8px_rgba(255,0,60,0.5)]" /> NVMe / Storage Analytics</h3>
+                    <motion.div variants={item} className="card-premium glass-shell rounded-[2rem] p-8 space-y-6 shadow-xl">
+                        <h3 className="text-white text-xs font-black uppercase tracking-widest flex items-center gap-3"><HardDrive className="w-5 h-5 text-[#FF003C] drop-shadow-[0_0_8px_rgba(255,0,60,0.5)]" /> NVMe / Storage Analytics</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <ScoreBar label="Sequential Read (MB/s)" value={results.disk.sequentialRead?.mbps || 0} max={7000} color="#00FFDE" />
                             <ScoreBar label="Sequential Write (MB/s)" value={results.disk.sequentialWrite?.mbps || 0} max={5000} color="#ff003c" />
