@@ -114,14 +114,22 @@ ipcMain.handle('network:ping', async (_, host: string) => {
 
 ipcMain.handle('network:detectMtu', async () => {
     try {
+        let low = 576
+        let high = 1500
         let mtu = 1500
-        for (let size = 1500; size >= 576; size -= 10) {
-            const result = await runCmd('ping', ['-f', '-l', String(size - 28), '-n', '1', '8.8.8.8'], 5000)
+
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2)
+            const result = await runCmd('ping', ['-f', '-l', String(mid - 28), '-n', '1', '8.8.8.8'], 5000)
+
             if (!result.toLowerCase().includes('fragmented') && !result.toLowerCase().includes('too large')) {
-                mtu = size
-                break
+                mtu = mid
+                low = mid + 1
+            } else {
+                high = mid - 1
             }
         }
+
         sendLog(`[Network] Detected optimal MTU: ${mtu}`)
         return mtu
     } catch {
