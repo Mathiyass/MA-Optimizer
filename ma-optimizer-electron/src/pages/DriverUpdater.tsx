@@ -116,7 +116,7 @@ export function DriverUpdater() {
     return (
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium Driver Updater Hero Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 glass-shell shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                 <div className="absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[var(--accent-cyan)]/20 animate-pulse" style={{ animationDuration: '4s' }}></div>
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 blur-[100px] rounded-full pointer-events-none bg-[#00FFDE]/20 animate-pulse" style={{ animationDuration: '6s' }}></div>
 
@@ -163,7 +163,7 @@ export function DriverUpdater() {
             {/* Updates Section */}
             {updates.length > 0 && (
                 <div className="space-y-4 mt-8">
-                    <h3 className="text-sm font-black text-[#FF003C] uppercase tracking-[0.2em] flex items-center gap-3 drop-shadow-[0_0_8px_rgba(255,0,60,0.5)]">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[#FF003C] flex items-center gap-3 drop-shadow-[0_0_8px_rgba(255,0,60,0.5)]">
                         <ShieldAlert className="w-5 h-5" /> Pending Updates ({updates.length})
                     </h3>
                     <div className="grid grid-cols-1 gap-4">
@@ -199,7 +199,7 @@ export function DriverUpdater() {
 
             {/* Installed Drivers Section */}
             <div className="space-y-6 mt-12">
-                <h3 className="text-sm font-black text-[var(--text-muted)] uppercase tracking-[0.2em] px-2">Hardware Device Tree</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent-cyan)] flex items-center gap-3 drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]">Hardware Device Tree</h3>
                 {loading ? (
                     <div className="flex justify-center py-16">
                         <Loader2 className="w-10 h-10 animate-spin text-[var(--accent-cyan)]" />

@@ -185,7 +185,7 @@ export function AppInstaller() {
         <div className="space-y-8 max-w-[90rem] mx-auto w-full pb-10">
             {/* Ultra-Premium AppInstaller Hero Section */}
             <motion.div
-                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 border bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                className="relative overflow-hidden rounded-[2.5rem] p-12 transition-all duration-700 glass-shell shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
@@ -225,7 +225,7 @@ export function AppInstaller() {
                             </motion.button>
                         )}
                         <button onClick={upgradeAll}
-                            className="px-8 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-sm text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-3 font-black tracking-widest uppercase w-full border">
+                            className="px-8 py-4 glass-shell rounded-2xl text-sm text-white hover:text-[var(--accent-cyan)] hover:border-[var(--accent-cyan)]/50 hover:bg-[rgba(0,255,222,0.1)] transition-all flex items-center justify-center gap-3 font-black tracking-widest uppercase w-full">
                             <ArrowUpCircle className="w-5 h-5" /> Update All
                         </button>
                     </div>
@@ -239,7 +239,7 @@ export function AppInstaller() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search winget packages..."
-                    className="w-full pl-12 pr-12 py-4 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-2xl text-[15px] font-medium text-white placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_20px_rgba(0,255,222,0.2)] transition-all border"
+                    className="w-full pl-12 pr-12 py-4 glass-shell rounded-2xl text-[15px] font-medium text-white placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-cyan)] focus:shadow-[0_0_20px_rgba(0,255,222,0.2)] transition-all"
                 />
                 {searching && <Loader2 className="absolute right-12 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-[var(--accent-cyan)]" />}
                 {search && (
