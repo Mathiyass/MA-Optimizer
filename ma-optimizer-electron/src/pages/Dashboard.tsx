@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { motion } from 'framer-motion'
-import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2 } from 'lucide-react'
+import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2, Monitor } from 'lucide-react'
 import { useSystemStore } from '../store/systemStore'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
@@ -82,8 +82,24 @@ export function Dashboard() {
     const addNotification = useAppStore(s => s.addNotification)
     const applied = useSettingsStore(s => Object.values(s.appliedTweaks).filter(Boolean).length)
     const [telemetryHistory, setTelemetryHistory] = useState<{ time: string, cpu: number, ram: number, diskR: number, diskW: number, netRx: number, netTx: number }[]>([])
+    const [osInfo, setOsInfo] = useState<any>(null)
+    const [uptime, setUptime] = useState(0)
 
     useEffect(() => {
+        // Fetch full info on mount
+        window.api?.system.getFullInfo().then((info: any) => {
+            if (info) {
+                setOsInfo(info.os)
+                setUptime(info.uptime || 0)
+            }
+        }).catch((e: any) => console.error(e))
+
+        // Uptime counter
+        const uptimeInterval = setInterval(() => {
+            setUptime(prev => prev + 1)
+        }, 1000)
+
+        // Telemetry
         const interval = setInterval(() => {
             setTelemetryHistory(prev => {
                 const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -101,8 +117,17 @@ export function Dashboard() {
                 return next
             })
         }, 1000)
-        return () => clearInterval(interval)
+        return () => {
+            clearInterval(interval)
+            clearInterval(uptimeInterval)
+        }
     }, [])
+
+    function formatUptime(seconds: number) {
+        const h = Math.floor(seconds / 3600)
+        const m = Math.floor((seconds % 3600) / 60)
+        return `${h}h ${m}m`
+    }
 
     // Optimization Flow State
     const [isOptimizing, setIsOptimizing] = useState(false)
@@ -422,6 +447,45 @@ export function Dashboard() {
                             <div className="text-xl font-mono text-[#FF003C] tracking-tighter">{formatBytes(disk.writePerSec)}/s</div>
                         </div>
                     </div>
+                </motion.div>
+
+                {/* System Specification */}
+                <motion.div variants={item} className={`flex-1 ${premiumCardClass} flex flex-col`}>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[rgba(0,255,222,0.1)] flex items-center justify-center border border-[rgba(0,255,222,0.2)]">
+                            <Monitor className="w-5 h-5 text-[var(--accent-cyan)]" />
+                        </div>
+                        <h3 className="text-[13px] font-black text-white tracking-wide">System Specification</h3>
+                    </div>
+
+                    {osInfo ? (
+                        <div className="flex-1 flex flex-col justify-between">
+                            <div className="flex justify-between items-start border-b border-white/5 pb-4">
+                                <div className="text-[12px] text-white/50">Operating System</div>
+                                <div className="text-[12px] text-white font-bold text-right leading-relaxed">{osInfo.distro} <br/> {osInfo.release}</div>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                                <div className="text-[12px] text-white/50">System Build</div>
+                                <div className="text-[12px] text-white font-bold font-mono">{osInfo.build}</div>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                                <div className="text-[12px] text-white/50">Hostname</div>
+                                <div className="text-[12px] text-white font-bold">{osInfo.hostname}</div>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                                <div className="text-[12px] text-white/50">Architecture</div>
+                                <div className="text-[12px] text-white font-bold">{osInfo.arch}</div>
+                            </div>
+                            <div className="flex justify-between items-center pb-2">
+                                <div className="text-[12px] text-white/50">System Uptime</div>
+                                <div className="text-[12px] text-white font-bold font-mono">{formatUptime(uptime)}</div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-[var(--accent-cyan)] opacity-50" />
+                        </div>
+                    )}
                 </motion.div>
             </div>
 
