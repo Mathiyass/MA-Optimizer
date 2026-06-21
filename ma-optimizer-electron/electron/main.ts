@@ -4,8 +4,6 @@ import * as fs from 'fs'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-// 🔧 FIX: app.setPath('userData', ...) and app.commandLine.appendSwitch must be called before any IPC handler imports
-// to ensure that custom user data paths (used by logger) and Chromium switches are applied correctly.
 app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
 app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
 
