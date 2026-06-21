@@ -27,10 +27,6 @@ export interface WindowApi {
         delete: () => Promise<boolean>
     }
     system: {
-        getCpuUsage: () => Promise<{ currentLoad: number; cpus: number[] }>
-        getRamUsage: () => Promise<{ total: number; used: number; free: number; usedPercent: number; swapTotal: number; swapUsed: number }>
-        getDiskIO: () => Promise<{ readPerSec: number; writePerSec: number; readBytesPerSec: number; writeBytesPerSec: number }>
-        getNetworkSpeed: () => Promise<{ rxSec: number; txSec: number; rxBytes: number; txBytes: number }>
         getFullInfo: () => Promise<any>
         getProcesses: () => Promise<any[]>
         killProcess: (pid: number) => Promise<boolean>

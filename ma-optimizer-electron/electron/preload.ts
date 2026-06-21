@@ -67,10 +67,6 @@ contextBridge.exposeInMainWorld('api', {
         delete: () => ipcRenderer.invoke('powerplan:delete'),
     },
     system: {
-        getCpuUsage: () => ipcRenderer.invoke('system:cpuUsage'),
-        getRamUsage: () => ipcRenderer.invoke('system:ramUsage'),
-        getDiskIO: () => ipcRenderer.invoke('system:diskIO'),
-        getNetworkSpeed: () => ipcRenderer.invoke('system:networkSpeed'),
         getFullInfo: () => ipcRenderer.invoke('system:fullInfo'),
         getProcesses: () => ipcRenderer.invoke('system:processes'),
         killProcess: (pid: number) => {

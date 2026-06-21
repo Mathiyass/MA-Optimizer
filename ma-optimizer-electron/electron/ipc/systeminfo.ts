@@ -9,30 +9,6 @@ function getSi() {
     return si
 }
 
-ipcMain.handle('system:cpuUsage', async () => {
-    try {
-        const load = await getSi().currentLoad()
-        return {
-            currentLoad: Math.round(load.currentLoad * 10) / 10,
-            cpus: load.cpus?.map((c: any) => Math.round(c.load * 10) / 10) || [],
-        }
-    } catch { return { currentLoad: 0, cpus: [] } }
-})
-
-ipcMain.handle('system:ramUsage', async () => {
-    try {
-        const mem = await getSi().mem()
-        return {
-            total: mem.total,
-            used: mem.active,
-            free: mem.available,
-            usedPercent: Math.round((mem.active / mem.total) * 1000) / 10,
-            swapTotal: mem.swaptotal,
-            swapUsed: mem.swapused,
-        }
-    } catch { return { total: 0, used: 0, free: 0, usedPercent: 0, swapTotal: 0, swapUsed: 0 } }
-})
-
 let diskIOMetrics = { readBytesPerSec: 0, writeBytesPerSec: 0 }
 
 function startTypeperfDiskIO() {
@@ -61,51 +37,6 @@ function startTypeperfDiskIO() {
 }
 
 startTypeperfDiskIO()
-
-// Use fsStats / Typeperf for reliable byte-rate data on Windows (disksIO often returns 0)
-ipcMain.handle('system:diskIO', async () => {
-    try {
-        if (process.platform === 'win32') {
-            return {
-                readPerSec: diskIOMetrics.readBytesPerSec,
-                writePerSec: diskIOMetrics.writeBytesPerSec,
-                readBytesPerSec: diskIOMetrics.readBytesPerSec,
-                writeBytesPerSec: diskIOMetrics.writeBytesPerSec,
-            }
-        }
-
-        const fs = await getSi().fsStats()
-        if (fs && (fs.rx_sec !== null || fs.wx_sec !== null)) {
-            return {
-                readPerSec: fs.rx_sec || 0,
-                writePerSec: fs.wx_sec || 0,
-                readBytesPerSec: fs.rx_sec || 0,
-                writeBytesPerSec: fs.wx_sec || 0,
-            }
-        }
-        // Fallback to disksIO
-        const io = await getSi().disksIO()
-        return {
-            readPerSec: io?.rIO_sec || 0,
-            writePerSec: io?.wIO_sec || 0,
-            readBytesPerSec: io?.rIO_sec || 0,
-            writeBytesPerSec: io?.wIO_sec || 0,
-        }
-    } catch { return { readPerSec: 0, writePerSec: 0, readBytesPerSec: 0, writeBytesPerSec: 0 } }
-})
-
-ipcMain.handle('system:networkSpeed', async () => {
-    try {
-        const net = await getSi().networkStats()
-        const primary = net[0] || {}
-        return {
-            rxSec: primary.rx_sec || 0,
-            txSec: primary.tx_sec || 0,
-            rxBytes: primary.rx_bytes || 0,
-            txBytes: primary.tx_bytes || 0,
-        }
-    } catch { return { rxSec: 0, txSec: 0, rxBytes: 0, txBytes: 0 } }
-})
 
 ipcMain.handle('system:fullInfo', async () => {
     try {
