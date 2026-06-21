@@ -31,7 +31,7 @@ const { spawnPromise } = require('./ipc/utils')
 
 // 🔧 FIX: Added global exception handler, styled native dialog cannot take CSS colors but we make it clear it's an error.
 process.on('uncaughtException', (error) => {
-    dialog.showErrorBox('Critical System Error', `MA-Optimizer encountered a critical error.\n\nPlease restart the application.\nError: ${error.message}\n\n${error.stack}`)
+    dialog.showMessageBoxSync({ type: 'error', title: 'Critical System Error', message: 'MA-Optimizer encountered a critical error.\n\nPlease restart the application.', detail: `Error: ${error.message}\n\n${error.stack}` })
     process.exit(1)
 })
 
@@ -75,7 +75,7 @@ async function ensureAdmin() {
             // Relaunches the app requesting admin elevation via UAC
             execSync(`powershell -Command "Start-Process '${exePath}' -Verb RunAs"`, { windowsHide: true })
         } catch (e: any) {
-            dialog.showErrorBox('Elevation Required', 'This application requires Administrator privileges to optimize your system. It could not elevate automatically.')
+            dialog.showMessageBoxSync({ type: 'error', title: 'Elevation Required', message: 'This application requires Administrator privileges to optimize your system.', detail: 'It could not elevate automatically.' })
         }
         app.quit()
         process.exit(0)
