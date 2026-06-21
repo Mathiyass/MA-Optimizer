@@ -3,13 +3,21 @@ import { contextBridge, ipcRenderer } from 'electron'
 // 🔧 FIX: Strict Input Validation Helper
 // Validates types of arguments before hitting IPC to prevent injection, DoS, and unexpected behavior
 function validate(args: any[], types: string[]) {
+    if (args.length !== types.length) {
+        throw new Error('Argument length mismatch');
+    }
     for (let i = 0; i < types.length; i++) {
-        const type = types[i]
-        const arg = args[i]
+        const type = types[i];
+        const arg = args[i];
+
         if (type === 'array') {
-            if (!Array.isArray(arg)) throw new Error(`Argument ${i} must be an array`)
+            if (!Array.isArray(arg)) throw new Error(`Argument ${i} must be an array`);
+        } else if (type === 'object') {
+            if (arg === null || typeof arg !== 'object' || Array.isArray(arg)) {
+                throw new Error(`Argument ${i} must be a non-null object`);
+            }
         } else if (typeof arg !== type) {
-            throw new Error(`Argument ${i} must be of type ${type}`)
+            throw new Error(`Argument ${i} must be of type ${type}`);
         }
     }
 }
