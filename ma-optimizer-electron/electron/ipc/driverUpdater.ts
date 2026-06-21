@@ -265,9 +265,7 @@ ipcMain.handle('drivers:installUpdate', async (event, updateId: string) => {
                     const line = lines[i];
                     try {
                         const data = JSON.parse(line)
-                        if (data.type === 'debug') {
-                            console.log(`[DriverUpdate Script Debug] ${data.step}: ${data.message}`)
-                        } else if (data.type === 'progress') {
+                        if (data.type === 'progress') {
                             win?.webContents.send('log:progress', { percent: data.percent, message: data.message, stage: data.stage })
                         } else if (data.type === 'result') {
                             finalResult = data.success
