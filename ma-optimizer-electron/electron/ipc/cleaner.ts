@@ -378,9 +378,11 @@ ipcMain.handle('cleaner:cleanRegistry', async (_, items: any[]) => {
     let cleaned = 0
     for (const item of items) {
         try {
-            const ps = `Remove-Item '${escapePS(item.Path)}' -Recurse -Force -ErrorAction SilentlyContinue`
-            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            const script = `Remove-Item -LiteralPath '${escapePS(item.Path)}' -Recurse -Force -ErrorAction SilentlyContinue`
+            const b64 = Buffer.from(script, 'utf16le').toString('base64')
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-EncodedCommand', b64], {
                 timeout: 10000,
+                windowsHide: true
             })
             cleaned++
         } catch { }
