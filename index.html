@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     
     <!-- Primary SEO Meta Tags -->
     <title>MA-Optimizer — The Ultimate Windows System Performance Suite</title>
@@ -16,343 +16,493 @@
     <meta property="og:description" content="Optimize Windows performance, latency, and system resources. Download MA-Optimizer v10.0.0 NSIS installer or portable edition instantly.">
     <meta property="og:image" content="Visual Tour img/1 (1).png">
 
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS & Frameworks -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Fira+Code:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
-    <!-- Custom Style System -->
-    <link rel="stylesheet" href="style.css">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "#05060b",
+                        "surface": "#0a0c14",
+                        "surface-card": "rgba(13, 15, 28, 0.6)",
+                        "primary-container": "#00f0ff",
+                        "secondary": "#a855f7",
+                        "on-surface": "#f3f4f6",
+                        "on-surface-variant": "#9ca3af"
+                    },
+                    spacing: {
+                        "container-padding": "32px",
+                        "lg": "24px",
+                        "xl": "40px"
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #05060b;
+            color: #f3f4f6;
+            scroll-behavior: smooth;
+            font-family: 'Outfit', sans-serif;
+        }
+        .glass-card {
+            background: rgba(13, 15, 28, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .neon-glow-primary {
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+        .neon-glow-violet {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
+        }
+        .text-glow-cyan {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        .text-glow-violet {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(7, 8, 13, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+        .header-scrolled {
+            background: rgba(5, 6, 11, 0.8) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Shimmer and Float Animations */
+        .animated-hero-title {
+            background: linear-gradient(135deg, #fff 40%, #00f0ff 80%, #a855f7 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-pan 5s ease infinite;
+        }
+        @keyframes gradient-pan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .floating-mockup {
+            animation: float 6s ease-in-out infinite;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotateX(10deg); }
+            50% { transform: translateY(-10px) rotateX(10deg); }
+            100% { transform: translateY(0) rotateX(10deg); }
+        }
+        .floating-mockup:hover {
+            transform: rotateX(0deg) translateY(-8px) !important;
+            box-shadow: 0 35px 60px -12px rgba(0, 240, 255, 0.2);
+            animation-play-state: paused;
+        }
+        
+        /* Visual Tour Slider */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: none;
+        }
+        .slide.active {
+            opacity: 1;
+            display: block;
+        }
+    </style>
 </head>
-<body>
+<body class="overflow-x-hidden">
 
-    <!-- Floating Navigation Bar -->
-    <header id="main-header">
-        <div class="container nav-container">
-            <a href="#" class="logo">
-                <div class="logo-icon">M</div>
-                <span class="logo-text">MA-Optimizer</span>
+    <!-- Top Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-300 h-20 flex items-center" id="navbar">
+        <div class="flex justify-between items-center w-full px-container-padding max-w-[1440px] mx-auto">
+            <a class="text-xl font-bold tracking-tighter text-on-surface flex items-center gap-3 no-underline" href="#">
+                <span class="material-symbols-outlined text-primary-container font-black" style="font-variation-settings: 'FILL' 1;">terminal</span>
+                MA-Optimizer
             </a>
             
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#tour">Visual Gallery</a></li>
-                <li><a href="#metrics">Benchmarks</a></li>
-                <li><a href="#download">Downloads</a></li>
-            </ul>
+            <div class="hidden md:flex items-center gap-10">
+                <a class="text-on-surface-variant hover:text-primary-container transition-colors text-sm font-semibold no-underline" href="#features">Features</a>
+                <a class="text-on-surface-variant hover:text-primary-container transition-colors text-sm font-semibold no-underline" href="#tour">Visual Gallery</a>
+                <a class="text-on-surface-variant hover:text-primary-container transition-colors text-sm font-semibold no-underline" href="#metrics">Benchmarks</a>
+                <a class="text-on-surface-variant hover:text-primary-container transition-colors text-sm font-semibold no-underline" href="#download">Downloads</a>
+            </div>
 
-            <div class="nav-cta">
-                <a href="https://github.com/Mathiyass/MA-Optimizer" class="btn btn-secondary" id="github-stars-link">
+            <div class="flex items-center gap-md">
+                <a href="https://github.com/Mathiyass/MA-Optimizer" target="_blank" class="border border-white/10 bg-white/5 hover:bg-white/10 text-on-surface text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition-all no-underline">
                     <i class="fab fa-github"></i> <span id="github-stars">GitHub</span>
                 </a>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-badge">
-                <i class="fas fa-crown"></i> PRO EDITION V10.0.0
-            </div>
+    <main class="pt-20">
+        <!-- Hero Section -->
+        <section class="relative min-h-[900px] flex flex-col items-center justify-center px-container-padding overflow-hidden">
+            <!-- Atmospheric Glows -->
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/5 rounded-full blur-[100px]"></div>
+            <div class="absolute top-1/2 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-[100px]"></div>
             
-            <h1 class="hero-title">The Ultimate Windows Performance Suite</h1>
-            
-            <p class="hero-subtitle">
-                MA-Optimizer wraps hundreds of deep-level registry modifications, service configurations, and active telemetry cleanups into a beautiful glassmorphic dashboard.
-            </p>
-
-            <div class="hero-actions">
-                <a href="#download" class="btn btn-primary">
-                    <i class="fas fa-download"></i> Get MA-Optimizer
-                </a>
-                <a href="#tour" class="btn btn-secondary">
-                    <i class="fas fa-images"></i> Explore Interface
-                </a>
-            </div>
-
-            <!-- Dashboard Mockup Frame -->
-            <div class="mockup-wrapper">
-                <div class="mockup-window glass-panel">
-                    <div class="window-header">
-                        <div class="window-dots">
-                            <span class="window-dot dot-red"></span>
-                            <span class="window-dot dot-yellow"></span>
-                            <span class="window-dot dot-green"></span>
-                        </div>
-                        <span class="window-title">MA-Optimizer Dashboard (v10.0.0)</span>
-                    </div>
-                    <img src="Visual Tour img/1 (1).png" alt="MA-Optimizer Dashboard Preview" class="mockup-img">
+            <div class="text-center z-10 max-w-4xl mx-auto mt-12">
+                <div class="inline-flex items-center gap-2 bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[#00f0ff] px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-6 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+                    <span class="material-symbols-outlined text-xs">workspace_premium</span> Pro Edition v10.0.0
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bento Grid Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Engineered for Extreme Optimizations</h2>
-                <p class="section-subtitle">
-                    A comprehensive suite of optimization tabs structured to unlock maximum frames and minimize hardware lag.
+                
+                <h1 class="text-5xl md:text-7xl font-black leading-[1.05] tracking-tight mb-6 animated-hero-title">
+                    Peak Performance.<br/>
+                    Zero Compromise.
+                </h1>
+                
+                <p class="text-base md:text-xl text-on-surface-variant mb-10 max-w-2xl mx-auto font-light">
+                    The ultimate system optimization engine for Windows. Unlocks true hardware capacity through direct registry calibrations, non-blocking asynchronous execution, and real-time telemetry analytics.
                 </p>
-            </div>
-
-            <div class="bento-grid">
-                <!-- Dashboard Feature -->
-                <div class="bento-card glass-panel">
-                    <div class="card-icon"><i class="fas fa-chart-line"></i></div>
-                    <div>
-                        <h3 class="card-title">Live Hardware Monitor</h3>
-                        <p class="card-desc">Real-time system CPU, memory, and network throughput charts running with zero resource overhead.</p>
-                    </div>
-                </div>
-
-                <!-- RAM Optimizer -->
-                <div class="bento-card glass-panel bento-lg">
-                    <div class="card-icon"><i class="fas fa-memory"></i></div>
-                    <div>
-                        <h3 class="card-title">Active RAM Cache Purging</h3>
-                        <p class="card-desc"> Purge system-wide standby caches and minimize active process working sets dynamically. The memory optimization engine runs completely asynchronously on all active programs without blocking the user interface.</p>
-                    </div>
-                </div>
-
-                <!-- Power Plan -->
-                <div class="bento-card glass-panel bento-lg">
-                    <div class="card-icon"><i class="fas fa-bolt"></i></div>
-                    <div>
-                        <h3 class="card-title">Ultimate Power Presets</h3>
-                        <p class="card-desc">Inject and apply our custom power plan designed for eSports gaming and high sustained workloads. Applies key registry parameters concurrently under 2 seconds.</p>
-                    </div>
-                </div>
-
-                <!-- Gaming Mode -->
-                <div class="bento-card glass-panel">
-                    <div class="card-icon"><i class="fas fa-gamepad"></i></div>
-                    <div>
-                        <h3 class="card-title">Lag Reduction presets</h3>
-                        <p class="card-desc">Optimize input latency, disable background notifications, and unlock FPS limits in a single toggle click.</p>
-                    </div>
-                </div>
-
-                <!-- DNS Benchmarks -->
-                <div class="bento-card glass-panel">
-                    <div class="card-icon"><i class="fas fa-globe"></i></div>
-                    <div>
-                        <h3 class="card-title">DNS Latency Benchmarks</h3>
-                        <p class="card-desc">Benchmark resolver speeds concurrently against presets (Cloudflare, Google, OpenDNS) and apply the fastest resolver instantly.</p>
-                    </div>
-                </div>
-
-                <!-- Cleaner -->
-                <div class="bento-card glass-panel">
-                    <div class="card-icon"><i class="fas fa-broom"></i></div>
-                    <div>
-                        <h3 class="card-title">Junk & Registry Purger</h3>
-                        <p class="card-desc">Batches registry key cleans and file removals into single PowerShell commands, reducing execution time from minutes to under 1 second.</p>
-                    </div>
-                </div>
-
-                <!-- Winget App installer -->
-                <div class="bento-card glass-panel">
-                    <div class="card-icon"><i class="fas fa-box-open"></i></div>
-                    <div>
-                        <h3 class="card-title">Winget App Installer</h3>
-                        <p class="card-desc">Download and configure developer tools, browsers, and utilities in batches using Microsoft Winget integration.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Visual Tour Carousel Gallery -->
-    <section class="tour-section" id="tour">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Visual Tour</h2>
-                <p class="section-subtitle">Take a walkthrough of the custom glassmorphism pages packed within MA-Optimizer.</p>
-            </div>
-
-            <div class="slider-container">
-                <div class="slider-view">
-                    <!-- Slides (15 screenshots) -->
-                    <div class="slide active">
-                        <img src="Visual Tour img/1 (1).png" alt="Dashboard Dashboard Panel">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (2).png" alt="Custom Power Plan Screen">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (3).png" alt="Performance Controls Panel">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (4).png" alt="CPU Optimization Settings">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (5).png" alt="Memory RAM Purger Controls">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (6).png" alt="Windows Services Manager">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (7).png" alt="Dedicated eSports Gaming Preset Mode">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (8).png" alt="Network Benchmarks Tab">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (9).png" alt="DNS Benchmarking Latency Tool">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (10).png" alt="System Junk Cleaner Tab">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (11).png" alt="Boot and Startup App Manager">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (12).png" alt="Built-in Windows Administration Tools">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (13).png" alt="Windows File Integrity and Repair Engine">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (14).png" alt="App Center and Winget Batch Installer">
-                    </div>
-                    <div class="slide">
-                        <img src="Visual Tour img/1 (15).png" alt="System Hardware Benchmark Screen">
-                    </div>
-                </div>
-
-                <div class="slider-nav">
-                    <button class="slider-btn" id="slider-prev" aria-label="Previous Slide">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="slider-dots"></div>
-                    <button class="slider-btn" id="slider-next" aria-label="Next Slide">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Metrics and Benchmarks Comparison -->
-    <section class="metrics-section" id="metrics">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Performance Benchmark Comparison</h2>
-                <p class="section-subtitle">Real-world benchmarking comparisons between legacy system states and optimized v10.0.0 configuration.</p>
-            </div>
-
-            <div class="glass-panel" style="overflow-x: auto;">
-                <table class="metrics-table">
-                    <thead>
-                        <tr>
-                            <th>Optimization Category</th>
-                            <th>Original State</th>
-                            <th>MA-Optimizer v10.0.0</th>
-                            <th>Net Gain</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Idle CPU Overhead</strong></td>
-                            <td><span class="badge-metric badge-original">12% - 25% WMI load</span></td>
-                            <td><span class="badge-metric badge-optimized">&lt; 0.5% polling load</span></td>
-                            <td>96% CPU Usage Reduction</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Interface Responsiveness</strong></td>
-                            <td>Thread blocks on sync calls</td>
-                            <td><span class="badge-metric badge-optimized">100% Async UI Thread</span></td>
-                            <td>Lag-free page navigation</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Custom Power Plan creation</strong></td>
-                            <td>~15 seconds (sequential)</td>
-                            <td><span class="badge-metric badge-optimized">~2 seconds (concurrent)</span></td>
-                            <td>86% Speed Enhancement</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Registry Cleaner execution</strong></td>
-                            <td>~30 seconds (50 sequential loops)</td>
-                            <td><span class="badge-metric badge-optimized">&lt; 1 second (1 script batch)</span></td>
-                            <td>97% Clean Execution Gain</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Download & Installation Center -->
-    <section class="tour-section" id="download" style="text-align: center;">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Download Center</h2>
-                <p class="section-subtitle">Get the latest performance build of MA-Optimizer for Windows 10 & 11.</p>
-            </div>
-
-            <div class="bento-grid" style="max-width: 800px; margin: 0 auto;">
-                <!-- Installer Download -->
-                <div class="bento-card glass-panel" style="padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center;">
-                    <div class="card-icon" style="color: var(--accent-cyan); font-size: 2.5rem; margin-bottom: 16px;"><i class="fas fa-file-signature"></i></div>
-                    <h3 class="card-title">Setup Installer</h3>
-                    <p class="card-desc" style="text-align: center; font-size: 0.9rem;">Provides a full NSIS installer setup wizard that adds shortcuts and configures directories.</p>
-                    <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.Setup.10.0.0.exe" class="btn btn-primary" style="width: 100%;">
-                        <i class="fas fa-download"></i> Download Installer
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#download" class="bg-primary-container hover:bg-opacity-90 text-background px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(0,240,255,0.25)] hover:shadow-[0_4px_30px_rgba(0,240,255,0.4)] no-underline">
+                        <span class="material-symbols-outlined font-black">download</span> Download Setup
                     </a>
-                </div>
-
-                <!-- Portable Download -->
-                <div class="bento-card glass-panel" style="padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center;">
-                    <div class="card-icon" style="color: var(--accent-violet); font-size: 2.5rem; margin-bottom: 16px;"><i class="fas fa-folder-minus"></i></div>
-                    <h3 class="card-title">Portable Edition</h3>
-                    <p class="card-desc" style="text-align: center; font-size: 0.9rem;">Standalone executable with zero installation needed. Perfect for USB drives and quick fixes.</p>
-                    <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.10.0.0.exe" class="btn btn-secondary" style="width: 100%; border-color: var(--accent-violet);">
-                        <i class="fas fa-cloud-download-alt" style="color: var(--accent-violet);"></i> Download Portable
+                    <a href="#tour" class="border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-on-surface px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all no-underline">
+                        <span class="material-symbols-outlined">menu_book</span> Explore UI Tour
                     </a>
                 </div>
             </div>
 
-            <!-- PowerShell Command Block -->
-            <div style="margin-top: 60px;">
-                <h3 style="margin-bottom: 12px; font-size: 1.25rem;">One-Click PowerShell Command Installation</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Paste this command into administrative PowerShell to download and launch the app immediately:</p>
-                <div class="cli-box">
-                    <span class="cli-code" id="cli-code-text">irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" | iex</span>
-                    <button class="cli-copy" id="copy-btn" aria-label="Copy code to clipboard">
-                        <i class="far fa-copy"></i> Copy
+            <!-- Dashboard Preview Mockup -->
+            <div class="w-full max-w-5xl mx-auto mt-16 glass-card rounded-2xl p-3 neon-glow-primary transform perspective-1000 floating-mockup">
+                <div class="h-6 flex items-center gap-2 px-2 mb-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                    <span class="text-[10px] text-on-surface-variant font-mono ml-4">MA-Optimizer Dashboard (v10.0.0)</span>
+                </div>
+                <img class="w-full h-auto rounded-lg object-cover" src="Visual Tour img/1 (1).png" alt="MA-Optimizer Dashboard View"/>
+            </div>
+        </section>
+
+        <!-- Bento Grid Features Section -->
+        <section class="py-24 px-container-padding max-w-[1440px] mx-auto" id="features">
+            <div class="mb-16 text-center">
+                <span class="text-xs font-bold text-primary-container uppercase tracking-[0.2em]">Core Architecture</span>
+                <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">Designed for Absolute System Control</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- RAM Cache Optimizer -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 md:col-span-2 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-primary-container">memory</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Active RAM Cache Purging</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Purge system standby caches and compress active process working sets. Built with 100% non-blocking async IPC commands, allowing the UI to remain perfectly responsive during optimization runs.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Custom Power Plan -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary">bolt</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Ultimate Power Presets</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Injects our fine-tuned custom power plan, setting critical scheduler values concurrently via Promise.all under 2 seconds.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Lag Reduction presets -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary">gamepad</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">eSports Gaming Mode</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Fine-tune network priorities, optimize CPU core parking, and configure eSports settings to reduce DPC latency.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- DNS Latency Benchmarking -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 md:col-span-2 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-primary-container">globe</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">DNS Speed Benchmarking</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Test latency concurrently across major DNS providers (Cloudflare, Google, OpenDNS, Quad9) and apply the fastest resolver settings to your adapters in one click.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- System Cleaner -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-primary-container">broom</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Junk Cleaner</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Batches complex folder and registry key cleans into a single PowerShell pipeline, reducing disk I/O overhead.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- App Installer -->
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 md:col-span-2 group">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary">box</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Winget App Center</h3>
+                        <p class="text-on-surface-variant font-light leading-relaxed">
+                            Quickly search, select, and batch-install major developer utilities, browsers, and applications directly from the application container.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visual Precision Gallery / Slider -->
+        <section class="py-24 bg-black/20" id="tour">
+            <div class="container max-w-[1000px]">
+                <div class="mb-16 text-center">
+                    <span class="text-xs font-bold text-secondary uppercase tracking-[0.2em]">Visual Tour</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">The Interface Gallery</h2>
+                </div>
+
+                <!-- Slider Frame -->
+                <div class="relative w-full aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                    <!-- 15 slides -->
+                    <div class="slide active"><img src="Visual Tour img/1 (1).png" alt="Dashboard Page" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (2).png" alt="Power Plan Settings" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (3).png" alt="CPU Optimization Panel" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (4).png" alt="Detailed CPU Stats" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (5).png" alt="Memory RAM Optimizer" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (6).png" alt="Windows Services Manager" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (7).png" alt="eSports Gaming Presets" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (8).png" alt="Network Benchmarks Setup" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (9).png" alt="DNS Speed Test Interface" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (10).png" alt="Registry Cleaner Mode" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (11).png" alt="Boot and Startup App Controller" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (12).png" alt="Windows Utility Tools Panel" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (13).png" alt="SFC and DISM System Repair" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (14).png" alt="Winget App Package Installer" class="w-full h-full object-cover"></div>
+                    <div class="slide"><img src="Visual Tour img/1 (15).png" alt="System Hardware Benchmarking" class="w-full h-full object-cover"></div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center mt-6">
+                    <button class="bg-white/5 hover:bg-white/10 text-on-surface border border-white/10 w-12 h-12 rounded-full flex items-center justify-center transition-all hover:text-primary-container" id="slider-prev" aria-label="Previous Slide">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <div class="slider-dots flex gap-2"></div>
+                    <button class="bg-white/5 hover:bg-white/10 text-on-surface border border-white/10 w-12 h-12 rounded-full flex items-center justify-center transition-all hover:text-primary-container" id="slider-next" aria-label="Next Slide">
+                        <span class="material-symbols-outlined">chevron_right</span>
                     </button>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- Benchmark Comparison Metrics -->
+        <section class="py-24" id="metrics">
+            <div class="max-w-[1440px] mx-auto px-container-padding">
+                <div class="text-center mb-16">
+                    <span class="text-xs font-bold text-primary-container uppercase tracking-[0.2em]">Benchmarks</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">Standardized System Metrics</h2>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white/5 text-xs font-bold uppercase tracking-wider text-on-surface-variant border-b border-white/5">
+                                <th class="p-6">Performance Area</th>
+                                <th class="p-6">Vanilla Windows</th>
+                                <th class="p-6 text-primary-container">MA-Optimized</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm font-mono">
+                            <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+                                <td class="p-6">Idle CPU Overhead</td>
+                                <td class="p-6 text-on-surface-variant">12% - 25% WMI load</td>
+                                <td class="p-6 text-primary-container font-bold">&lt; 0.5% polling load</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+                                <td class="p-6">Application Thread Blocks</td>
+                                <td class="p-6 text-on-surface-variant">Frequent (synchronous calls)</td>
+                                <td class="p-6 text-primary-container font-bold">0% (Fully Async Handlers)</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+                                <td class="p-6">Power Plan Creation</td>
+                                <td class="p-6 text-on-surface-variant">~15 seconds</td>
+                                <td class="p-6 text-primary-container font-bold">~2 seconds</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors border-b border-white/5">
+                                <td class="p-6">Registry Cleaning (50 keys)</td>
+                                <td class="p-6 text-on-surface-variant">~30 seconds</td>
+                                <td class="p-6 text-primary-container font-bold">&lt; 1 second</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Command installation Section -->
+        <section class="py-24 bg-black/20" id="terminal">
+            <div class="container max-w-[800px] text-center">
+                <h2 class="text-3xl font-extrabold mb-4 text-on-surface">For the Terminal Junkies</h2>
+                <p class="text-on-surface-variant text-sm mb-10">Run this command in an administrative PowerShell terminal to immediately install and launch MA-Optimizer:</p>
+                
+                <div class="glass-card rounded-2xl bg-black/80 text-left overflow-hidden shadow-2xl border border-white/10">
+                    <div class="bg-white/5 px-6 py-3 flex justify-between items-center border-b border-white/10">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <span class="text-xs font-mono opacity-50">powershell — installer</span>
+                        <button class="text-on-surface-variant hover:text-primary-container transition-all" id="copy-btn" aria-label="Copy Command">
+                            <span class="material-symbols-outlined text-sm font-bold">content_copy</span>
+                        </button>
+                    </div>
+                    <div class="p-6 font-mono text-xs md:text-sm leading-relaxed custom-scrollbar max-h-64 overflow-y-auto">
+                        <p class="text-on-surface-variant">$ <span id="cli-code-text">irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" | iex</span></p>
+                        <p class="text-primary-container">Initializing Installer...</p>
+                        <p class="text-on-surface-variant">System compatible. Initiating asynchronous optimization engine...</p>
+                        <br/>
+                        <p class="text-secondary">[OK] Setting up non-blocking statistics daemon</p>
+                        <p class="text-secondary">[OK] Injecting DNS speed test components</p>
+                        <p class="text-secondary">[OK] Registering active memory cache cleaner</p>
+                        <br/>
+                        <p class="text-primary-container font-bold">Ready. Launching MA-Optimizer Pro Edition...</p>
+                        <p class="cursor-blink">_</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download Section -->
+        <section class="py-24" id="download">
+            <div class="container max-w-[1000px] text-center">
+                <div class="mb-16 text-center">
+                    <span class="text-xs font-bold text-primary-container uppercase tracking-[0.2em]">Downloads</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">Release Assets</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[800px] mx-auto">
+                    <!-- Standard Installer -->
+                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center hover:border-primary-container/20 transition-all duration-300 group">
+                        <div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-primary-container text-3xl font-black">file_open</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Setup Installer</h3>
+                        <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
+                            Standard NSIS wizard setup. Creates start menu shortcuts, registers file paths, and configures directory folders.
+                        </p>
+                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.Setup.10.0.0.exe" class="bg-primary-container hover:bg-opacity-90 text-background px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(0,240,255,0.15)] no-underline">
+                            <span class="material-symbols-outlined font-black">download</span> Download Installer
+                        </a>
+                    </div>
+
+                    <!-- Portable Binary -->
+                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center hover:border-secondary/20 transition-all duration-300 group">
+                        <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary text-3xl font-black">folder_zip</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Portable Edition</h3>
+                        <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
+                            Zero-installation standalone binary. Ideal for system engineers, network operations, or running from USB drives.
+                        </p>
+                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.10.0.0.exe" class="border border-secondary/50 hover:bg-secondary/10 text-secondary px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all no-underline">
+                            <span class="material-symbols-outlined font-black">folder_shared</span> Download Portable
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <a href="#" class="logo">
-                    <div class="logo-icon">M</div>
-                    <span class="logo-text">MA-Optimizer</span>
-                </a>
-                
-                <div class="social-links">
-                    <a href="https://discord.gg/QERP5JJM8k" class="social-link" target="_blank" aria-label="Join Discord Server"><i class="fab fa-discord"></i></a>
-                    <a href="https://www.instagram.com/mathi_ya_/" class="social-link" target="_blank" aria-label="Follow Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.facebook.com/mathisha.angirasa/" class="social-link" target="_blank" aria-label="Facebook Profile"><i class="fab fa-facebook-f"></i></a>
-                </div>
+    <footer class="bg-surface border-t border-white/5 py-12">
+        <div class="flex flex-col md:flex-row justify-between items-center px-container-padding gap-8 max-w-[1440px] mx-auto">
+            <div class="flex flex-col gap-2">
+                <span class="font-bold tracking-tighter text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">terminal</span>
+                    MA-Optimizer
+                </span>
+                <p class="text-xs text-on-surface-variant">&copy; 2026 MA-Optimizer. Engineered for High-Performance.</p>
             </div>
             
-            <div class="copyright">
-                <p>&copy; 2026 Mathiya. All rights reserved. Released under the MIT License.</p>
+            <div class="flex gap-8">
+                <a href="https://discord.gg/QERP5JJM8k" target="_blank" class="text-xs text-on-surface-variant hover:text-on-surface hover:underline decoration-primary-container transition-all"><i class="fab fa-discord"></i> Discord</a>
+                <a href="https://www.instagram.com/mathi_ya_/" target="_blank" class="text-xs text-on-surface-variant hover:text-on-surface hover:underline decoration-primary-container transition-all"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="https://www.facebook.com/mathisha.angirasa/" target="_blank" class="text-xs text-on-surface-variant hover:text-on-surface hover:underline decoration-primary-container transition-all"><i class="fab fa-facebook-f"></i> Facebook</a>
             </div>
         </div>
     </footer>
 
     <!-- Client Scripts -->
     <script src="script.js"></script>
+    
+    <script>
+        // Mouse movement card spotlight reflections
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Simulating standard text blink indicator
+        const blink = document.querySelector('.cursor-blink');
+        if (blink) {
+            setInterval(() => {
+                blink.style.opacity = blink.style.opacity == "0" ? "1" : "0";
+            }, 500);
+        }
+
+        // Navigation scroll changes
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                nav.classList.add('header-scrolled');
+            } else {
+                nav.classList.remove('header-scrolled');
+            }
+        });
+    </script>
 </body>
 </html>
