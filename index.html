@@ -18,7 +18,8 @@
 
     <!-- CSS & Frameworks -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Fira+Code:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -26,11 +27,10 @@
             theme: {
                 extend: {
                     colors: {
-                        "background": "#05060b",
-                        "surface": "#0a0c14",
-                        "surface-card": "rgba(13, 15, 28, 0.6)",
+                        "background": "#030408",
+                        "surface": "#080911",
                         "primary-container": "#00f0ff",
-                        "secondary": "#a855f7",
+                        "secondary-accent": "#a855f7",
                         "on-surface": "#f3f4f6",
                         "on-surface-variant": "#9ca3af"
                     },
@@ -46,52 +46,58 @@
     
     <style>
         body {
-            background-color: #05060b;
+            background-color: #030408;
             color: #f3f4f6;
             scroll-behavior: smooth;
             font-family: 'Outfit', sans-serif;
-        }
-        .glass-card {
-            background: rgba(13, 15, 28, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .neon-glow-primary {
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
-        }
-        .neon-glow-violet {
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
-        }
-        .text-glow-cyan {
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-        }
-        .text-glow-violet {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(7, 8, 13, 0.5);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #00f0ff;
-        }
-        .header-scrolled {
-            background: rgba(5, 6, 11, 0.8) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
         }
         
-        /* Shimmer and Float Animations */
+        /* Glassmorphism Specification */
+        .glass-card {
+            background: rgba(10, 12, 22, 0.45);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 240, 255, 0.08);
+            transform: translateY(-4px);
+        }
+        
+        /* Fluent Spotlight Follow Effect */
+        .glass-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(255, 255, 255, 0.05), transparent 40%);
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .glass-card:hover::after {
+            opacity: 1;
+        }
+        
+        /* Glowing text layers */
+        .text-glow-cyan {
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+        .text-glow-violet {
+            text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        }
+        
+        /* Flowing gradient and floating animations */
         .animated-hero-title {
             background: linear-gradient(135deg, #fff 40%, #00f0ff 80%, #a855f7 100%);
             background-size: 200% 200%;
@@ -119,7 +125,40 @@
             animation-play-state: paused;
         }
         
-        /* Visual Tour Slider */
+        /* Dynamic Ambient Lighting Blobs */
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.12;
+            z-index: 0;
+            pointer-events: none;
+            animation: float-glow 25s ease-in-out infinite alternate;
+        }
+        @keyframes float-glow {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(80px, 120px) scale(1.25); }
+            100% { transform: translate(-50px, -80px) scale(0.9); }
+        }
+        
+        /* Shimmer primary buttons */
+        .shimmer-btn {
+            background: linear-gradient(135deg, #00f0ff, #a855f7);
+            background-size: 200% 200%;
+            color: #030408;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
+            animation: btn-glow 3s linear infinite;
+        }
+        .shimmer-btn:hover {
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.5), 0 0 15px rgba(168, 85, 247, 0.3);
+        }
+        @keyframes btn-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Slideshow */
         .slide {
             position: absolute;
             top: 0;
@@ -136,9 +175,15 @@
         }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden custom-scrollbar">
 
-    <!-- Top Navigation Bar -->
+    <!-- Glowing Background Blobs -->
+    <div class="glow-blob bg-primary-container w-[400px] h-[400px] top-10 left-10" style="animation-delay: 0s;"></div>
+    <div class="glow-blob bg-secondary-accent w-[500px] h-[500px] top-[800px] right-20" style="animation-delay: -5s;"></div>
+    <div class="glow-blob bg-blue-600 w-[450px] h-[450px] top-[1800px] left-20" style="animation-delay: -10s;"></div>
+    <div class="glow-blob bg-primary-container w-[400px] h-[400px] bottom-40 right-10" style="animation-delay: -15s;"></div>
+
+    <!-- Floating Navigation Bar -->
     <nav class="fixed top-0 left-0 w-full z-50 bg-transparent transition-all duration-300 h-20 flex items-center" id="navbar">
         <div class="flex justify-between items-center w-full px-container-padding max-w-[1440px] mx-auto">
             <a class="text-xl font-bold tracking-tighter text-on-surface flex items-center gap-3 no-underline" href="#">
@@ -164,10 +209,6 @@
     <main class="pt-20">
         <!-- Hero Section -->
         <section class="relative min-h-[900px] flex flex-col items-center justify-center px-container-padding overflow-hidden">
-            <!-- Atmospheric Glows -->
-            <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/5 rounded-full blur-[100px]"></div>
-            <div class="absolute top-1/2 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-[100px]"></div>
-            
             <div class="text-center z-10 max-w-4xl mx-auto mt-12">
                 <div class="inline-flex items-center gap-2 bg-[#00f0ff]/10 border border-[#00f0ff]/20 text-[#00f0ff] px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-6 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
                     <span class="material-symbols-outlined text-xs">workspace_premium</span> Pro Edition v10.0.0
@@ -178,12 +219,12 @@
                     Zero Compromise.
                 </h1>
                 
-                <p class="text-base md:text-xl text-on-surface-variant mb-10 max-w-2xl mx-auto font-light">
+                <p class="text-base md:text-xl text-on-surface-variant mb-10 max-w-2xl mx-auto font-light leading-relaxed">
                     The ultimate system optimization engine for Windows. Unlocks true hardware capacity through direct registry calibrations, non-blocking asynchronous execution, and real-time telemetry analytics.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="#download" class="bg-primary-container hover:bg-opacity-90 text-background px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-[0_4px_20px_rgba(0,240,255,0.25)] hover:shadow-[0_4px_30px_rgba(0,240,255,0.4)] no-underline">
+                    <a href="#download" class="shimmer-btn text-background px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all no-underline">
                         <span class="material-symbols-outlined font-black">download</span> Download Setup
                     </a>
                     <a href="#tour" class="border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-on-surface px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all no-underline">
@@ -193,7 +234,7 @@
             </div>
 
             <!-- Dashboard Preview Mockup -->
-            <div class="w-full max-w-5xl mx-auto mt-16 glass-card rounded-2xl p-3 neon-glow-primary transform perspective-1000 floating-mockup">
+            <div class="w-full max-w-5xl mx-auto mt-16 glass-card rounded-2xl p-3 transform perspective-1000 floating-mockup">
                 <div class="h-6 flex items-center gap-2 px-2 mb-2">
                     <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                     <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
@@ -205,7 +246,7 @@
         </section>
 
         <!-- Bento Grid Features Section -->
-        <section class="py-24 px-container-padding max-w-[1440px] mx-auto" id="features">
+        <section class="py-24 px-container-padding max-w-[1440px] mx-auto relative" id="features">
             <div class="mb-16 text-center">
                 <span class="text-xs font-bold text-primary-container uppercase tracking-[0.2em]">Core Architecture</span>
                 <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">Designed for Absolute System Control</h2>
@@ -213,8 +254,8 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- RAM Cache Optimizer -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 md:col-span-2 group">
-                    <div>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between md:col-span-2 group">
+                    <div class="relative z-10">
                         <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
                             <span class="material-symbols-outlined text-primary-container">memory</span>
                         </div>
@@ -226,10 +267,10 @@
                 </div>
 
                 <!-- Custom Power Plan -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 group">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
-                            <span class="material-symbols-outlined text-secondary">bolt</span>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between group">
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-secondary-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary-accent">bolt</span>
                         </div>
                         <h3 class="text-2xl font-bold mb-3 text-on-surface">Ultimate Power Presets</h3>
                         <p class="text-on-surface-variant font-light leading-relaxed">
@@ -239,10 +280,10 @@
                 </div>
 
                 <!-- Lag Reduction presets -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 group">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
-                            <span class="material-symbols-outlined text-secondary">gamepad</span>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between group">
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-secondary-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary-accent">gamepad</span>
                         </div>
                         <h3 class="text-2xl font-bold mb-3 text-on-surface">eSports Gaming Mode</h3>
                         <p class="text-on-surface-variant font-light leading-relaxed">
@@ -252,8 +293,8 @@
                 </div>
 
                 <!-- DNS Latency Benchmarking -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 md:col-span-2 group">
-                    <div>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between md:col-span-2 group">
+                    <div class="relative z-10">
                         <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
                             <span class="material-symbols-outlined text-primary-container">globe</span>
                         </div>
@@ -265,8 +306,8 @@
                 </div>
 
                 <!-- System Cleaner -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-primary-container/20 transition-all duration-300 group">
-                    <div>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between group">
+                    <div class="relative z-10">
                         <div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
                             <span class="material-symbols-outlined text-primary-container">broom</span>
                         </div>
@@ -278,10 +319,10 @@
                 </div>
 
                 <!-- App Installer -->
-                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between hover:border-secondary/20 transition-all duration-300 md:col-span-2 group">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
-                            <span class="material-symbols-outlined text-secondary">box</span>
+                <div class="glass-card p-8 rounded-2xl flex flex-col justify-between md:col-span-2 group">
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-secondary-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                            <span class="material-symbols-outlined text-secondary-accent">box</span>
                         </div>
                         <h3 class="text-2xl font-bold mb-3 text-on-surface">Winget App Center</h3>
                         <p class="text-on-surface-variant font-light leading-relaxed">
@@ -296,7 +337,7 @@
         <section class="py-24 bg-black/20" id="tour">
             <div class="container max-w-[1000px]">
                 <div class="mb-16 text-center">
-                    <span class="text-xs font-bold text-secondary uppercase tracking-[0.2em]">Visual Tour</span>
+                    <span class="text-xs font-bold text-secondary-accent uppercase tracking-[0.2em]">Visual Tour</span>
                     <h2 class="text-3xl md:text-5xl font-extrabold mt-2 text-on-surface">The Interface Gallery</h2>
                 </div>
 
@@ -421,29 +462,33 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[800px] mx-auto">
                     <!-- Standard Installer -->
-                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center hover:border-primary-container/20 transition-all duration-300 group">
-                        <div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
-                            <span class="material-symbols-outlined text-primary-container text-3xl font-black">file_open</span>
+                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-primary-container/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                                <span class="material-symbols-outlined text-primary-container text-3xl font-black">file_open</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-on-surface">Setup Installer</h3>
+                            <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
+                                Standard NSIS wizard setup. Creates start menu shortcuts, registers file paths, and configures directory folders.
+                            </p>
                         </div>
-                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Setup Installer</h3>
-                        <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
-                            Standard NSIS wizard setup. Creates start menu shortcuts, registers file paths, and configures directory folders.
-                        </p>
-                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.Setup.10.0.0.exe" class="bg-primary-container hover:bg-opacity-90 text-background px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(0,240,255,0.15)] no-underline">
+                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.Setup.10.0.0.exe" class="shimmer-btn text-background px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all no-underline">
                             <span class="material-symbols-outlined font-black">download</span> Download Installer
                         </a>
                     </div>
 
                     <!-- Portable Binary -->
-                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center hover:border-secondary/20 transition-all duration-300 group">
-                        <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
-                            <span class="material-symbols-outlined text-secondary text-3xl font-black">folder_zip</span>
+                    <div class="glass-card p-10 rounded-2xl flex flex-col justify-between items-center group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-full bg-secondary-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform mb-6">
+                                <span class="material-symbols-outlined text-secondary-accent text-3xl font-black">folder_zip</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-on-surface">Portable Edition</h3>
+                            <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
+                                Zero-installation standalone binary. Ideal for system engineers, network operations, or running from USB drives.
+                            </p>
                         </div>
-                        <h3 class="text-2xl font-bold mb-3 text-on-surface">Portable Edition</h3>
-                        <p class="text-on-surface-variant text-sm font-light mb-8 max-w-xs leading-relaxed">
-                            Zero-installation standalone binary. Ideal for system engineers, network operations, or running from USB drives.
-                        </p>
-                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.10.0.0.exe" class="border border-secondary/50 hover:bg-secondary/10 text-secondary px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all no-underline">
+                        <a href="https://github.com/Mathiyass/MA-Optimizer/releases/download/v10.0.0/MA-Optimizer.10.0.0.exe" class="border border-secondary-accent/50 hover:bg-secondary-accent/10 text-secondary-accent px-8 py-3.5 rounded-xl font-bold w-full flex items-center justify-center gap-2 transition-all no-underline">
                             <span class="material-symbols-outlined font-black">folder_shared</span> Download Portable
                         </a>
                     </div>
@@ -453,7 +498,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-surface border-t border-white/5 py-12">
+    <footer class="bg-surface border-t border-white/5 py-12 relative z-10">
         <div class="flex flex-col md:flex-row justify-between items-center px-container-padding gap-8 max-w-[1440px] mx-auto">
             <div class="flex flex-col gap-2">
                 <span class="font-bold tracking-tighter text-on-surface flex items-center gap-2">
@@ -475,7 +520,7 @@
     <script src="script.js"></script>
     
     <script>
-        // Mouse movement card spotlight reflections
+        // Mouse movement card spotlight reflections with safe defaults
         document.querySelectorAll('.glass-card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
