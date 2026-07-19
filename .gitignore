@@ -157,3 +157,22 @@ ma-optimizer-electron/build/
 # App specific
 asar-content.txt
 build_output*.txt
+
+# Temp diffs and debug dumps
+**/full_diff.txt
+**/task-*-diff.txt
+**/temp_diff*.txt
+
+# AI agent scaffolding
+**/docs/superpowers/
+github_release_notes.md
+
+# Build cache files
+**/*.tsbuildinfo
+
+# Compiled Electron binary
+**/dist-electron/
+**/app.asar
+
+# Orphan root package-lock (no root package.json)
+/package-lock.json

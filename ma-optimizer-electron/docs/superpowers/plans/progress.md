@@ -1,4 +1,0 @@
-Task 1: complete (commits 0f54274..HEAD, review clean)
-Task 2: complete (commits 0f8c64d..HEAD, review clean - ignoring false positives from uncommitted working tree changes)
-Task 3: complete (commits 2bd1fde..HEAD, review clean - fixed chart bug manually)
-Task 4: complete (commits 37aa974..HEAD, review clean)
