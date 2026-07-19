@@ -33,6 +33,8 @@ function DnsTab() {
     const [selectedDns, setSelectedDns] = useState<number | null>(null)
     const [adapters, setAdapters] = useState<string[]>([])
     const [selectedAdapter, setSelectedAdapter] = useState('')
+    const [latencies, setLatencies] = useState<Record<string, number>>({})
+    const [testing, setTesting] = useState(false)
     const addLog = useLogStore(s => s.addLine)
     const addNotification = useAppStore(s => s.addNotification)
 
@@ -43,6 +45,29 @@ function DnsTab() {
             if (names.length > 0) setSelectedAdapter(names[0])
         }).catch(() => { })
     }, [])
+
+    const runBenchmark = async () => {
+        setTesting(true)
+        addLog('[DNS] Running speed benchmark on DNS providers...')
+        const results: Record<string, number> = {}
+        try {
+            await Promise.all(dnsPresets.map(async (dns) => {
+                try {
+                    const res = await window.api?.network.pingTest(dns.primary)
+                    results[dns.primary] = res && res.avg > 0 ? res.avg : -1
+                } catch {
+                    results[dns.primary] = -1
+                }
+            }))
+            setLatencies(results)
+            addNotification('success', 'DNS speed test completed!')
+            addLog('[DNS] Speed benchmark finished')
+        } catch (e: any) {
+            addLog(`[ERROR] DNS Benchmark failed: ${e.message}`)
+        } finally {
+            setTesting(false)
+        }
+    }
 
     const applyDns = async () => {
         if (selectedDns === null || !selectedAdapter) return
@@ -58,25 +83,57 @@ function DnsTab() {
 
     return (
         <div className="space-y-6">
-            <h3 className="text-white text-lg font-black tracking-wide mb-4">Fast DNS Providers</h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h3 className="text-white text-lg font-black tracking-wide">Fast DNS Providers</h3>
+                    <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Select a provider and adapter to override your DNS settings</p>
+                </div>
+                <button
+                    onClick={runBenchmark}
+                    disabled={testing}
+                    className="flex items-center gap-2 px-5 py-3.5 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 hover:border-[var(--accent-cyan)]/60 hover:bg-[var(--accent-cyan)]/25 rounded-2xl text-[var(--accent-cyan)] text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(0,255,222,0.05)] border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+                    {testing ? 'Benchmarking...' : 'Test DNS Speeds'}
+                </button>
+            </div>
+            
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {dnsPresets.map((dns, i) => (
-                    <button
-                        key={i}
-                        onClick={() => setSelectedDns(i)}
-                        className={`p-5 rounded-2xl border text-left transition-all duration-300 group ${selectedDns === i
-                            ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)] border'
-                            : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
-                            }`}
-                    >
-                        <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">
-                            {dns.name}
-                            {selectedDns === i && <Activity className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />}
-                        </div>
-                        <div className="text-xs font-mono text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">{dns.primary}</div>
-                        <div className="text-xs font-mono text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors mt-1">{dns.secondary}</div>
-                    </button>
-                ))}
+                {dnsPresets.map((dns, i) => {
+                    const lat = latencies[dns.primary]
+                    const hasLat = lat !== undefined
+                    const isOk = lat > 0
+                    
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => setSelectedDns(i)}
+                            className={`p-5 rounded-2xl border text-left transition-all duration-300 group relative overflow-hidden ${selectedDns === i
+                                ? 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)] border'
+                                : 'bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 hover:border-[var(--accent-cyan)]/30 hover:bg-[rgba(255,255,255,0.05)] shadow-inner border'
+                                }`}
+                        >
+                            <div className="text-[15px] font-bold text-white mb-2 tracking-wide flex justify-between items-center">
+                                {dns.name}
+                                {selectedDns === i && <Activity className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />}
+                            </div>
+                            <div className="text-xs font-mono text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">{dns.primary}</div>
+                            <div className="text-xs font-mono text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors mt-1">{dns.secondary}</div>
+                            
+                            {hasLat && (
+                                <div className={`absolute top-4 right-4 px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                                    isOk 
+                                        ? lat < 30 
+                                            ? 'text-[#00FFDE] bg-[#00FFDE]/10 border-[#00FFDE]/30 border' 
+                                            : 'text-[#FF003C] bg-[#FF003C]/10 border-[#FF003C]/30 border'
+                                        : 'text-[#FF003C] bg-[#FF003C]/10 border-[#FF003C]/30 border'
+                                }`}>
+                                    {isOk ? `${lat} ms` : 'Offline'}
+                                </div>
+                            )}
+                        </button>
+                    )
+                })}
             </div>
 
             <div className="mt-8 pt-8 border-t border-white/10">

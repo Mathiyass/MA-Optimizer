@@ -37,6 +37,7 @@ export interface WindowApi {
         setProcessPriority: (pid: number, p: number) => Promise<boolean>
         openPath: (p: string) => Promise<boolean>
         runTool: (cmd: string) => Promise<boolean>
+        cleanRam: () => Promise<boolean>
     }
     services: {
         list: () => Promise<any[]>

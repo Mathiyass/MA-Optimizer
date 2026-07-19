@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Zap, RefreshCw, Loader2 } from 'lucide-react'
+import { Zap, RefreshCw, Loader2, MemoryStick, Check } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
 import { getTweaksByCategoryAndTab, getSafeTweaks } from '../data/tweaks'
 import { useAppStore } from '../store/appStore'
 import { useLogStore } from '../store/logStore'
+import { useSystemStore } from '../store/systemStore'
 
 const tabs = [
     { id: 'visual', label: 'Visual Effects' },
@@ -191,6 +192,72 @@ function ServicesTab() {
     )
 }
 
+function formatGb(bytes: number) {
+    if (!bytes) return '0.0 GB'
+    return (bytes / 1024 / 1024 / 1024).toFixed(1) + ' GB'
+}
+
+function MemoryOptimizerPanel() {
+    const ram = useSystemStore(s => s.ram)
+    const [cleaning, setCleaning] = useState(false)
+    const addLog = useLogStore(s => s.addLine)
+    const addNotification = useAppStore(s => s.addNotification)
+
+    const cleanRam = async () => {
+        setCleaning(true)
+        addLog('[Memory] Initializing RAM Cache Optimization...')
+        try {
+            const success = await window.api?.system.cleanRam()
+            if (success) {
+                addNotification('success', 'RAM cache optimization complete!')
+                addLog('[Memory] RAM working sets and standby list released')
+            } else {
+                addNotification('error', 'Failed to optimize RAM cache')
+            }
+        } catch (e: any) {
+            addLog(`[ERROR] RAM optimization failed: ${e.message}`)
+        } finally {
+            setCleaning(false)
+        }
+    }
+
+    const percent = ram.percent || 0
+
+    return (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex-1 w-full space-y-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                            <MemoryStick className="w-5 h-5 text-[var(--accent-cyan)]" /> Real-time RAM Optimizer
+                        </h3>
+                        <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Reclaim standby cache and working sets from inactive applications.</p>
+                    </div>
+                    <span className="text-white text-sm font-mono font-bold">{formatGb(ram.used)} / {formatGb(ram.total)} ({percent}%)</span>
+                </div>
+                
+                <div className="w-full h-3 bg-black/40 border border-white/5 rounded-full overflow-hidden relative">
+                    <motion.div 
+                        className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.4)]"
+                        style={{ width: `${percent}%` }}
+                        animate={{ width: `${percent}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                </div>
+            </div>
+
+            <button
+                onClick={cleanRam}
+                disabled={cleaning}
+                className="px-8 py-4 bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full md:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap border flex items-center justify-center gap-2 cursor-pointer"
+            >
+                {cleaning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                {cleaning ? 'Releasing...' : 'Release RAM Cache'}
+            </button>
+        </div>
+    )
+}
+
 export function Performance() {
     const [tab, setTab] = useState('visual')
     const items = getTweaksByCategoryAndTab('performance', tab)
@@ -272,6 +339,15 @@ export function Performance() {
             {tab === 'services' ? (
                 <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 mt-6 border">
                     <ServicesTab />
+                </div>
+            ) : tab === 'memory' ? (
+                <div className="space-y-6 mt-6">
+                    <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 border">
+                        <MemoryOptimizerPanel />
+                    </div>
+                    <div className="grid gap-4">
+                        {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
+                    </div>
                 </div>
             ) : (
                 <div className="grid gap-4 mt-6">

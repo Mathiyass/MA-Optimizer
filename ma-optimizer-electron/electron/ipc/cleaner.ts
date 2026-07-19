@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { sendLog } from './logger'
+import { sendLog, sendError } from './logger'
 import { escapePS, execPromise, spawnPromise } from './utils'
 
 interface CleanerCategory {
@@ -375,17 +375,18 @@ ipcMain.handle('cleaner:scanRegistry', async () => {
 })
 
 ipcMain.handle('cleaner:cleanRegistry', async (_, items: any[]) => {
+    if (!items || items.length === 0) return { cleaned: 0 }
     let cleaned = 0
-    for (const item of items) {
-        try {
-            const script = `Remove-Item -LiteralPath '${escapePS(item.Path)}' -Recurse -Force -ErrorAction SilentlyContinue`
-            const b64 = Buffer.from(script, 'utf16le').toString('base64')
-            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-EncodedCommand', b64], {
-                timeout: 10000,
-                windowsHide: true
-            })
-            cleaned++
-        } catch { }
+    try {
+        const commands = items.map(item => `Remove-Item -LiteralPath '${escapePS(item.Path)}' -Recurse -Force -ErrorAction SilentlyContinue`).join('\n')
+        const b64 = Buffer.from(commands, 'utf16le').toString('base64')
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-EncodedCommand', b64], {
+            timeout: 30000,
+            windowsHide: true
+        })
+        cleaned = items.length
+    } catch (e: any) {
+        sendError(`[Cleaner] Failed to clean registry: ${e.message}`)
     }
     sendLog(`[Cleaner] Fixed ${cleaned} registry issues`)
     return { cleaned }

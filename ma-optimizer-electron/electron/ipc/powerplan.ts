@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs'
 import { sendLog, sendError } from './logger'
-import { escapePS, spawnSyncChecked } from './utils'
+import { escapePS, spawnPromise } from './utils'
 
 const MA_PLAN_GUID = 'e3a5506b-2d5f-4a5d-9c2a-4d3e5f1a7b9c'
 const MA_PLAN_NAME = 'MA Power Plan'
@@ -28,9 +28,9 @@ async function run(cmd: string, args: string[]): Promise<string> {
     })
 }
 
-function reg(regPath: string, name: string, value: string | number, type = 'REG_DWORD') {
+async function reg(regPath: string, name: string, value: string | number, type = 'REG_DWORD') {
     try {
-        spawnSyncChecked('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { timeout: 10000, encoding: 'utf-8' })
+        await spawnPromise('reg', ['add', regPath, '/v', String(name), '/t', type, '/d', String(value), '/f'], { timeout: 10000 })
     } catch { }
 }
 
@@ -120,28 +120,24 @@ async function createMaPowerPlan(): Promise<boolean> {
 
         send('Step 8/8: Applying registry performance tweaks...')
         const mmPath = 'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile'
-        reg(mmPath, 'SystemResponsiveness', 0)
-        reg(mmPath, 'NetworkThrottlingIndex', 4294967295)
-
         const gamesPath = `${mmPath}\\Tasks\\Games`
-        reg(gamesPath, 'GPU Priority', 8)
-        reg(gamesPath, 'Priority', 6)
-        reg(gamesPath, 'Scheduling Category', 'High', 'REG_SZ')
-        reg(gamesPath, 'SFIO Priority', 'High', 'REG_SZ')
-        reg(gamesPath, 'Background Only', 'False', 'REG_SZ')
-        reg(gamesPath, 'Clock Rate', 10000)
-        reg(gamesPath, 'Latency Sensitive', 'True', 'REG_SZ')
 
-        // Disable Connected Standby / Modern Standby
-        reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'CsEnabled', 0)
-        reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'PlatformAoAcOverride', 0)
-        reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'EnergyEstimationEnabled', 0)
-
-        // Disable Fast Startup
-        reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power', 'HiberbootEnabled', 0)
-
-        // Interrupt coalescing disabled
-        reg('HKLM\\SYSTEM\\CurrentControlSet\\Services\\Ndis\\Parameters', 'AllowCoalescingOnHost', 0)
+        await Promise.all([
+            reg(mmPath, 'SystemResponsiveness', 0),
+            reg(mmPath, 'NetworkThrottlingIndex', 4294967295),
+            reg(gamesPath, 'GPU Priority', 8),
+            reg(gamesPath, 'Priority', 6),
+            reg(gamesPath, 'Scheduling Category', 'High', 'REG_SZ'),
+            reg(gamesPath, 'SFIO Priority', 'High', 'REG_SZ'),
+            reg(gamesPath, 'Background Only', 'False', 'REG_SZ'),
+            reg(gamesPath, 'Clock Rate', 10000),
+            reg(gamesPath, 'Latency Sensitive', 'True', 'REG_SZ'),
+            reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'CsEnabled', 0),
+            reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'PlatformAoAcOverride', 0),
+            reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power', 'EnergyEstimationEnabled', 0),
+            reg('HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power', 'HiberbootEnabled', 0),
+            reg('HKLM\\SYSTEM\\CurrentControlSet\\Services\\Ndis\\Parameters', 'AllowCoalescingOnHost', 0),
+        ])
 
         send('Activating MA Power Plan...')
         await run('powercfg', ['/setactive', MA_PLAN_GUID])
@@ -239,7 +235,7 @@ public class TimerRes {
 Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
 [TimerRes]::Set(${safeNs})
 `
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, ' ')], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps.replace(/\r?\n/g, ' ')], {
             timeout: 10000, encoding: 'utf-8'
         })
         send(`Timer resolution set to ${ns / 10000}ms`)
@@ -253,7 +249,7 @@ Add-Type -TypeDefinition $code -ErrorAction SilentlyContinue
 ipcMain.handle('powerplan:getTimer', async () => {
     try {
         const ps = `(Get-ItemProperty -Path "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel" -Name "GlobalTimerResolutionRequests" -ErrorAction SilentlyContinue).GlobalTimerResolutionRequests`
-        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             encoding: 'utf-8', timeout: 5000,
         })
         const result = stdout.trim()

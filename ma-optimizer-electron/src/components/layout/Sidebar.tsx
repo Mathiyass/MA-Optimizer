@@ -98,7 +98,7 @@ export function Sidebar() {
             {/* Footer */}
             <div className="px-6 py-6 border-t border-white/5 bg-black/20 backdrop-blur-md relative z-10">
                 <a
-                    href="https://maportfolio.mathishaangirasass.workers.dev/"
+                    href="https://maportfolio.mathiya.workers.dev/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex flex-col items-center justify-center text-[var(--text-dim)] hover:text-[var(--accent-cyan)] transition-colors cursor-pointer group"

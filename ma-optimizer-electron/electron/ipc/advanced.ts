@@ -4,13 +4,13 @@ import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs'
 import { sendLog, sendError } from './logger'
-import { escapePS, spawnSyncChecked } from './utils'
+import { escapePS, spawnPromise } from './utils'
 
 // Get installed UWP apps
 ipcMain.handle('advanced:getApps', async () => {
     try {
         const ps = `Get-AppxPackage -AllUsers | Select-Object Name,PackageFullName,InstallLocation,Publisher,IsFramework | Where-Object { $_.IsFramework -ne $true } | ConvertTo-Json -Depth 2`
-        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             encoding: 'utf-8', timeout: 60000, maxBuffer: 10 * 1024 * 1024,
         })
         const result = stdout.trim()
@@ -30,20 +30,19 @@ ipcMain.handle('advanced:getApps', async () => {
 
 // Remove UWP apps
 ipcMain.handle('advanced:removeApps', async (_, names: string[]) => {
+    if (!names || names.length === 0) return { removed: 0, total: 0 }
     let removed = 0
-    for (const name of names) {
-        try {
-            const ps = `Get-AppxPackage -AllUsers '*${escapePS(name)}*' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue`
-            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-                timeout: 30000, encoding: 'utf-8',
-            })
-            removed++
-            sendLog(`[Advanced] Removed ${name}`)
-        } catch {
-            sendLog(`[Advanced] Failed to remove ${name}`)
-        }
+    try {
+        const filterList = names.map(n => `'*${escapePS(n)}*'`).join(', ')
+        const ps = `@(${filterList}) | ForEach-Object { Get-AppxPackage -AllUsers $_ | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue }`
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            timeout: 60000, encoding: 'utf-8',
+        })
+        removed = names.length
+        sendLog(`[Advanced] Removed apps: ${names.join(', ')}`)
+    } catch (e: any) {
+        sendError(`[Advanced] Failed to remove apps: ${e.message}`)
     }
-    sendLog(`[Advanced] Removed ${removed}/${names.length} apps`)
     return { removed, total: names.length }
 })
 
@@ -51,7 +50,7 @@ ipcMain.handle('advanced:removeApps', async (_, names: string[]) => {
 ipcMain.handle('advanced:getFeatures', async () => {
     try {
         const ps = `Get-WindowsOptionalFeature -Online | Select-Object FeatureName,State | ConvertTo-Json`
-        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             encoding: 'utf-8', timeout: 60000, maxBuffer: 10 * 1024 * 1024,
         })
         const result = stdout.trim()
@@ -74,7 +73,7 @@ ipcMain.handle('advanced:toggleFeature', async (_, name: string, enable: boolean
         const cmd = enable
             ? `Enable-WindowsOptionalFeature -Online -FeatureName '${safeName}' -All -NoRestart`
             : `Disable-WindowsOptionalFeature -Online -FeatureName '${safeName}' -NoRestart`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', cmd], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', cmd], {
             timeout: 120000, encoding: 'utf-8',
         })
         sendLog(`[Advanced] ${enable ? 'Enabled' : 'Disabled'} feature: ${name}`)
@@ -106,7 +105,7 @@ ipcMain.handle('advanced:bcdedit', async (_, args: string[]) => {
             }
         }
 
-        const { stdout } = spawnSyncChecked('bcdedit', args, {
+        const { stdout } = await spawnPromise('bcdedit', args, {
             encoding: 'utf-8', timeout: 10000,
         })
         const result = stdout.trim()
@@ -139,7 +138,7 @@ ipcMain.handle('advanced:godMode', async () => {
 ipcMain.handle('advanced:computerName', async (_, name: string) => {
     try {
         const ps = `Rename-Computer -NewName '${escapePS(name)}' -Force`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             timeout: 15000, encoding: 'utf-8',
         })
         sendLog(`[Advanced] Computer name changed to ${name} — restart required`)

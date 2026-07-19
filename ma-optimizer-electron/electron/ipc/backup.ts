@@ -4,7 +4,7 @@ import * as path from 'path'
 import { app } from 'electron'
 import { sendLog, sendError } from './logger'
 import { loadBackups } from './registry'
-import { escapePS, spawnSyncChecked } from './utils'
+import { escapePS, spawnPromise } from './utils'
 
 const backupDir = path.join(app.getPath('userData'), 'backups')
 
@@ -74,7 +74,7 @@ ipcMain.handle('backup:undoAll', async () => {
                 const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
                 const val = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
                 const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${val} -Force`
-                spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
                     timeout: 10000, encoding: 'utf-8',
                 })
                 restored++
@@ -105,7 +105,7 @@ ipcMain.handle('backup:undoLast', async () => {
             const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
             const val = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
             const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${val} -Force`
-            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
                 timeout: 10000, encoding: 'utf-8',
             })
         }

@@ -1,0 +1,8 @@
+version: 10.0.0
+files:
+  - url: MA-Optimizer-Setup-10.0.0.exe
+    sha512: +JK+kiit3dOB5yrJzEYZif0oarDNUYnaIDpq+OfgxOfZNmpYyFQG8AT+1MQugaeI6mJwDgXdJeDnBfUndcd/pw==
+    size: 107758304
+path: MA-Optimizer-Setup-10.0.0.exe
+sha512: +JK+kiit3dOB5yrJzEYZif0oarDNUYnaIDpq+OfgxOfZNmpYyFQG8AT+1MQugaeI6mJwDgXdJeDnBfUndcd/pw==
+releaseDate: '2026-07-19T15:07:35.003Z'

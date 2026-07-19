@@ -4,18 +4,14 @@ import { sendLog, sendError } from './logger'
 import * as path from 'path'
 import * as fs from 'fs'
 import { app } from 'electron'
-import { escapePS, spawnSyncChecked } from './utils'
-import { ipcRenderer } from 'electron' // wait, this is main process, use ipcMain
+import { escapePS, spawnPromise } from './utils'
 
 let restorePointCreated = false
 async function ensureRestorePoint() {
     if (restorePointCreated) return
     try {
-        const { ipcMain } = require('electron')
-        // We can't easily trigger another IPC handler from here without emit or similar
-        // Let's just run the powershell directly
         const ps = `Checkpoint-Computer -Description 'MA-Optimizer Auto-Backup' -RestorePointType 'MODIFY_SETTINGS'`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             timeout: 120000, encoding: 'utf-8',
         })
         restorePointCreated = true
@@ -72,7 +68,7 @@ ipcMain.handle('registry:get', async (_, hive: string, regPath: string, name: st
     try {
         const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
         const ps = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
-        const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             encoding: 'utf-8',
             timeout: 10000,
         })
@@ -97,7 +93,7 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
         let currentValue: any = null
         try {
             const psGet = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
-            const { stdout } = spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', psGet], {
+            const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psGet], {
                 encoding: 'utf-8', timeout: 10000,
             })
             currentValue = stdout.trim()
@@ -120,14 +116,14 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
         // Ensure path and restore point
         await ensureRestorePoint()
         const psEnsure = `if(!(Test-Path '${fullPath}')){New-Item -Path '${fullPath}' -Force | Out-Null}`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', psEnsure], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psEnsure], {
             timeout: 10000, encoding: 'utf-8',
         })
 
         // Set value
         const valEscaped = typeof value === 'string' ? `'${escapePS(value)}'` : value
         const psSet = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Type ${psType} -Force`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', psSet], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psSet], {
             timeout: 10000, encoding: 'utf-8',
         })
 
@@ -144,7 +140,7 @@ ipcMain.handle('registry:delete', async (_, hive: string, regPath: string, name:
     try {
         const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
         const ps = `Remove-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`
-        spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             timeout: 10000, encoding: 'utf-8',
         })
         sendLog(`[Registry] DELETED ${hive}\\${regPath}\\${name}`)
@@ -171,7 +167,7 @@ ipcMain.handle('registry:restoreAll', async () => {
                 const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
                 const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
                 const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
-                spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+                await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
                     timeout: 10000, encoding: 'utf-8',
                 })
                 restored++
@@ -202,7 +198,7 @@ ipcMain.handle('registry:restoreLast', async () => {
             const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
             const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
             const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
-            spawnSyncChecked('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
                 timeout: 10000, encoding: 'utf-8',
             })
         }

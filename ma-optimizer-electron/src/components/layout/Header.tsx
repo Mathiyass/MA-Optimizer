@@ -16,8 +16,8 @@ export function Header() {
             }
         }
         check()
-        const interval = setInterval(check, 1000)
-        return () => clearInterval(interval)
+        window.addEventListener('resize', check)
+        return () => window.removeEventListener('resize', check)
     }, [])
 
     const handleUndo = async () => {

@@ -3,7 +3,7 @@
   "version": "10.0.0",
   "description": "MA-Optimizer — The Ultimate Windows System Optimizer",
   "author": "Mathisha Angirasa",
-  "homepage": "https://mathiyass.github.io/MAportfolio/",
+  "homepage": "https://maportfolio.mathiya.workers.dev",
   "repository": "https://github.com/Mathiyass/MA-Optimizer",
   "license": "MIT",
   "main": "electron/dist/main.js",

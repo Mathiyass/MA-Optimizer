@@ -97,6 +97,7 @@ contextBridge.exposeInMainWorld('api', {
             validate([cmd], ['string'])
             return ipcRenderer.invoke('system:runTool', cmd)
         },
+        cleanRam: () => ipcRenderer.invoke('system:cleanRam'),
     },
     services: {
         list: () => ipcRenderer.invoke('services:list'),
