@@ -283,8 +283,11 @@ npm install
 # 4. Launch Development mode (Vite + Electron concurrently)
 npm run dev
 
-# 5. Build standard installer for distribution
+# 5. Build standard installer for distribution (outputs to dist-electron/installer/)
 npm run dist:installer
+
+# 6. Build portable executable for distribution (outputs to dist-electron/portable/)
+npm run dist:portable
 ```
 
 ---
