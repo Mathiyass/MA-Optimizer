@@ -187,14 +187,22 @@ header.scrolled {
 
 .btn-primary {
     background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+    background-size: 200% 200%;
     color: var(--bg-dark);
     box-shadow: 0 4px 20px rgba(0, 240, 255, 0.2);
     border: none;
+    animation: btn-glow 3s linear infinite;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+    box-shadow: 0 8px 30px rgba(0, 240, 255, 0.5), 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+@keyframes btn-glow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .btn-secondary {
@@ -238,11 +246,19 @@ header.scrolled {
     line-height: 1.1;
     margin-bottom: 24px;
     background: linear-gradient(135deg, #fff 40%, var(--accent-cyan) 80%, var(--accent-violet) 100%);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
+    animation: gradient-pan 5s ease infinite;
+}
+
+@keyframes gradient-pan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .hero-subtitle {
@@ -265,6 +281,13 @@ header.scrolled {
     max-width: 1000px;
     margin: 0 auto;
     perspective: 1000px;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
 }
 
 .mockup-window {
@@ -275,13 +298,14 @@ header.scrolled {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     transform: rotateX(10deg);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
     position: relative;
     background: #000;
 }
 
 .mockup-window:hover {
     transform: rotateX(0deg) translateY(-8px);
+    box-shadow: 0 35px 60px -12px rgba(0, 240, 255, 0.2);
 }
 
 .window-header {
