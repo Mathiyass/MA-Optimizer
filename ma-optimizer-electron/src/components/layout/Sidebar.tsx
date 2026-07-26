@@ -13,6 +13,9 @@ const navItems: Array<{
 }> = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { id: 'performance', icon: Zap, label: 'CPU & Memory' },
+        { id: 'process-lasso', icon: SlidersHorizontal, label: 'Process Governor', accent: 'cyan', badge: 'PRO' },
+        { id: 'hone', icon: Rocket, label: 'Low Latency Engine', accent: 'cyan', badge: 'FREE' },
+        { id: 'exitlag', icon: Globe, label: 'Multi-Path Routing', accent: 'violet', badge: 'MULTI' },
         { id: 'ma-power', icon: Crown, label: 'Power Plan', accent: 'violet', badge: '★' },
         { id: 'network', icon: Globe, label: 'Network' },
         { id: 'privacy', icon: ShieldCheck, label: 'Privacy' },

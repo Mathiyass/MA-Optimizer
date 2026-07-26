@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Gamepad2, Zap, Loader2 } from 'lucide-react'
+import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -9,6 +9,7 @@ import { useAppStore } from '../store/appStore'
 import { useLogStore } from '../store/logStore'
 
 const tabs = [
+    { id: 'gearup', label: 'Network & FPS Booster' },
     { id: 'general', label: 'General' },
     { id: 'input', label: 'Input' },
     { id: 'gpu', label: 'GPU' },
@@ -20,8 +21,162 @@ function TweakRow({ tweakId }: { tweakId: string }) {
     return <TweakCard id={tweakId} title={tweak.name} description={tweak.description} risk={tweak.risk} enabled={enabled} onChange={toggle} loading={loading} />
 }
 
+function GearUpBoosterTab() {
+    const [catalog, setCatalog] = useState<any[]>([])
+    const [selectedGame, setSelectedGame] = useState<string>('cs2')
+    const [nodes, setNodes] = useState<any[]>([])
+    const [pinging, setPinging] = useState(false)
+    const [boosting, setBoosting] = useState(false)
+    const [boostActive, setBoostActive] = useState(false)
+    const addNotification = useAppStore(s => s.addNotification)
+
+    useEffect(() => {
+        window.api?.gearup.getCatalog().then((list: any[]) => {
+            setCatalog(list || [])
+            if (list?.length) setSelectedGame(list[0].id)
+        }).catch(() => {})
+    }, [])
+
+    const testPingNodes = async (gameId: string) => {
+        setPinging(true)
+        try {
+            const updated = await window.api?.gearup.pingGameNodes(gameId)
+            setNodes(updated || [])
+        } catch {}
+        setPinging(false)
+    }
+
+    useEffect(() => {
+        if (selectedGame) testPingNodes(selectedGame)
+    }, [selectedGame])
+
+    const handleBoost = async () => {
+        setBoosting(true)
+        try {
+            const target = catalog.find(g => g.id === selectedGame)
+            if (target) {
+                await window.api?.gearup.enableQosRouting(target.exe)
+            }
+            const ok = await window.api?.gearup.boostGame(selectedGame)
+            if (ok) {
+                setBoostActive(true)
+                addNotification('success', `Game Boost engaged for ${target?.name || 'game'}! Ping & RAM optimized.`)
+            }
+        } catch {
+            addNotification('error', 'Game boost failed')
+        }
+        setBoosting(false)
+    }
+
+    const handleStopBoost = async () => {
+        await window.api?.gearup.stopBoost()
+        setBoostActive(false)
+        addNotification('info', 'Game Boost deactivated')
+    }
+
+    const handleDownloadBoost = async () => {
+        try {
+            await window.api?.gearup.boostDownloads()
+            addNotification('success', 'Steam / Epic Games download acceleration enabled!')
+        } catch {
+            addNotification('error', 'Download booster failed')
+        }
+    }
+
+    const currentGame = catalog.find(g => g.id === selectedGame)
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 glass-shell rounded-[2rem] border border-white/5">
+                <div>
+                    <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-[var(--accent-cyan)]" /> Multi-Path Network & FPS Booster
+                    </h3>
+                    <p className="text-[var(--text-muted)] text-xs mt-1">Direct game server routing, packet loss prevention, and QoS DSCP 46 prioritization.</p>
+                </div>
+
+                <button
+                    onClick={handleDownloadBoost}
+                    className="px-6 py-3 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] font-black uppercase text-xs tracking-widest hover:bg-[#00FFDE]/20 transition-all rounded-2xl border flex items-center gap-2"
+                >
+                    <Download className="w-4 h-4" /> Accelerate Launcher Downloads
+                </button>
+            </div>
+
+            {/* Game Selector Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {catalog.map(g => (
+                    <button
+                        key={g.id}
+                        onClick={() => setSelectedGame(g.id)}
+                        className={`p-4 rounded-2xl border text-left transition-all ${selectedGame === g.id ? 'border-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 shadow-[0_0_20px_rgba(0,255,222,0.2)]' : 'glass-shell hover:border-white/20'}`}
+                    >
+                        <div className="font-bold text-white text-sm truncate">{g.name}</div>
+                        <div className="text-[10px] text-[var(--text-muted)] mt-1 uppercase font-black tracking-widest">{g.category}</div>
+                    </button>
+                ))}
+            </div>
+
+            {/* Selected Game Node Ping Card */}
+            {currentGame && (
+                <div className="card-premium glass-shell p-6 rounded-[2rem] space-y-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <div className="text-xs font-black uppercase tracking-widest text-[var(--accent-cyan)]">Target Game</div>
+                            <div className="text-2xl font-black text-white">{currentGame.name}</div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => testPingNodes(selectedGame)}
+                                disabled={pinging}
+                                className="px-4 py-2.5 glass-shell text-xs text-white font-bold rounded-xl flex items-center gap-2 hover:bg-white/10"
+                            >
+                                <Activity className={`w-4 h-4 ${pinging ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} /> Re-ping
+                            </button>
+
+                            {boostActive ? (
+                                <button
+                                    onClick={handleStopBoost}
+                                    className="px-6 py-3 bg-[#FF003C]/20 border-[#FF003C]/40 text-[#FF003C] font-black text-xs uppercase tracking-widest rounded-2xl border"
+                                >
+                                    Stop Boost
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleBoost}
+                                    disabled={boosting}
+                                    className="px-8 py-3 bg-[var(--accent-cyan)] text-black font-black text-xs uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(0,255,222,0.4)] flex items-center gap-2 border border-[var(--accent-cyan)]/50"
+                                >
+                                    {boosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                                    BOOST {currentGame.name} NOW
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Regional Server Nodes */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+                        {(nodes.length ? nodes : currentGame.serverNodes).map((node: any, idx: number) => (
+                            <div key={idx} className="p-4 rounded-xl glass-shell border border-white/5 flex items-center justify-between">
+                                <div>
+                                    <div className="text-xs font-bold text-white">{node.region}</div>
+                                    <div className="text-[10px] font-mono text-[var(--text-muted)]">{node.ip}</div>
+                                </div>
+                                <div className={`text-sm font-mono font-black ${node.ping > 0 && node.ping < 60 ? 'text-[#00FFDE]' : node.ping < 120 ? 'text-amber-400' : 'text-[#FF003C]'}`}>
+                                    {node.ping > 0 ? `${node.ping}ms` : 'Checking...'}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
 export function Gaming() {
-    const [tab, setTab] = useState('general')
+    const [tab, setTab] = useState('gearup')
     const [gameBoostOn, setGameBoostOn] = useState(false)
     const [applying, setApplying] = useState(false)
     const [gpuInfo, setGpuInfo] = useState<{ vendor: string; model: string; vram: number } | null>(null)
@@ -85,7 +240,7 @@ export function Gaming() {
                             Gaming Mode
                         </motion.h2>
                         <p className="text-[var(--text-muted)] text-sm uppercase tracking-[0.3em] font-black mb-8">
-                            {gameBoostOn ? 'Optimal Performance Active' : 'Performance Throttled'}
+                            MA-Optimizer Game Engine Integration
                         </p>
                         
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
@@ -113,69 +268,24 @@ export function Gaming() {
                             ) : (
                                 <Gamepad2 className={`w-12 h-12 transition-all duration-300 group-active:scale-90 ${gameBoostOn ? 'text-[var(--accent-cyan)] drop-shadow-[0_0_15px_rgba(0,255,222,0.8)]' : 'text-white/50 group-hover:text-white'}`} />
                             )}
-                            
-                            {/* Inner ripple effect */}
-                            {gameBoostOn && (
-                                <div className="absolute inset-0 rounded-full border-2 border-[var(--accent-cyan)] opacity-0 animate-ping" style={{ animationDuration: '2s' }}></div>
-                            )}
                         </button>
                     </div>
                 </div>
             </motion.div>
 
-            {/* Metrics Row */}
-            {gameBoostOn && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-scale-in">
-                    <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border">
-                        <div className="flex justify-between items-start mb-4">
-                            <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">FPS Stability</span>
-                            <Zap className="w-5 h-5 text-[var(--accent-cyan)] drop-shadow-[0_0_8px_rgba(0,255,222,0.5)]" />
-                        </div>
-                        <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-4xl font-black text-white">99.8</span>
-                            <span className="text-xl font-bold text-[var(--accent-cyan)] opacity-80">%</span>
-                        </div>
-                        <div className="h-2 w-full bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-full overflow-hidden border">
-                            <div className="h-full bg-[var(--accent-cyan)] w-[99.8%] shadow-[0_0_10px_var(--accent-cyan)]"></div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border">
-                        <div className="flex justify-between items-start mb-4">
-                            <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">Input Latency</span>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-[#FF003C] animate-pulse shadow-[0_0_8px_#FF003C]"></span>
-                                <span className="text-[10px] font-black text-[#FF003C] tracking-wider">ULTRA-LOW</span>
-                            </div>
-                        </div>
-                        <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-4xl font-black text-white">0.5</span>
-                            <span className="text-xl font-bold text-[#FF003C] opacity-80">ms</span>
-                        </div>
-                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Polling Rate: <span className="text-[#FF003C]">Maximized</span></p>
-                    </div>
-
-                    <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border">
-                        <div className="flex justify-between items-start mb-4">
-                            <span className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest font-black">Background Apps</span>
-                            <span className="text-xs font-black text-[#FF003C] tracking-wider bg-[#FF003C]/10 px-2 py-1 rounded-2xl">SUSPENDED</span>
-                        </div>
-                        <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-4xl font-black text-white">42</span>
-                            <span className="text-xl font-bold text-[#FF003C] opacity-80">PROCS</span>
-                        </div>
-                        <p className="text-xs text-[var(--text-muted)] font-bold tracking-wide">Resources: <span className="text-[#FF003C]">Freed</span></p>
-                    </div>
-                </div>
-            )}
-
-            <h3 className="text-2xl font-black text-white mt-12 mb-6 tracking-tight">Active Enhancements</h3>
             <TabGroup tabs={tabs} active={tab} onChange={setTab} />
 
-            <div className="grid gap-4 mt-6">
-                {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
-                {items.length === 0 && <div className="text-[var(--text-muted)] text-center py-12 font-bold tracking-widest uppercase">No tweaks in this category</div>}
-            </div>
+            {tab === 'gearup' ? (
+                <div className="mt-6">
+                    <GearUpBoosterTab />
+                </div>
+            ) : (
+                <div className="grid gap-4 mt-6">
+                    {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
+                    {items.length === 0 && <div className="text-[var(--text-muted)] text-center py-12 font-bold tracking-widest uppercase">No tweaks in this category</div>}
+                </div>
+            )}
         </div>
     )
 }
+

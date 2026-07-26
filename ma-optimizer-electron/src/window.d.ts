@@ -61,6 +61,10 @@ export interface WindowApi {
         getOpenPorts: () => Promise<any[]>
         tracert: (host: string) => Promise<string>
         nslookup: (host: string) => Promise<string>
+        testPacketSize: (host: string, bytes: number) => Promise<{ bytes: number; success: boolean; ms: number }>
+        exportTcpConfig: () => Promise<string | null>
+        importTcpConfig: (settings: any) => Promise<boolean>
+        benchmarkDns: () => Promise<Array<{ name: string; primary: string; secondary: string; latency: number }>>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>
@@ -113,6 +117,7 @@ export interface WindowApi {
         runBcdedit: (args: string[]) => Promise<string | null>
         enableGodMode: () => Promise<boolean>
         changeComputerName: (name: string) => Promise<boolean>
+        launchControlPanel: (applet: string) => Promise<boolean>
     }
     benchmark: {
         runCpu: () => Promise<any>
@@ -145,6 +150,35 @@ export interface WindowApi {
         scanUpdates: () => Promise<any[]>
         installUpdate: (title: string) => Promise<boolean>
         backup: (folderPath: string) => Promise<boolean>
+        restore: (folderPath: string) => Promise<boolean>
+    }
+    processLasso: {
+        getConfig: () => Promise<any>
+        updateConfig: (cfg: any) => Promise<any>
+        setAffinity: (pid: number, mask: number) => Promise<boolean>
+        setIoPriority: (pid: number, level: string) => Promise<boolean>
+        toggleCoreParking: (disable: boolean) => Promise<boolean>
+        runSmartTrim: () => Promise<boolean>
+    }
+    gearup: {
+        getCatalog: () => Promise<any[]>
+        pingGameNodes: (gameId: string) => Promise<any[]>
+        enableQosRouting: (gameExe: string) => Promise<boolean>
+        boostGame: (gameId: string) => Promise<boolean>
+        stopBoost: () => Promise<boolean>
+        boostDownloads: () => Promise<boolean>
+    }
+    hone: {
+        enableMsiMode: () => Promise<boolean>
+        disableMouseAccel: () => Promise<boolean>
+        applyPreset: () => Promise<{ success: boolean; appliedTweaks: number; message: string }>
+    }
+    exitlag: {
+        getConfig: () => Promise<any>
+        updateConfig: (cfg: any) => Promise<any>
+        pingRoutes: (gameId: string) => Promise<any[]>
+        enableMultipathRoute: (gameExe: string) => Promise<boolean>
+        stopRoute: () => Promise<boolean>
     }
     onLogLine: (cb: (line: string) => void) => void
     offLogLine: () => void

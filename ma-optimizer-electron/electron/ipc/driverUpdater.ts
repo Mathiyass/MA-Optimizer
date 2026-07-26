@@ -364,3 +364,17 @@ ipcMain.handle('drivers:backup', async (_, folderPath: string) => {
         return false
     }
 })
+
+// 5. Restore/Import drivers from folder using pnputil
+ipcMain.handle('drivers:restore', async (_, folderPath: string) => {
+    try {
+        const safeFolderPath = String(folderPath)
+        const command = `pnputil.exe /add-driver "${escapePS(safeFolderPath)}\\*.inf" /subdirs /install`
+        await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile -Command "${command}"' -Verb RunAs -Wait`])
+        return true
+    } catch (error) {
+        console.error('Failed to restore drivers:', error)
+        return false
+    }
+})
+

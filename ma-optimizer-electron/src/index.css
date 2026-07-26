@@ -611,3 +611,23 @@ input::placeholder {
   backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* ⚡ Ultra Low-End PC Hardware & Rendering Optimizations */
+.card-premium, .glass-shell, .app-card-item {
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 100px;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-layer {
+    animation: none !important;
+  }
+  .animate-pulse {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.1s !important;
+  }
+}

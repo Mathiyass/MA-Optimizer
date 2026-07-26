@@ -7,7 +7,14 @@ const isDev = process.env.NODE_ENV === 'development'
 // 🔧 FIX: app.setPath('userData', ...) and app.commandLine.appendSwitch must be called before any IPC handler imports
 // to ensure that custom user data paths (used by logger) and Chromium switches are applied correctly.
 app.setPath('userData', path.join(app.getPath('appData'), 'MA-Optimizer'))
-app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication')
+app.commandLine.appendSwitch('disable-features', 'AutofillServerCommunication,CalculateNativeWinOcclusion,TranslateUI,MediaRouter')
+app.commandLine.appendSwitch('enable-low-end-device-mode')
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=192 --optimize-for-size --gc-global')
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
+app.commandLine.appendSwitch('disable-component-update')
+app.commandLine.appendSwitch('disable-renderer-backgrounding')
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
+
 
 // IPC handler imports
 require('./ipc/admin')
@@ -25,6 +32,14 @@ require('./ipc/benchmark')
 require('./ipc/repair')
 require('./ipc/advanced')
 require('./ipc/driverUpdater')
+require('./ipc/processLasso')
+require('./ipc/gearup')
+require('./ipc/hone')
+require('./ipc/exitlag')
+
+
+
+
 
 const { startSystemStatsPolling, stopSystemStatsPolling } = require('./ipc/systeminfo')
 const { spawnPromise } = require('./ipc/utils')
@@ -327,7 +342,7 @@ app.whenReady().then(async () => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
-                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:* ws://localhost:* https://logo.clearbit.com https://icons.duckduckgo.com"]
+                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' data:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:* ws://localhost:* https:"]
             }
         })
     })

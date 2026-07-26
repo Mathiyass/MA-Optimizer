@@ -258,7 +258,7 @@ export function AppInstaller() {
                     {appCategories.map(c => (
                         <button key={c.id} onClick={() => setCategory(c.id)}
                             className={`px-5 py-2.5 rounded-2xl text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap ${category === c.id ? 'bg-[rgba(0,255,222,0.1)] text-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 shadow-[0_0_15px_rgba(0,255,222,0.2)] border' : 'glass-shell text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
-                                }`}>{c.label}</button>
+                                }`}>{c.name}</button>
                     ))}
                 </div>
             )}
@@ -330,6 +330,7 @@ export function AppInstaller() {
                                             id={app.id}
                                             name={app.name}
                                             desc={app.desc}
+                                            domain={app.domain}
                                             installed={appInstalled}
                                             inQueue={inQueue}
                                             selected={selected.has(app.id)}
@@ -419,10 +420,10 @@ export function AppInstaller() {
 
 // Extracted app card component
 function AppCard({
-    id, name, desc, version, source, installed, inQueue, selected, isRemote,
+    id, name, desc, domain, version, source, installed, inQueue, selected, isRemote,
     onToggle, onInstall, onUninstall, onUpdate,
 }: {
-    id: string; name: string; desc: string; version?: string; source?: string
+    id: string; name: string; desc: string; domain?: string; version?: string; source?: string
     installed: boolean; inQueue: boolean; selected: boolean; isRemote?: boolean
     onToggle: () => void; onInstall: () => void; onUninstall: () => void; onUpdate: () => void
 }) {
@@ -430,54 +431,37 @@ function AppCard({
     const [imgError, setImgError] = useState(false);
 
     useEffect(() => {
-        if (!isRemote && (window as any).apps_cache_icon?.[id]) {
-            setImgSrc((window as any).apps_cache_icon[id]);
-            return;
+        let targetDomain = domain;
+        if (!targetDomain) {
+            const publisher = id.split('.')[0].toLowerCase();
+            const domainMap: Record<string, string> = {
+                google: 'google.com', mozilla: 'mozilla.org', brave: 'brave.com', opera: 'opera.com', vivaldi: 'vivaldi.com',
+                microsoft: 'microsoft.com', github: 'github.com', docker: 'docker.com', postman: 'postman.com',
+                jetbrains: 'jetbrains.com', videolan: 'videolan.org', obsproject: 'obsproject.com',
+                spotify: 'spotify.com', discord: 'discord.com', telegram: 'telegram.org',
+                whatsapp: 'whatsapp.com', slacktechnologies: 'slack.com', zoom: 'zoom.us',
+                bitwarden: 'bitwarden.com', epicgames: 'epicgames.com', valve: 'steampowered.com',
+                gog: 'gog.com', "7zip": "7-zip.org", python: "python.org", openjs: "nodejs.org",
+                oracle: "oracle.com", rustlang: "rust-lang.org", dbeaver: "dbeaver.io",
+                handbrake: "handbrake.fr", audacity: "audacityteam.org", gimp: "gimp.org",
+                kde: "kde.org", dotpdn: "getpaint.net", inkscape: "inkscape.org", qbittorrent: "qbittorrent.org",
+                playnite: "playnite.link", autohotkey: "autohotkey.com", cpuid: "cpuid.com", realix: "hwinfo.com",
+                voidtools: "voidtools.com", sharex: "getsharex.com", rufus: "rufus.ie", windirstat: "windirstat.net",
+                thedocumentfoundation: "libreoffice.org", sumatrapdf: "sumatrapdfreader.org", obsidian: "obsidian.md",
+                notion: "notion.so", keepassxcteam: "keepassxc.org", malwarebytes: "malwarebytes.com",
+                protontechnologies: "protonvpn.com", eloston: "chromium.org", librewolf: "librewolf.net",
+                alex313031: "thorium.rocks"
+            };
+            targetDomain = domainMap[publisher] || `${publisher}.com`;
         }
 
-        const fetchNativeIcon = async () => {
-            try {
-                if (window.api?.winget?.getIcon) {
-                    const base64 = await window.api.winget.getIcon(name);
-                    if (base64) {
-                        setImgSrc(base64);
-                        return;
-                    }
-                }
-
-                // Fallback to domain logo if native extraction fails
-                const publisher = id.split('.')[0].toLowerCase();
-                const domainMap: Record<string, string> = {
-                    google: 'google.com', mozilla: 'mozilla.org', brave: 'brave.com', opera: 'opera.com', vivaldi: 'vivaldi.com',
-                    microsoft: 'microsoft.com', github: 'github.com', docker: 'docker.com', postman: 'postman.com',
-                    jetbrains: 'jetbrains.com', videolan: 'videolan.org', obsproject: 'obsproject.com',
-                    spotify: 'spotify.com', discord: 'discord.com', telegram: 'telegram.org',
-                    whatsapp: 'whatsapp.com', slacktechnologies: 'slack.com', zoom: 'zoom.us',
-                    bitwarden: 'bitwarden.com', epicgames: 'epicgames.com', valve: 'steampowered.com',
-                    gog: 'gog.com', "7zip": "7-zip.org", python: "python.org", openjs: "nodejs.org",
-                    oracle: "oracle.com", rustlang: "rust-lang.org", dbeaver: "dbeaver.io",
-                    handbrake: "handbrake.fr", audacity: "audacityteam.org", gimp: "gimp.org",
-                    kde: "kde.org", dotpdn: "getpaint.net", inkscape: "inkscape.org", qbittorrent: "qbittorrent.org",
-                    playnite: "playnite.link", autohotkey: "autohotkey.com", cpuid: "cpuid.com", realix: "hwinfo.com",
-                    voidtools: "voidtools.com", sharex: "getsharex.com", rufus: "rufus.ie", windirstat: "windirstat.net",
-                    thedocumentfoundation: "libreoffice.org", sumatrapdf: "sumatrapdfreader.org", obsidian: "obsidian.md",
-                    notion: "notion.so", keepassxcteam: "keepassxc.org", malwarebytes: "malwarebytes.com",
-                    protontechnologies: "protonvpn.com", eloston: "chromium.org", librewolf: "librewolf.net"
-                };
-                const domain = domainMap[publisher] || `${publisher}.com`;
-                setImgSrc(`https://logo.clearbit.com/${domain}`);
-            } catch {
-                setImgError(true);
-            }
-        };
-
-        fetchNativeIcon();
-    }, [id, name, isRemote]);
+        setImgSrc(`https://icon.horse/icon/${targetDomain}`);
+    }, [id, name, domain]);
 
     const handleImgError = () => {
-        if (imgSrc && imgSrc.includes('clearbit')) {
-            const domain = imgSrc.split('/').pop();
-            setImgSrc(`https://icons.duckduckgo.com/ip3/${domain}.ico`);
+        if (imgSrc && imgSrc.includes('icon.horse')) {
+            const dom = domain || id.split('.')[0].toLowerCase() + '.com';
+            setImgSrc(`https://icons.duckduckgo.com/ip3/${dom}.ico`);
         } else {
             setImgError(true);
         }

@@ -48,7 +48,7 @@ export function About() {
                     </motion.div>
                     <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[var(--accent-cyan)] to-[#00FFDE] mb-2 tracking-tighter drop-shadow-lg">MA-Optimizer</h1>
                     <div className="flex items-center gap-4 mb-6">
-                        <span className="px-3 py-1 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] rounded-2xl text-xs font-black uppercase tracking-widest border">Version 10.0</span>
+                        <span className="px-3 py-1 bg-[var(--accent-cyan)]/10 border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] rounded-2xl text-xs font-black uppercase tracking-widest border">Version 11.0</span>
                         <span className="px-3 py-1 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] rounded-2xl text-xs font-black uppercase tracking-widest border">Stable</span>
                     </div>
                     <p className="text-[var(--text-muted)] text-lg max-w-2xl mx-auto leading-relaxed font-medium">

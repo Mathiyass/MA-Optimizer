@@ -15,6 +15,9 @@ interface Tool {
 
 const tools: Tool[] = [
     // System
+    { label: 'God Mode Folder', cmd: 'godmode', icon: Shield, desc: 'Create God Mode folder on Desktop', category: 'System' },
+    { label: 'Control Panel', cmd: 'control.exe', icon: Settings, desc: 'Classic Windows Control Panel', category: 'System' },
+    { label: 'System Properties', cmd: 'sysdm.cpl', icon: Cog, desc: 'System protection & performance options', category: 'System' },
     { label: 'Task Manager', cmd: 'taskmgr.exe', icon: Monitor, desc: 'Monitor processes', category: 'System' },
     { label: 'System Configuration', cmd: 'msconfig.exe', icon: Settings, desc: 'Boot and startup settings', category: 'System' },
     { label: 'Computer Management', cmd: 'compmgmt.msc', icon: Cog, desc: 'Full system management', category: 'System' },
@@ -26,8 +29,12 @@ const tools: Tool[] = [
     { label: 'PowerShell', cmd: 'powershell.exe', icon: TerminalSquare, desc: 'Open PowerShell as Admin', category: 'Terminal' },
     { label: 'Registry Editor', cmd: 'regedit.exe', icon: FileCog, desc: 'Windows Registry Editor', category: 'Terminal' },
     // Network
+    { label: 'Network Connections', cmd: 'ncpa.cpl', icon: Wifi, desc: 'Manage network adapters', category: 'Network' },
+    { label: 'Windows Firewall', cmd: 'firewall.cpl', icon: Shield, desc: 'Firewall security rules', category: 'Network' },
     { label: 'Services', cmd: 'services.msc', icon: Settings, desc: 'Windows services manager', category: 'Network' },
-    // Storage
+    // Storage & Control
+    { label: 'Programs & Features', cmd: 'appwiz.cpl', icon: Cog, desc: 'Uninstall/modify applications', category: 'Storage' },
+    { label: 'Power Options', cmd: 'powercfg.cpl', icon: Settings, desc: 'Power plan & battery configuration', category: 'Storage' },
     { label: 'Device Manager', cmd: 'devmgmt.msc', icon: Cog, desc: 'Manage hardware devices', category: 'Storage' },
     { label: 'Disk Management', cmd: 'diskmgmt.msc', icon: HardDrive, desc: 'Manage disk partitions', category: 'Storage' },
     { label: 'Disk Cleanup', cmd: 'cleanmgr.exe', icon: HardDrive, desc: 'Windows disk cleanup', category: 'Storage' },
@@ -56,7 +63,15 @@ const categoryIcons: Record<string, LucideIcon> = {
 export function Tools() {
     const [filter, setFilter] = useState('')
     const [activeCategory, setActiveCategory] = useState<string | null>(null)
-    const launch = (cmd: string) => window.api?.system.runTool(cmd)
+    const launch = (cmd: string) => {
+        if (cmd === 'godmode') {
+            window.api?.advanced.enableGodMode()
+        } else if (cmd.endsWith('.cpl') || cmd === 'control.exe') {
+            window.api?.advanced.launchControlPanel(cmd)
+        } else {
+            window.api?.system.runTool(cmd)
+        }
+    }
 
     const categories = Array.from(new Set(tools.map(t => t.category)))
     const filtered = tools.filter(t => {

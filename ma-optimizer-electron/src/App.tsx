@@ -13,24 +13,31 @@ import { useLogStore } from './store/logStore'
 import { useSystemMonitor } from './hooks/useSystemMonitor'
 
 import { Dashboard } from './pages/Dashboard'
-import { MaPowerPlan } from './pages/MaPowerPlan'
-import { Performance } from './pages/Performance'
-import { Network } from './pages/Network'
-import { Privacy } from './pages/Privacy'
-import { Gaming } from './pages/Gaming'
-import { Cleaner } from './pages/Cleaner'
-import { Startup } from './pages/Startup'
-import { AppInstaller } from './pages/AppInstaller'
-import { Tools } from './pages/Tools'
-import { Repair } from './pages/Repair'
-import { Advanced } from './pages/Advanced'
-import { Benchmark } from './pages/Benchmark'
-import { About } from './pages/About'
-import { DriverUpdater } from './pages/DriverUpdater'
+
+const Performance = lazy(() => import('./pages/Performance').then(m => ({ default: m.Performance })))
+const MaPowerPlan = lazy(() => import('./pages/MaPowerPlan').then(m => ({ default: m.MaPowerPlan })))
+const Network = lazy(() => import('./pages/Network').then(m => ({ default: m.Network })))
+const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })))
+const Gaming = lazy(() => import('./pages/Gaming').then(m => ({ default: m.Gaming })))
+const Cleaner = lazy(() => import('./pages/Cleaner').then(m => ({ default: m.Cleaner })))
+const Startup = lazy(() => import('./pages/Startup').then(m => ({ default: m.Startup })))
+const AppInstaller = lazy(() => import('./pages/AppInstaller').then(m => ({ default: m.AppInstaller })))
+const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools })))
+const Repair = lazy(() => import('./pages/Repair').then(m => ({ default: m.Repair })))
+const Advanced = lazy(() => import('./pages/Advanced').then(m => ({ default: m.Advanced })))
+const Benchmark = lazy(() => import('./pages/Benchmark').then(m => ({ default: m.Benchmark })))
+const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })))
+const DriverUpdater = lazy(() => import('./pages/DriverUpdater').then(m => ({ default: m.DriverUpdater })))
+const ProcessLassoPage = lazy(() => import('./pages/ProcessLasso').then(m => ({ default: m.ProcessLassoPage })))
+const HoneOptimizerPage = lazy(() => import('./pages/HoneOptimizer').then(m => ({ default: m.HoneOptimizerPage })))
+const ExitLagPage = lazy(() => import('./pages/ExitLag').then(m => ({ default: m.ExitLagPage })))
 
 const pages: Record<string, React.ComponentType> = {
     dashboard: Dashboard,
     performance: Performance,
+    'process-lasso': ProcessLassoPage,
+    hone: HoneOptimizerPage,
+    exitlag: ExitLagPage,
     'ma-power': MaPowerPlan,
     network: Network,
     privacy: Privacy,
@@ -154,9 +161,11 @@ export default function App() {
                     <main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-card-border">
                         <div className="p-6 h-full">
                             <ErrorBoundary resetKey={currentPage}>
+                                <Suspense fallback={<LoadingFallback />}>
                                     <div key={currentPage} className="h-full animate-fade-in">
                                         <PageComponent />
                                     </div>
+                                </Suspense>
                             </ErrorBoundary>
                         </div>
                     </main>

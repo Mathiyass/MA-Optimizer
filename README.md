@@ -61,42 +61,42 @@
 <table align="center" width="100%">
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #00ffff;">📊 Smart Dashboard</h3>
-      <p>Monitor your PC's vital stats in real-time. View stunning telemetry charts covering CPU, RAM, Disk, and Network usage, all wrapped in a sleek, animated glassmorphism UI.</p>
+      <h3 style="color: #00ffff;">📊 Telemetry Dashboard</h3>
+      <p>Monitor your PC's vital stats in real-time. Live CPU, RAM, Disk I/O, and Network telemetry charts wrapped in a sleek glassmorphism UI with low-spec PC optimization.</p>
     </td>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #ff00ff;">⚡ Performance Tuning</h3>
-      <p>Unleash maximum performance. Instantly apply one-click optimizations for CPU core parking, RAM management, process scheduling priorities, and Windows visual effects.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #ffff00;">🎮 Gaming Pro Mode</h3>
-      <p>Gain the competitive edge. Reduce input latency, block background distractions, apply optimal GPU settings, and activate dedicated eSports gaming presets for higher FPS.</p>
-    </td>
-    <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #00ffcc;">🛡️ Privacy Guard</h3>
-      <p>Reclaim your data. Disable intrusive Windows telemetry, put a stop to tracking services, and lock down your personal information with uncompromising privacy controls.</p>
+      <h3 style="color: #00FFDE;">⚡ MA ProBalance Process Governor</h3>
+      <p>Prevents micro-stutters under heavy CPU load by dynamically adjusting thread priority. Features SmartTrim working set RAM purging and CPU Core Unparking.</p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #ff5500;">🧹 Deep Cleaner</h3>
-      <p>Free up precious disk space. Automatically purge gigabytes of temporary files, stale Windows Update caches, browser residuals, and system logs safely and quickly.</p>
+      <h3 style="color: #FF003C;">🎮 Low Latency &amp; FPS Engine</h3>
+      <p>1:1 raw mouse curve stripper, Message Signaled Interrupts (MSI Mode) for GPU/NIC drivers, and Multimedia Class Scheduler priority dedication.</p>
     </td>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #4287f5;">🛠️ System Repair</h3>
-      <p>Fix common errors effortlessly. Automated integration of powerful native Windows tools like SFC, DISM, and Network resets to resolve complex system corruptions.</p>
+      <h3 style="color: #a855f7;">🌐 Multi-Path Connection Engine</h3>
+      <p>Parallel interface packet delivery, QoS DSCP 46 packet tagging, live TCP socket latency diagnostics, and Steam/Epic download acceleration.</p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #38B2AC;">📥 App Center & Installer</h3>
-      <p>Set up a new PC in minutes. Browse and batch-install essential software directly from the app via lightning-fast Microsoft Winget integration.</p>
+      <h3 style="color: #00FFDE;">🛡️ Anti-Telemetry &amp; OS Privacy</h3>
+      <p>Granular Windows 10/11 telemetry blocking, activity harvesting prevention, location tracking disablement, and Windows Copilot/Recall control.</p>
     </td>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #ff2a2a;">🏎️ MA Power Plan</h3>
-      <p>No more compromises. Install and activate our exclusive, community-tested custom power plan engineered specifically for sustained peak performance.</p>
+      <h3 style="color: #4287f5;">🛠️ Hardware Driver Manager</h3>
+      <p>PnP device tree inspection, driver backups, legacy driver cleanup, and hardware diagnostics via native Windows <code style="color: #00FFDE;">pnputil</code> API.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" style="padding: 20px;">
+      <h3 style="color: #38B2AC;">📥 Winget App Center &amp; Icon CDN</h3>
+      <p>Browse, search, and batch-install curated software (including Thorium Browser AVX2) with high-resolution brand logos powered by IconHorse CDN.</p>
+    </td>
+    <td width="50%" valign="top" style="padding: 20px;">
+      <h3 style="color: #ff2a2a;">👑 MA Power Plan</h3>
+      <p>Inject and activate our community-tested custom power plan engineered specifically for sustained peak CPU performance and minimum DPC latency.</p>
     </td>
   </tr>
 </table>
@@ -115,13 +115,13 @@
 <table border="0" style="border-collapse: collapse; width: 100%; border: none;">
   <tr>
     <td width="33%" align="center" style="border: none; padding: 10px;">
-      <img src="Visual%20Tour%20img/1%20(1).png" alt="Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(0, 255, 255, 0.2);" />
+      <img src="Visual%20Tour%20img/dashboard.png" alt="Dashboard" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(0, 255, 255, 0.2);" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 10px;">
-      <img src="Visual%20Tour%20img/1%20(2).png" alt="Performance" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(255, 0, 255, 0.2);" />
+      <img src="Visual%20Tour%20img/probalance_process_governor.png" alt="ProBalance Process Governor" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(255, 0, 255, 0.2);" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 10px;">
-      <img src="Visual%20Tour%20img/1%20(3).png" alt="Gaming" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(255, 255, 0, 0.2);" />
+      <img src="Visual%20Tour%20img/multipath_connection_engine.png" alt="Multi-Path Connection Engine" width="100%" style="border-radius: 12px; box-shadow: 0 10px 20px rgba(255, 255, 0, 0.2);" />
     </td>
   </tr>
 </table>
@@ -129,52 +129,63 @@
 <br>
 
 <details>
-<summary><b>🖼️ Click to Expand Full Visual Gallery (12 More Images)</b></summary>
+<summary><b>🖼️ Click to Expand Full Visual Gallery (All 18 Module Screens)</b></summary>
 <br>
 
 <table border="0" style="border-collapse: collapse; width: 100%; border: none;">
   <tr>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(4).png" alt="Privacy Guard" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/low_latency_fps_engine.png" alt="Low Latency FPS Engine" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(5).png" alt="Deep Cleaner" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/performance_tuning.png" alt="Performance Tuning" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(6).png" alt="System Repair" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(7).png" alt="App Center" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
-    </td>
-    <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(8).png" alt="Power Plan" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
-    </td>
-    <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(9).png" alt="Tour 9" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/ma_power_plan.png" alt="MA Power Plan" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
   </tr>
   <tr>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(10).png" alt="Tour 10" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/network_dns_benchmark.png" alt="Network DNS Benchmarks" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(11).png" alt="Tour 11" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/anti_telemetry_privacy.png" alt="Anti-Telemetry Privacy" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(12).png" alt="Tour 12" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/esports_gaming_mode.png" alt="eSports Gaming Mode" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
   </tr>
   <tr>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(13).png" alt="Tour 13" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/junk_registry_cleaner.png" alt="Junk Registry Cleaner" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(14).png" alt="Tour 14" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/startup_app_controller.png" alt="Startup App Controller" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
     <td width="33%" align="center" style="border: none; padding: 8px;">
-      <img src="Visual%20Tour%20img/1%20(15).png" alt="Tour 15" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+      <img src="Visual%20Tour%20img/winget_app_installer.png" alt="Winget App Installer" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/hardware_driver_manager.png" alt="Hardware Driver Manager" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/windows_utility_tools.png" alt="Windows Utility Tools" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/system_repair_sfc_dism.png" alt="System Repair SFC DISM" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/advanced_tweaks.png" alt="Advanced System Tweaks" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/system_benchmark.png" alt="System Benchmarking" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
+    </td>
+    <td width="33%" align="center" style="border: none; padding: 8px;">
+      <img src="Visual%20Tour%20img/about_system_info.png" alt="About MA-Optimizer" width="100%" style="border-radius: 8px; border: 1px solid #1a1c29;" />
     </td>
   </tr>
 </table>
@@ -199,9 +210,9 @@ irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" 
 ### 📦 Manual Install
 
 If you prefer to install things manually:
-1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases) page.
-2. Download the latest `MA.Optimizer.Setup.exe`.
-3. Run the installer (Administrator privileges are required for system tweaks to take effect).
+1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases/tag/v11.0) page.
+2. Download `v11.0.MA-Optimizer.Installer.Setup.exe` (Installer) or `v11.0.MA-Optimizer.Portable.exe` (Portable).
+3. Run the application (Administrator privileges are required for system tweaks to take effect).
 
 ---
 

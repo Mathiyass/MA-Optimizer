@@ -187,3 +187,74 @@ ipcMain.handle('network:nslookup', async (_, host: string) => {
     const safeHost = String(host).replace(/[&|;'`"<>]/g, '')
     return await runCmd('nslookup', [safeHost], 10000)
 })
+
+ipcMain.handle('network:testPacketSize', async (_, host: string, bytes: number) => {
+    try {
+        const safeHost = String(host).replace(/[&|;'`"<>]/g, '')
+        const safeBytes = Math.min(Math.max(64, parseInt(String(bytes)) || 1472), 1500)
+        const start = Date.now()
+        const result = await runCmd('ping', ['-f', '-l', String(safeBytes), '-n', '1', safeHost], 4000)
+        const ms = Date.now() - start
+        const isFragmented = result.toLowerCase().includes('fragmented') || result.toLowerCase().includes('too large')
+        const isSuccess = !isFragmented && (result.toLowerCase().includes('bytes=') || result.toLowerCase().includes('reply from'))
+        return { bytes: safeBytes, success: isSuccess, ms: isSuccess ? ms : -1 }
+    } catch {
+        return { bytes, success: false, ms: -1 }
+    }
+})
+
+ipcMain.handle('network:exportTcpConfig', async () => {
+    try {
+        const ps = `Get-NetTCPSetting | ConvertTo-Json`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        return result
+    } catch {
+        return null
+    }
+})
+
+ipcMain.handle('network:importTcpConfig', async (_, settings: any) => {
+    try {
+        if (!settings || typeof settings !== 'object') return false
+        if (settings.AutoTuningLevelLocal) {
+            await runCmd('netsh', ['int', 'tcp', 'set', 'global', `autotuninglevel=${settings.AutoTuningLevelLocal}`])
+        }
+        if (settings.CongestionProvider) {
+            await runCmd('netsh', ['int', 'tcp', 'set', 'global', `congestionprovider=${settings.CongestionProvider}`])
+        }
+        if (settings.EcnCapability) {
+            await runCmd('netsh', ['int', 'tcp', 'set', 'global', `ecncapability=${settings.EcnCapability}`])
+        }
+        sendLog('[Network] Imported TCP Configuration profile successfully')
+        return true
+    } catch (e: any) {
+        sendError(`Failed to import TCP config: ${e.message}`)
+        return false
+    }
+})
+
+ipcMain.handle('network:benchmarkDns', async () => {
+    const servers = [
+        { name: 'Cloudflare', primary: '1.1.1.1', secondary: '1.0.0.1' },
+        { name: 'Google Public DNS', primary: '8.8.8.8', secondary: '8.8.4.4' },
+        { name: 'Quad9 Security', primary: '9.9.9.9', secondary: '149.112.112.112' },
+        { name: 'AdGuard AdBlock', primary: '94.140.14.14', secondary: '94.140.15.15' },
+        { name: 'OpenDNS Home', primary: '208.67.222.222', secondary: '208.67.220.220' },
+    ]
+
+    const results = []
+    for (const s of servers) {
+        try {
+            const start = Date.now()
+            const pingRes = await runCmd('ping', ['-n', '3', '-w', '1000', s.primary], 3500)
+            const msMatch = pingRes.match(/Average\s*=\s*(\d+)ms/) || pingRes.match(/(\d+)ms/g)
+            const latency = msMatch ? parseInt(Array.isArray(msMatch) ? msMatch[msMatch.length - 1] : msMatch[1]) : (Date.now() - start)
+            results.push({ ...s, latency: isNaN(latency) ? 999 : latency })
+        } catch {
+            results.push({ ...s, latency: 999 })
+        }
+    }
+    return results.sort((a, b) => a.latency - b.latency)
+})
+
+

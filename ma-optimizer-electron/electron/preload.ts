@@ -151,6 +151,16 @@ contextBridge.exposeInMainWorld('api', {
             validate([host], ['string'])
             return ipcRenderer.invoke('network:nslookup', host)
         },
+        testPacketSize: (host: string, bytes: number) => {
+            validate([host, bytes], ['string', 'number'])
+            return ipcRenderer.invoke('network:testPacketSize', host, bytes)
+        },
+        exportTcpConfig: () => ipcRenderer.invoke('network:exportTcpConfig'),
+        importTcpConfig: (settings: any) => {
+            validate([settings], ['object'])
+            return ipcRenderer.invoke('network:importTcpConfig', settings)
+        },
+        benchmarkDns: () => ipcRenderer.invoke('network:benchmarkDns'),
     },
     cleaner: {
         scan: (categories: string[]) => {
@@ -266,6 +276,10 @@ contextBridge.exposeInMainWorld('api', {
             validate([name], ['string'])
             return ipcRenderer.invoke('advanced:computerName', name)
         },
+        launchControlPanel: (applet: string) => {
+            validate([applet], ['string'])
+            return ipcRenderer.invoke('advanced:launchControlPanel', applet)
+        },
     },
     benchmark: {
         runCpu: () => ipcRenderer.invoke('benchmark:cpu'),
@@ -313,6 +327,68 @@ contextBridge.exposeInMainWorld('api', {
             validate([folderPath], ['string'])
             return ipcRenderer.invoke('drivers:backup', folderPath)
         },
+        restore: (folderPath: string) => {
+            validate([folderPath], ['string'])
+            return ipcRenderer.invoke('drivers:restore', folderPath)
+        },
+    },
+    processLasso: {
+        getConfig: () => ipcRenderer.invoke('processLasso:getConfig'),
+        updateConfig: (cfg: any) => {
+            validate([cfg], ['object'])
+            return ipcRenderer.invoke('processLasso:updateConfig', cfg)
+        },
+        setAffinity: (pid: number, mask: number) => {
+            validate([pid, mask], ['number', 'number'])
+            return ipcRenderer.invoke('processLasso:setAffinity', pid, mask)
+        },
+        setIoPriority: (pid: number, level: string) => {
+            validate([pid, level], ['number', 'string'])
+            return ipcRenderer.invoke('processLasso:setIoPriority', pid, level)
+        },
+        toggleCoreParking: (disable: boolean) => {
+            validate([disable], ['boolean'])
+            return ipcRenderer.invoke('processLasso:toggleCoreParking', disable)
+        },
+        runSmartTrim: () => ipcRenderer.invoke('processLasso:runSmartTrim'),
+    },
+    gearup: {
+        getCatalog: () => ipcRenderer.invoke('gearup:getCatalog'),
+        pingGameNodes: (gameId: string) => {
+            validate([gameId], ['string'])
+            return ipcRenderer.invoke('gearup:pingGameNodes', gameId)
+        },
+        enableQosRouting: (gameExe: string) => {
+            validate([gameExe], ['string'])
+            return ipcRenderer.invoke('gearup:enableQosRouting', gameExe)
+        },
+        boostGame: (gameId: string) => {
+            validate([gameId], ['string'])
+            return ipcRenderer.invoke('gearup:boostGame', gameId)
+        },
+        stopBoost: () => ipcRenderer.invoke('gearup:stopBoost'),
+        boostDownloads: () => ipcRenderer.invoke('gearup:boostDownloads'),
+    },
+    hone: {
+        enableMsiMode: () => ipcRenderer.invoke('hone:enableMsiMode'),
+        disableMouseAccel: () => ipcRenderer.invoke('hone:disableMouseAccel'),
+        applyPreset: () => ipcRenderer.invoke('hone:applyPreset'),
+    },
+    exitlag: {
+        getConfig: () => ipcRenderer.invoke('exitlag:getConfig'),
+        updateConfig: (cfg: any) => {
+            validate([cfg], ['object'])
+            return ipcRenderer.invoke('exitlag:updateConfig', cfg)
+        },
+        pingRoutes: (gameId: string) => {
+            validate([gameId], ['string'])
+            return ipcRenderer.invoke('exitlag:pingRoutes', gameId)
+        },
+        enableMultipathRoute: (gameExe: string) => {
+            validate([gameExe], ['string'])
+            return ipcRenderer.invoke('exitlag:enableMultipathRoute', gameExe)
+        },
+        stopRoute: () => ipcRenderer.invoke('exitlag:stopRoute'),
     },
     onLogLine: (cb: (line: string) => void) => {
         const listener = (_: any, line: string) => cb(line)

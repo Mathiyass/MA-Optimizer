@@ -148,3 +148,21 @@ ipcMain.handle('advanced:computerName', async (_, name: string) => {
         return false
     }
 })
+
+// Launch Control Panel applets
+ipcMain.handle('advanced:launchControlPanel', async (_, applet: string) => {
+    try {
+        const allowedApplets = ['control.exe', 'sysdm.cpl', 'ncpa.cpl', 'devmgmt.msc', 'services.msc', 'appwiz.cpl', 'taskmgr.exe', 'cleanmgr.exe', 'main.cpl', 'powercfg.cpl', 'firewall.cpl']
+        const cleanApplet = String(applet).toLowerCase().trim()
+        if (!allowedApplets.includes(cleanApplet)) {
+            throw new Error(`Unauthorized applet: ${applet}`)
+        }
+        await spawnPromise('cmd', ['/c', 'start', '', cleanApplet])
+        sendLog(`[Advanced] Launched applet: ${cleanApplet}`)
+        return true
+    } catch (e: any) {
+        sendError(`Failed to launch applet ${applet}: ${e.message}`)
+        return false
+    }
+})
+

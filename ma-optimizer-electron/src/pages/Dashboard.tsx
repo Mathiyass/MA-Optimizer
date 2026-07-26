@@ -167,9 +167,11 @@ export function Dashboard() {
 
     const quickCards = [
         { icon: Crown, label: 'Power Plan', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'ma-power' as const, desc: 'Flagship performance profile' },
-        { icon: Zap, label: 'CPU & Memory', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'performance' as const, desc: 'Process & resource tuning' },
-        { icon: Shield, label: 'Privacy', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'privacy' as const, desc: 'Advanced OS telemetry control' },
-        { icon: Wifi, label: 'Network', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'network' as const, desc: 'TCP/IP and adapter optimization' },
+        { icon: Zap, label: 'Process Governor', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'process-lasso' as const, desc: 'ProBalance, CPU Affinity & SmartTrim' },
+        { icon: Shield, label: 'Anti-Telemetry Suite', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'privacy' as const, desc: 'OS Privacy Presets & Data Control' },
+        { icon: Wifi, label: 'TCP & MTU Tuner', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'network' as const, desc: 'TCP Optimizer & DNS Benchmark' },
+        { icon: Monitor, label: 'Multi-Path Game Booster', color: 'from-[#FF003C] to-[rgba(255,0,60,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'gaming' as const, desc: 'Multi-path ping & QoS DSCP 46 boost' },
+        { icon: Zap, label: 'Hardware Driver Manager', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'drivers' as const, desc: 'Hardware Device Tree, Backup & Import' },
     ]
 
     const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -489,7 +491,7 @@ export function Dashboard() {
                 </motion.div>
             </div>
 
-            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+            <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
                 {quickCards.map((c, i) => (
                     <motion.button
                         key={i}
