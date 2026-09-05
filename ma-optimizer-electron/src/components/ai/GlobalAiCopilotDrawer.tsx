@@ -26,6 +26,10 @@ import {
     AlertTriangle,
     Layers,
     Lock,
+    Settings,
+    Key,
+    ChevronRight,
+    CheckCircle2,
 } from 'lucide-react'
 import { useAppStore, PageId } from '../../store/appStore'
 import { useSystemStore } from '../../store/systemStore'
@@ -42,6 +46,12 @@ interface ChatMessage {
     text: string
     timestamp: number
     model?: string
+}
+
+interface ActionTag {
+    raw: string
+    type: string
+    param?: string
 }
 
 type PersonaType = 'general' | 'reasoning' | 'gaming' | 'coder' | 'network' | 'latency'
@@ -109,10 +119,26 @@ function getPersonaForPage(page: PageId): PersonaType {
     }
 }
 
+function extractActionTags(text: string): { cleanText: string; actions: ActionTag[] } {
+    const regex = /\[ACTION:([A-Z0-9_]+)(?::([^\]]+))?\]/g
+    const actions: ActionTag[] = []
+    let match: RegExpExecArray | null
+    while ((match = regex.exec(text)) !== null) {
+        actions.push({
+            raw: match[0],
+            type: match[1],
+            param: match[2],
+        })
+    }
+    const cleanText = text.replace(regex, '').trim()
+    return { cleanText, actions }
+}
+
 export function GlobalAiCopilotDrawer() {
     const isAiDrawerOpen = useAppStore((s) => s.isAiDrawerOpen)
     const setAiDrawerOpen = useAppStore((s) => s.setAiDrawerOpen)
     const currentPage = useAppStore((s) => s.currentPage)
+    const setPage = useAppStore((s) => s.setPage)
     const addNotification = useAppStore((s) => s.addNotification)
 
     const cpu = useSystemStore((s) => s.cpu)
@@ -141,16 +167,51 @@ export function GlobalAiCopilotDrawer() {
         {
             id: 'init',
             sender: 'assistant',
-            text: `⚡ **MA-Optimizer Autonomous Neural Copilot Active.**\n\n**Zero-Latency • Kernel Grounded • Real-Time Telemetry**\n\nContinuous system telemetry analysis is running in the background. Ask any diagnostic question, run instantaneous optimizations below, or bridge live telemetry to web intelligence models.`,
+            text: `⚡ **MATHIYA AI Co-Pilot Online**\n\nEngineered with multi-layer intelligence cascade, sub-millisecond local failover, and direct Win32 kernel telemetry.\n\nContinuous system telemetry analysis is active. Ask any diagnostic question, run instantaneous optimizations below, or bridge live telemetry to web intelligence models.\n\n[ACTION:TURBO_BOOST]\n[ACTION:TRIM_RAM]`,
             timestamp: Date.now(),
-            model: 'Autonomous Neural Core',
+            model: 'Autonomous Neural Core (Sub-ms)',
         },
     ])
     const [inputPrompt, setInputPrompt] = useState('')
     const [isStreaming, setIsStreaming] = useState(false)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
+    const [executedActionKeys, setExecutedActionKeys] = useState<Record<string, boolean>>({})
     const [copiedPrompt, setCopiedPrompt] = useState(false)
+    const [showSettingsModal, setShowSettingsModal] = useState(false)
+    const [aiSettings, setAiSettings] = useState({
+        preferredProvider: 'auto',
+        groqKey: '',
+        openrouterKey: '',
+        geminiKey: '',
+        cerebrasKey: '',
+        mistralKey: '',
+    })
+    const [isSavingSettings, setIsSavingSettings] = useState(false)
     const chatEndRef = useRef<HTMLDivElement>(null)
+
+    // Load AI Settings on mount
+    useEffect(() => {
+        const loadSettings = async () => {
+            if (window.api?.ai?.getSettings) {
+                try {
+                    const s = await window.api.ai.getSettings()
+                    if (s) {
+                        setAiSettings({
+                            preferredProvider: s.preferredProvider || 'auto',
+                            groqKey: s.groqKey || '',
+                            openrouterKey: s.openrouterKey || '',
+                            geminiKey: s.geminiKey || '',
+                            cerebrasKey: s.cerebrasKey || '',
+                            mistralKey: s.mistralKey || '',
+                        })
+                    }
+                } catch (e) {
+                    console.error('Failed to load AI settings', e)
+                }
+            }
+        }
+        loadSettings()
+    }, [])
 
     // Set persona based on active page whenever drawer opens or page changes
     useEffect(() => {
@@ -232,7 +293,7 @@ export function GlobalAiCopilotDrawer() {
                                 sender: 'assistant',
                                 text: chunk,
                                 timestamp: Date.now(),
-                                model: model || 'Autonomous Neural Engine',
+                                model: model || 'Autonomous Neural Core',
                             },
                         ]
                     } else {
@@ -343,11 +404,139 @@ export function GlobalAiCopilotDrawer() {
         try {
             await actionFn()
             addNotification('success', successMsg)
+            setExecutedActionKeys((prev) => ({ ...prev, [id]: true }))
         } catch (e: any) {
             addNotification('error', `Action failed: ${e.message || e}`)
         } finally {
             setActionLoading(null)
         }
+    }
+
+    // Handle In-Chat Action Tag Execution
+    const handleTagActionClick = async (action: ActionTag, msgId: string) => {
+        const actionKey = `${msgId}-${action.raw}`
+        if (executedActionKeys[actionKey] || actionLoading === actionKey) return
+
+        switch (action.type) {
+            case 'TURBO_BOOST':
+                await executeAction(
+                    actionKey,
+                    async () => window.api?.heuristic.turboBoost(),
+                    '⚡ Turbo Boost engaged! High priority and thread scheduling applied.'
+                )
+                break
+            case 'TRIM_RAM':
+                await executeAction(
+                    actionKey,
+                    async () => window.api?.system.cleanRam(),
+                    '🔄 RAM working sets swept and reclaimed successfully!'
+                )
+                break
+            case 'UNPARK_CORES':
+                await executeAction(
+                    actionKey,
+                    async () => window.api?.processLasso.toggleCoreParking(true),
+                    '⚙️ All logical CPU cores unparked! Low latency engaged.'
+                )
+                break
+            case 'MSI_MODE':
+                await executeAction(
+                    actionKey,
+                    async () => window.api?.hone.enableMsiMode(),
+                    '🔥 Message Signaled Interrupts (MSI) mode engaged!'
+                )
+                break
+            case 'FLUSH_DNS':
+                await executeAction(
+                    actionKey,
+                    async () => window.api?.network.flushDns(),
+                    '🌐 Windows DNS resolver cache flushed successfully!'
+                )
+                break
+            case 'NAVIGATE':
+                if (action.param) {
+                    setPage(action.param as PageId)
+                    addNotification('success', `Navigated to ${action.param.toUpperCase()} view.`)
+                    setExecutedActionKeys((prev) => ({ ...prev, [actionKey]: true }))
+                }
+                break
+            default:
+                addNotification('info', `Action triggered: ${action.type}`)
+                break
+        }
+    }
+
+    const saveAiSettings = async () => {
+        setIsSavingSettings(true)
+        try {
+            if (window.api?.ai?.saveSettings) {
+                await window.api.ai.saveSettings(aiSettings)
+                addNotification('success', 'AI Copilot settings saved locally!')
+                setShowSettingsModal(false)
+            }
+        } catch (e: any) {
+            addNotification('error', `Failed to save AI settings: ${e.message || e}`)
+        } finally {
+            setIsSavingSettings(false)
+        }
+    }
+
+    const renderActionChip = (action: ActionTag, msgId: string) => {
+        const actionKey = `${msgId}-${action.raw}`
+        const isExecuted = Boolean(executedActionKeys[actionKey])
+        const isLoading = actionLoading === actionKey
+
+        let label = action.type.replace(/_/g, ' ')
+        let Icon = Zap
+        let colorClasses = 'border-[var(--accent-cyan)]/40 bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)]'
+
+        if (action.type === 'TURBO_BOOST') {
+            label = '⚡ Turbo Boost'
+            Icon = Zap
+            colorClasses = 'border-[var(--accent-cyan)]/50 bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] hover:shadow-[0_0_15px_rgba(0,255,222,0.3)]'
+        } else if (action.type === 'TRIM_RAM') {
+            label = '🔄 Trim RAM'
+            Icon = RotateCcw
+            colorClasses = 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+        } else if (action.type === 'UNPARK_CORES') {
+            label = '⚙️ Unpark Cores'
+            Icon = Cpu
+            colorClasses = 'border-indigo-500/50 bg-indigo-500/20 text-indigo-300 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+        } else if (action.type === 'MSI_MODE') {
+            label = '🔥 MSI Mode'
+            Icon = Flame
+            colorClasses = 'border-[#FF003C]/50 bg-[#FF003C]/20 text-[#FF003C] hover:shadow-[0_0_15px_rgba(255,0,60,0.3)]'
+        } else if (action.type === 'FLUSH_DNS') {
+            label = '🌐 Flush DNS'
+            Icon = Globe
+            colorClasses = 'border-sky-500/50 bg-sky-500/20 text-sky-300 hover:shadow-[0_0_15px_rgba(56,189,248,0.3)]'
+        } else if (action.type === 'NAVIGATE') {
+            label = `🧭 Open ${action.param || 'Tab'}`
+            Icon = ChevronRight
+            colorClasses = 'border-purple-500/50 bg-purple-500/20 text-purple-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+        }
+
+        return (
+            <button
+                key={actionKey}
+                onClick={() => handleTagActionClick(action, msgId)}
+                disabled={isExecuted || isLoading}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase transition-all duration-200 border ${
+                    isExecuted
+                        ? 'border-emerald-500/30 bg-emerald-950/40 text-emerald-400 cursor-default'
+                        : colorClasses
+                }`}
+            >
+                {isLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : isExecuted ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                    <Icon className="w-3.5 h-3.5" />
+                )}
+                <span>{isExecuted ? '✓ Calibrated' : label}</span>
+            </button>
+        )
     }
 
     return (
@@ -369,7 +558,7 @@ export function GlobalAiCopilotDrawer() {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-                        className="fixed top-0 right-0 bottom-0 w-full sm:w-[480px] lg:w-[540px] bg-[#0c0e17]/95 backdrop-blur-3xl border-l border-white/10 z-50 flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.8)]"
+                        className="fixed top-0 right-0 bottom-0 w-full sm:w-[480px] lg:w-[560px] bg-[#0c0e17]/95 backdrop-blur-3xl border-l border-white/10 z-50 flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.8)]"
                     >
                         {/* Drawer Header */}
                         <div className="p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
@@ -380,10 +569,10 @@ export function GlobalAiCopilotDrawer() {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-white font-black text-base tracking-wide leading-tight">
-                                            AI Copilot Sidecar
+                                            MATHIYA AI Co-Pilot
                                         </h2>
                                         <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] tracking-wider">
-                                            Autonomous Core
+                                            Multi-Tier
                                         </span>
                                     </div>
                                     <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
@@ -391,17 +580,26 @@ export function GlobalAiCopilotDrawer() {
                                         <span className="text-white font-mono uppercase font-bold">
                                             {currentPage}
                                         </span>{' '}
-                                        • Real-Time Heuristic Suite
+                                        • Live Telemetry Grounded
                                     </p>
                                 </div>
                             </div>
 
-                            <button
-                                onClick={() => setAiDrawerOpen(false)}
-                                className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setShowSettingsModal(true)}
+                                    title="AI Engine & API Keys Configuration"
+                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent-cyan)] hover:bg-white/10 transition-colors"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => setAiDrawerOpen(false)}
+                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Top Telemetry & Bottleneck Strip */}
@@ -564,50 +762,73 @@ export function GlobalAiCopilotDrawer() {
 
                         {/* Chat / Messages Area */}
                         <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-                            {messages.map((m) => (
-                                <div
-                                    key={m.id}
-                                    className={`flex gap-3 ${
-                                        m.sender === 'user' ? 'justify-end' : 'justify-start'
-                                    }`}
-                                >
-                                    {m.sender === 'assistant' && (
-                                        <div className="w-7 h-7 rounded-xl bg-[var(--accent-cyan)]/20 border border-[var(--accent-cyan)]/40 flex items-center justify-center text-[var(--accent-cyan)] shrink-0 mt-0.5">
-                                            <Bot className="w-4 h-4" />
-                                        </div>
-                                    )}
-
+                            {messages.map((m) => {
+                                const { cleanText, actions } = extractActionTags(m.text)
+                                return (
                                     <div
-                                        className={`max-w-[85%] rounded-2xl p-4 text-xs leading-relaxed ${
-                                            m.sender === 'user'
-                                                ? 'bg-[var(--accent-cyan)] text-black font-semibold shadow-[0_0_15px_rgba(0,255,222,0.3)]'
-                                                : 'glass-shell text-text-primary border border-white/5 bg-white/[0.02]'
+                                        key={m.id}
+                                        className={`flex gap-3 ${
+                                            m.sender === 'user' ? 'justify-end' : 'justify-start'
                                         }`}
                                     >
-                                        <div className="whitespace-pre-wrap font-sans">{m.text}</div>
                                         {m.sender === 'assistant' && (
-                                            <div className="mt-2 text-[10px] font-mono text-[var(--accent-cyan)]/70 flex items-center gap-1.5">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] inline-block animate-pulse"></span>
-                                                Autonomous Neural Core • Sub-ms
+                                            <div className="w-7 h-7 rounded-xl bg-[var(--accent-cyan)]/20 border border-[var(--accent-cyan)]/40 flex items-center justify-center text-[var(--accent-cyan)] shrink-0 mt-0.5">
+                                                <Bot className="w-4 h-4" />
+                                            </div>
+                                        )}
+
+                                        <div
+                                            className={`max-w-[88%] rounded-2xl p-4 text-xs leading-relaxed ${
+                                                m.sender === 'user'
+                                                    ? 'bg-[var(--accent-cyan)] text-black font-semibold shadow-[0_0_15px_rgba(0,255,222,0.3)]'
+                                                    : 'glass-shell text-text-primary border border-white/5 bg-white/[0.02]'
+                                            }`}
+                                        >
+                                            <div className="whitespace-pre-wrap font-sans">{cleanText}</div>
+
+                                            {/* Interactive In-Chat Action Execution Chips */}
+                                            {m.sender === 'assistant' && actions.length > 0 && (
+                                                <div className="mt-3 pt-3 border-t border-white/10">
+                                                    <div className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-center gap-1.5">
+                                                        <Zap className="w-3 h-3 text-[var(--accent-cyan)]" />
+                                                        <span>Recommended 1-Click Calibrations:</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {actions.map((act) => renderActionChip(act, m.id))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {m.sender === 'assistant' && (
+                                                <div className="mt-2.5 pt-2 border-t border-white/5 text-[10px] font-mono text-[var(--accent-cyan)]/75 flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] inline-block animate-pulse"></span>
+                                                        <span>{m.model || 'Autonomous Neural Core'}</span>
+                                                    </div>
+                                                    <span className="text-[9px] text-[var(--text-muted)]">
+                                                        {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {m.sender === 'user' && (
+                                            <div className="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
+                                                <User className="w-4 h-4" />
                                             </div>
                                         )}
                                     </div>
-
-                                    {m.sender === 'user' && (
-                                        <div className="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
-                                            <User className="w-4 h-4" />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                )
+                            })}
 
                             {isStreaming && (
                                 <div className="flex gap-3 justify-start">
                                     <div className="w-7 h-7 rounded-xl bg-[var(--accent-cyan)]/20 border border-[var(--accent-cyan)]/40 flex items-center justify-center text-[var(--accent-cyan)] shrink-0">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                     </div>
-                                    <div className="glass-shell rounded-2xl p-3 text-xs text-text-muted border border-white/5">
-                                        Analyzing system telemetry & kernel heuristics...
+                                    <div className="glass-shell rounded-2xl p-3 text-xs text-text-muted border border-white/5 flex items-center gap-2">
+                                        <Sparkles className="w-3.5 h-3.5 text-[var(--accent-cyan)] animate-pulse" />
+                                        <span>Synthesizing Win32 kernel telemetry & multi-layer AI...</span>
                                     </div>
                                 </div>
                             )}
@@ -690,7 +911,7 @@ export function GlobalAiCopilotDrawer() {
                                     type="text"
                                     value={inputPrompt}
                                     onChange={(e) => setInputPrompt(e.target.value)}
-                                    placeholder={`Ask ${PERSONAS[selectedPersona].label} about ${currentPage}...`}
+                                    placeholder={`Ask MATHIYA about ${currentPage} or "What do you think about my PC?"...`}
                                     className="flex-1 bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)]/50 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-[var(--text-muted)] outline-none transition-all"
                                 />
 
@@ -704,6 +925,180 @@ export function GlobalAiCopilotDrawer() {
                             </form>
                         </div>
                     </motion.aside>
+
+                    {/* AI Copilot Settings Modal */}
+                    <AnimatePresence>
+                        {showSettingsModal && (
+                            <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="w-full max-w-lg bg-[#0c0e17] border border-white/15 rounded-2xl shadow-[0_0_50px_rgba(0,255,222,0.15)] overflow-hidden flex flex-col"
+                                >
+                                    <div className="p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-xl bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/30 flex items-center justify-center text-[var(--accent-cyan)]">
+                                                <Settings className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-bold text-white tracking-wide">
+                                                    AI Copilot Engine Settings
+                                                </h3>
+                                                <p className="text-[11px] text-[var(--text-muted)]">
+                                                    Multi-Tier Cascade & Optional Personal API Keys
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowSettingsModal(false)}
+                                            className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                        {/* Security Notice Banner */}
+                                        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-2.5">
+                                            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                                            <div className="text-[11px] text-emerald-300 leading-relaxed">
+                                                <strong>Strict Local Privacy:</strong> Any API keys entered here are stored strictly on your personal device using encrypted local electron-store. Zero keys are ever committed to git or uploaded anywhere.
+                                            </div>
+                                        </div>
+
+                                        {/* Preferred Provider Selection */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-white mb-1.5 uppercase tracking-wider">
+                                                Inference Tier Strategy
+                                            </label>
+                                            <select
+                                                value={aiSettings.preferredProvider}
+                                                onChange={(e) => setAiSettings({ ...aiSettings, preferredProvider: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white outline-none"
+                                            >
+                                                <option value="auto" className="bg-[#0c0e17]">
+                                                    ⚡ Auto Cascade (Groq → Cerebras → Mistral → OpenRouter → Gemini → Pollinations → Kernel)
+                                                </option>
+                                                <option value="groq" className="bg-[#0c0e17]">
+                                                    Groq (Sub-150ms High Speed)
+                                                </option>
+                                                <option value="cerebras" className="bg-[#0c0e17]">
+                                                    Cerebras (Ultra-Fast 2000 TPS)
+                                                </option>
+                                                <option value="openrouter" className="bg-[#0c0e17]">
+                                                    OpenRouter (Global Gateway)
+                                                </option>
+                                                <option value="gemini" className="bg-[#0c0e17]">
+                                                    Google Gemini (1.5 Flash)
+                                                </option>
+                                                <option value="mistral" className="bg-[#0c0e17]">
+                                                    Mistral AI (Small Latest)
+                                                </option>
+                                                <option value="local" className="bg-[#0c0e17]">
+                                                    Autonomous Neural Core (Zero Latency Offline)
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        {/* Optional API Keys */}
+                                        <div className="space-y-3 pt-2">
+                                            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                                                <Key className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                                                <span>Optional Personal API Keys (Zero Config Required)</span>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    Groq API Key
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.groqKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, groqKey: e.target.value })}
+                                                    placeholder="gsk_..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    OpenRouter API Key
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.openrouterKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, openrouterKey: e.target.value })}
+                                                    placeholder="sk-or-..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    Google Gemini API Key
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.geminiKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, geminiKey: e.target.value })}
+                                                    placeholder="AIza..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    Cerebras API Key
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.cerebrasKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, cerebrasKey: e.target.value })}
+                                                    placeholder="csk-..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    Mistral API Key
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.mistralKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, mistralKey: e.target.value })}
+                                                    placeholder="API key..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 border-t border-white/10 bg-white/[0.01] flex items-center justify-end gap-2.5">
+                                        <button
+                                            onClick={() => setShowSettingsModal(false)}
+                                            className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={saveAiSettings}
+                                            disabled={isSavingSettings}
+                                            className="px-5 py-2 rounded-xl bg-[var(--accent-cyan)] hover:bg-[#00e6c8] text-black text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,255,222,0.3)]"
+                                        >
+                                            {isSavingSettings ? (
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            ) : (
+                                                <Check className="w-3.5 h-3.5" />
+                                            )}
+                                            Save Settings
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
                 </>
             )}
         </AnimatePresence>

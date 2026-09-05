@@ -193,6 +193,8 @@ export interface WindowApi {
         setModel: (modelName: string) => Promise<{ activeModel: string }>
         query: (prompt: string, context?: any, queryId?: string, persona?: string) => void
         openWebModel: (service: string) => Promise<{ success: boolean; url: string }>
+        getSettings: () => Promise<{ preferredProvider: string; hasCustomKeys: boolean; groqKey?: string; openrouterKey?: string; geminiKey?: string; cerebrasKey?: string; mistralKey?: string }>
+        saveSettings: (settings: any) => Promise<{ success: boolean }>
     }
     onAiChunk: (cb: (data: { queryId: string; chunk: string; done: boolean; model?: string }) => void) => () => void
     onActivityState: (cb: (state: { activeGame: string | null; isGaming: boolean }) => void) => () => void

@@ -418,6 +418,11 @@ contextBridge.exposeInMainWorld('api', {
             validate([service], ['string'])
             return ipcRenderer.invoke('ai:openWebModel', service)
         },
+        getSettings: () => ipcRenderer.invoke('ai:getSettings'),
+        saveSettings: (settings: any) => {
+            validate([settings], ['object'])
+            return ipcRenderer.invoke('ai:saveSettings', settings)
+        },
     },
     onAiChunk: (cb: (data: { queryId: string; chunk: string; done: boolean; model?: string }) => void) => {
         const listener = (_: any, data: any) => cb(data)

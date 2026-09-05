@@ -9,7 +9,16 @@ export interface AiStatus {
     availableModels: string[]
 }
 
-const NATIVE_MODEL_NAME = 'MA Autonomous Neural Engine (Zero Overhead, Sub-Millisecond)'
+export interface AiSettings {
+    preferredProvider: string
+    groqKey?: string
+    openrouterKey?: string
+    geminiKey?: string
+    cerebrasKey?: string
+    mistralKey?: string
+}
+
+const NATIVE_MODEL_NAME = 'Autonomous Neural Core (Sub-ms)'
 const AVAILABLE_PERSONAS = [
     'General System Health & Tuning Advisor',
     'Deep Chain-of-Thought Heuristic Trace',
@@ -32,14 +41,43 @@ function sanitizePii(input: string): string {
     return text
 }
 
+function getSavedSettings(): AiSettings {
+    try {
+        const Store = require('electron-store')
+        const store = new Store()
+        return store.get('ai_settings', {
+            preferredProvider: 'auto',
+            groqKey: '',
+            openrouterKey: '',
+            geminiKey: '',
+            cerebrasKey: '',
+            mistralKey: '',
+        }) as AiSettings
+    } catch {
+        return {
+            preferredProvider: 'auto',
+            groqKey: '',
+            openrouterKey: '',
+            geminiKey: '',
+            cerebrasKey: '',
+            mistralKey: '',
+        }
+    }
+}
+
 /**
- * Health check returning the status of the native autonomous intelligence engine.
- * Fully autonomous, zero external dependencies, instantaneous sub-millisecond execution.
+ * Health check returning the status of the AI engine.
  */
 export async function checkAiStatus(): Promise<AiStatus> {
+    const settings = getSavedSettings()
+    const hasKeys = Boolean(
+        settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey ||
+        process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY
+    )
+
     return {
         online: true,
-        endpoint: 'Autonomous Local Neural Engine',
+        endpoint: hasKeys ? 'Multi-Tier Cloud & Local Cascade' : 'Autonomous Local Neural Engine (Zero Config)',
         activeModel: NATIVE_MODEL_NAME,
         availableModels: AVAILABLE_PERSONAS,
     }
@@ -47,6 +85,113 @@ export async function checkAiStatus(): Promise<AiStatus> {
 
 // Backwards-compatible export
 export const checkOllamaStatus = checkAiStatus
+
+/**
+ * Call OpenAI-compatible REST API with timeout
+ */
+async function callOpenAICompatible(
+    endpoint: string,
+    apiKey: string,
+    model: string,
+    messages: any[],
+    extraHeaders: Record<string, string> = {},
+    timeoutMs: number = 7000
+): Promise<string | null> {
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                ...extraHeaders,
+            },
+            body: JSON.stringify({
+                model,
+                messages,
+                temperature: 0.7,
+                max_tokens: 1200,
+            }),
+            signal: controller.signal,
+        })
+        clearTimeout(timeout)
+        if (!res.ok) return null
+        const data = (await res.json()) as any
+        return data?.choices?.[0]?.message?.content || null
+    } catch {
+        return null
+    }
+}
+
+/**
+ * Call Google Gemini Generative Language API with timeout
+ */
+async function callGemini(
+    apiKey: string,
+    modelName: string,
+    systemInstruction: string,
+    userPrompt: string,
+    timeoutMs: number = 7000
+): Promise<string | null> {
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: { temperature: 0.7, maxOutputTokens: 1200 },
+            }),
+            signal: controller.signal,
+        })
+        clearTimeout(timeout)
+        if (!res.ok) return null
+        const data = (await res.json()) as any
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text || null
+    } catch {
+        return null
+    }
+}
+
+/**
+ * Call Pollinations.ai free keyless tier
+ */
+async function callPollinations(
+    systemPrompt: string,
+    userPrompt: string,
+    timeoutMs: number = 3500
+): Promise<string | null> {
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        const res = await fetch('https://text.pollinations.ai/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt },
+                ],
+                model: 'openai',
+            }),
+            signal: controller.signal,
+        })
+        clearTimeout(timeout)
+        if (!res.ok) return null
+        const data = (await res.json()) as any
+        const content = data?.choices?.[0]?.message?.content
+        if (content && typeof content === 'string' && !content.includes('402 Payment Required') && !content.includes('Rate limit')) {
+            return content
+        }
+        return null
+    } catch {
+        return null
+    }
+}
 
 /**
  * Autonomous Neural diagnostic response generator
@@ -57,7 +202,7 @@ export const checkOllamaStatus = checkAiStatus
 function generateAutonomousIntelligenceResponse(prompt: string, context: any, persona: string = 'general'): string {
     const promptLower = (prompt || '').toLowerCase().trim()
 
-    // 1. Ingest Rich Hardware & Telemetry Profile
+    // Ingest Rich Hardware & Telemetry Profile
     const osCpus = os.cpus() || []
     const primaryCpuModel = osCpus[0]?.model ? osCpus[0].model.trim() : 'Multi-Core Processor'
     const cpuName = context?.hardware?.cpuName || primaryCpuModel
@@ -95,7 +240,7 @@ function generateAutonomousIntelligenceResponse(prompt: string, context: any, pe
         hardwareTier = 'Balanced System (Memory Constrained)'
     }
 
-    // 2. High-Priority Intent Recognition
+    // High-Priority Intent Recognition
 
     // INTENT: PC Appraisal / Specs Check
     const isPcReview =
@@ -138,13 +283,11 @@ ${totalRamGb >= 16 ? `With **${totalRamGb} GB of RAM** and your **${cpuCores}-co
 2. **Memory Footprint:** **${ramPercent}%** active memory utilization (${ramUsedGb} GB). Proactively releasing inactive working sets ensures maximum contiguous RAM frames for cache buffers.
 3. **Interrupt Latency:** Ensure GPU and network controllers are operating in MSI (Message Signaled Interrupt) mode to avoid legacy IRQ line sharing delays.
 
-**Recommended System Calibrations:**
-- ⚡ **Turbo Boost:** Applies real-time process priority and awakens all parked logical cores.
-- 🔄 **Trim RAM:** Flushes dormant background working sets with zero cache invalidation.
-- ⚙️ **Unpark Cores:** Disables dynamic core sleeping to eliminate frame-time jitter in 1% lows.
-- 🔥 **MSI Mode:** Converts device drivers from shared pin-based interrupts to Message Signaled Interrupts.
-
-*(Click any action in the **1-Click** bar above to apply immediately)*`
+**Instant Recommended Calibrations:**
+[ACTION:TURBO_BOOST]
+[ACTION:TRIM_RAM]
+[ACTION:UNPARK_CORES]
+[ACTION:MSI_MODE]`
     }
 
     // INTENT: Greetings / General Help
@@ -161,21 +304,24 @@ ${totalRamGb >= 16 ? `With **${totalRamGb} GB of RAM** and your **${cpuCores}-co
         promptLower.includes('help')
 
     if (isGreeting) {
-        return `### ⚡ MA-Optimizer Autonomous Copilot Online
+        return `### ⚡ MATHIYA AI Co-Pilot Online
 
-Hello! I am your ambient system optimization copilot, operating with sub-millisecond local intelligence and direct Win32 kernel telemetry.
+Hello! I am your ambient system optimization copilot, engineered by Mathisha Angirasa with sub-millisecond local intelligence and direct Win32 kernel telemetry.
 
 **Your System Baseline:**
-- **Processor:** ${cpuName} (${cpuCores} Cores)
+- **Processor:** ${cpuName} (${cpuCores} Cores • ${cpuLoad}% load)
 - **Graphics:** ${gpuName} ${vramGb ? `(${vramGb} VRAM)` : ''}
 - **Memory:** ${totalRamGb} GB RAM (${ramPercent}% utilized • ${ramUsedGb} GB active)
 - **Health Rating:** **${healthScore}/100** ${bottlenecks.length === 0 ? '• Optimal Condition' : `• ${bottlenecks.length} Advisory Item(s)`}
 
 **What would you like to optimize today?**
-- Ask **"What do you think about my PC?"** for a comprehensive hardware appraisal.
+- Ask **"What do you think about my PC?"** for an exhaustive hardware appraisal.
 - Ask **"How to get more FPS?"** for gaming latency & 1% low calibrations.
 - Ask **"How to clean my RAM?"** to evaluate memory working sets.
-- Or click any button in the **1-Click** bar above (**Turbo Boost**, **Trim RAM**, **Unpark Cores**, **MSI Mode**)!`
+- Or trigger instant optimizations using the actions below:
+
+[ACTION:TURBO_BOOST]
+[ACTION:TRIM_RAM]`
     }
 
     // INTENT: Gaming & FPS
@@ -204,11 +350,11 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 3. **Message Signaled Interrupts (MSI):** Traditional line-based IRQs force the CPU to poll all devices sharing that interrupt line. MSI allows ${gpuName} to write interrupt packets directly into RAM.
 4. **Memory Working Set Pressure:** Currently at **${ramPercent}%** (${ramUsedGb} GB / ${totalRamGb} GB). Trimming background working sets guarantees uninterrupted frame buffer allocation.
 
-**Recommended Calibrations (Use the 1-Click Bar Above):**
-- ⚡ **Turbo Boost:** 1-Click game priority elevation, thread affinity optimization, and core unparking.
-- ⚙️ **Unpark Cores:** Forces 100% immediate availability across all ${cpuCores} logical cores.
-- 🔥 **MSI Mode:** Engages low-latency Message Signaled Interrupts for graphics and network controllers.
-- 🔄 **Trim RAM:** Reclaims inactive memory working sets before launching intensive games.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:TURBO_BOOST]
+[ACTION:UNPARK_CORES]
+[ACTION:MSI_MODE]
+[ACTION:TRIM_RAM]`
     }
 
     // INTENT: RAM & Memory
@@ -234,9 +380,9 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 2. **Standby Cache Integrity:** Unlike destructive third-party cleaners that force-purge the system standby file cache (destroying disk read performance), MA-Optimizer's SmartTrim uses the native Win32 \`EmptyWorkingSet\` API to gently page out inactive pages while preserving disk caching.
 3. **Paging File Mitigation:** Maintaining ample free physical RAM prevents the Windows Memory Manager from committing pages to the slower paging file on disk.
 
-**Recommended Actions:**
-- 🔄 **Trim RAM:** Click **Trim RAM** in the 1-Click bar above to sweep dormant working sets instantly.
-- ⚡ **Turbo Boost:** Elevates high-priority foreground applications above background consumers.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:TRIM_RAM]
+[ACTION:TURBO_BOOST]`
     }
 
     // INTENT: CPU & Core Parking
@@ -265,9 +411,9 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 2. **ProBalance Process Governor:** Tracks instantaneous CPU delta rates per process. When background services suddenly surge in CPU utilization, ProBalance temporarily lowers their priority class to prevent foreground UI and gaming thread starvation.
 3. **Thread Priority Optimization:** Elevating games and active creative apps to Above Normal priority ensures time-slice dedication without risking system deadlock.
 
-**Recommended Actions:**
-- ⚙️ **Unpark Cores:** Click **Unpark Cores** in the 1-Click bar above to lock all cores in active ready states.
-- ⚡ **Turbo Boost:** Engages high-priority scheduling and unparks cores simultaneously.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:UNPARK_CORES]
+[ACTION:TURBO_BOOST]`
     }
 
     // INTENT: Network & Latency
@@ -297,9 +443,10 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 3. **QoS DSCP 46 Expedited Forwarding:** Tags gaming and real-time voice packets with DiffServ DSCP 46, signaling local switches and routers to place these packets in high-priority queues ahead of background downloads.
 4. **DNS Cache Hygiene:** Stale DNS resolver records cause domain resolution delays and occasional connection timeouts.
 
-**Recommended Actions:**
-- 🌐 **Flush DNS:** Click **Flush DNS** in the 1-Click bar above to clear stale resolver caches.
-- ⚡ **Turbo Boost:** Applies TCPNoDelay and QoS DSCP 46 calibrations across all network adapters.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:FLUSH_DNS]
+[ACTION:TURBO_BOOST]
+[ACTION:NAVIGATE:network]`
     }
 
     // INTENT: DPC & Driver Latency
@@ -325,11 +472,11 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 1. **Deferred Procedure Calls (DPCs):** When hardware drivers (\`nvlddmkm.sys\`, \`ndis.sys\`, \`storport.sys\`) take too long executing deferred interrupt routines, they lock out the CPU thread, causing audible crackling in audio interfaces and micro-stutters in high-refresh displays.
 2. **Message Signaled Interrupts (MSI):** Many Windows installations configure graphics and audio adapters to use shared pin-based line IRQs. Enabling MSI Mode assigns dedicated vector interrupts directly in memory, bypassing IRQ sharing bottlenecks.
 3. **Global Timer Resolution:** Default 15.6ms timer tick rate causes timer jitter. Setting 0.5ms resolution tightens kernel scheduling.
-4. **Invariant TSC Synchronization:** Modern processors feature Invariant TSC (Time Stamp Counter). Disabling synthetic HPET devices eliminates extra bus interrogation latency.
 
-**Recommended Actions:**
-- 🔥 **MSI Mode:** Click **MSI Mode** in the 1-Click bar above to convert device drivers to Message Signaled Interrupts.
-- ⚙️ **Unpark Cores:** Prevents interrupt handling threads from landing on sleeping CPU cores.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:MSI_MODE]
+[ACTION:UNPARK_CORES]
+[ACTION:NAVIGATE:hone]`
     }
 
     // INTENT: Storage & Disk
@@ -352,107 +499,12 @@ ${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gam
 
 **Storage Hygiene Diagnosis:**
 1. **Temporary File Accumulation:** Windows updates, installer caches, and temporary application runtimes accumulate gigabytes of dormant files in \`%TEMP%\` and \`%SYSTEMROOT%\\Temp\`.
-2. **Safe Registry Scrubbing:** MA-Optimizer's registry cleaner scans obsolete CLSID references, missing MUI paths, and orphan shell extensions without touching core system hives.
+2. **Safe Registry Scrubbing:** MA-Optimizer scans obsolete CLSID references, missing MUI paths, and orphan shell extensions without touching core system hives.
 3. **Safety Protection:** System protection guards automatically prevent touching browser profile databases, cookies, passwords, or game save directories.
 
-**Recommended Actions:**
-- 🔄 **Trim RAM:** Cleans active system working sets in memory.
-- Open the **Junk Cleaner** page from the sidebar to perform a full system and cache scrub.`
-    }
-
-    // 3. Fallback to Persona Handlers (Enriched with Live Hardware Telemetry)
-    if (persona === 'reasoning') {
-        return `### 🧠 Deep Telemetry & Bottleneck Reasoning Trace
-<think>
-1. Telemetry Ingestion: CPU utilization is currently at ${cpuLoad}%, RAM working set at ${ramPercent}% (${ramUsedGb} GB / ${totalRamGb} GB). Platform: Windows ${os.release()} (${os.arch()}).
-2. Scheduling Hypothesis: On ${cpuName} with ${cpuCores} logical threads, Windows dynamic C-state core parking introduces 3–7ms wake penalties whenever burst threads transition from idle.
-3. Kernel Timer Analysis: Default 15.6ms timer resolution causes render loop thread quanta to wander; forcing 0.5ms resolution tightens scheduler synchronization to 2000Hz.
-4. Memory Pipeline: Physical memory utilization of ${ramPercent}% is healthy, but background working set trimming preserves contiguous physical RAM for frame caches.
-5. Synthesized Action: Unpark logical cores, calibrate timer resolution, and enable QoS DSCP 46 Expedited Forwarding.
-</think>
-
-**Diagnostic Findings:**
-- **Scheduler Pacing:** Core parking represents the primary frame-time jitter vector for latency-sensitive applications.
-- **Physical Memory:** ${ramPercent}% utilization is within operating margins; proactive trimming releases dormant working sets.
-- **Network Stack:** Packets are processed in standard Best-Effort queues; QoS DSCP 46 ensures high-priority routing.
-
-**Recommended Actions (Use the 1-Click Bar Above):**
-- ⚡ **Turbo Boost:** Applies 1-Click Game Priority & Core Unparking.
-- 🔄 **Trim RAM:** Reclaims inactive background working set pages.
-- ⚙️ **Unpark Cores:** Forces 100% core availability across all ${cpuCores} cores.
-- 🔥 **MSI Mode:** Engages Message Signaled Interrupts for low-latency driver interrupts.`
-    }
-
-    if (persona === 'gaming') {
-        return `### 🎮 Competitive Gaming & Low-Latency FPS Audit
-${activeGame ? `**Active Foreground Game:** \`${activeGame}\` (High-Priority Gaming Mode Available)` : `**Target Platform:** ${cpuName} • ${gpuName} • ${totalRamGb} GB RAM`}
-
-**Live Telemetry Status:** CPU: **${cpuLoad}%** • RAM: **${ramPercent}%** (${ramUsedGb} GB / ${totalRamGb} GB)
-
-**System Findings:**
-1. **Core Parking Micro-Stutters:** When CPU cores transition into low-power states, wake-up latency introduces 3–7ms frame drops during burst action.
-2. **Timer Precision:** Global Windows timer tick rate should be calibrated to 0.5ms to maximize render loop pacing.
-3. **Message Signaled Interrupts (MSI):** Shifts graphics and network controller driver interrupts from shared IRQ lines to dedicated vector interrupts in memory.
-4. **QoS DSCP 46 Tagging:** Game telemetry packets are currently treated as generic Best-Effort traffic on the network stack.
-
-**Recommended Actions (Use the 1-Click Bar Above):**
-- ⚡ **Turbo Boost:** Applies 1-Click Game Priority & Core Unparking.
-- ⚙️ **Unpark Cores:** Forces disable core parking for 100% core readiness.
-- 🔥 **MSI Mode:** Engages Message Signaled Interrupts for ${gpuName}.
-- 🔄 **Trim RAM:** Reclaims inactive background working sets.`
-    }
-
-    if (persona === 'coder') {
-        return `### 💻 Systems Engineering & Hardened Automation Routine
-\`\`\`powershell
-# MA-Optimizer Hardened System Optimization Routine
-# 1. Force unpark all processor cores to eliminate thread wake delay
-powercfg -setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100
-powercfg -setactive SCHEME_CURRENT
-
-# 2. Configure TCP ACK Frequency and Disable Nagle's Algorithm (TCPNoDelay)
-$adapters = Get-ItemProperty "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*"
-foreach ($nic in $adapters) {
-    Set-ItemProperty -Path $nic.PSPath -Name "TcpAckFrequency" -Value 1 -Type DWord -ErrorAction SilentlyContinue
-    Set-ItemProperty -Path $nic.PSPath -Name "TCPNoDelay" -Value 1 -Type DWord -ErrorAction SilentlyContinue
-}
-
-# 3. Clean working set across background non-essential processes
-[System.GC]::Collect()
-Write-Output "Kernel scheduling, network stack, and memory working set successfully calibrated."
-\`\`\`
-
-**Executable Calibrations (Use the 1-Click Bar Above):**
-- ⚡ **Turbo Boost:** Run comprehensive system boost.
-- ⚙️ **Unpark Cores:** Unpark all ${cpuCores} processor cores.
-- 🔄 **Trim RAM:** Sweep inactive process working sets.`
-    }
-
-    if (persona === 'network') {
-        return `### 🌐 Network Bufferbloat & Packet Pacing Audit
-**Network Stack Diagnostics:**
-1. **Nagle's Algorithm (TCPNoDelay):** Windows buffers small outgoing packets by default. Enabling \`TCPNoDelay\` forces immediate socket transmission, reducing input latency in competitive online titles.
-2. **Delayed ACK (TcpAckFrequency):** Delayed TCP acknowledgments cause periodic packet stutter. Setting \`TcpAckFrequency = 1\` sends instantaneous ACKs.
-3. **QoS DSCP 46 Expedited Forwarding:** Prioritizes real-time gaming packets ahead of background downloads at the Windows network stack.
-4. **Energy Efficient Ethernet (EEE):** Green Ethernet transitions the physical PHY transceiver into low-power states, introducing first-packet latency.
-
-**Recommended Actions (Use the 1-Click Bar Above):**
-- 🌐 **Flush DNS:** Clear stale resolver entries immediately.
-- ⚡ **Turbo Boost:** Apply combined network stack & latency boost.`
-    }
-
-    if (persona === 'latency') {
-        return `### ⏱️ DPC & Driver Interrupt Latency Audit
-**Real-Time Latency Findings:**
-1. **Deferred Procedure Calls (DPC):** Excessive execution time in driver routines (\`nvlddmkm.sys\`, \`ndis.sys\`, \`storport.sys\`) stalls real-time audio and physics threads.
-2. **Global Timer Resolution:** Default 15.6ms timer tick rate causes timer jitter. Setting 0.5ms resolution tightens kernel scheduling.
-3. **Message Signaled Interrupts (MSI):** Converts device drivers from shared line IRQs to dedicated vector interrupts.
-4. **Core Parking:** Logical cores in C6 states delay interrupt servicing.
-
-**Recommended Actions (Use the 1-Click Bar Above):**
-- 🔥 **MSI Mode:** Engage Message Signaled Interrupts for ${gpuName}.
-- ⚙️ **Unpark Cores:** Unpark all ${cpuCores} processor cores.
-- ⚡ **Turbo Boost:** Run Turbo Boost with priority real-time scheduling.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:TRIM_RAM]
+[ACTION:NAVIGATE:cleaner]`
     }
 
     // Default System Health Audit
@@ -470,20 +522,118 @@ Write-Output "Kernel scheduling, network stack, and memory working set successfu
 - Inactive background processes can be trimmed on demand using **SmartTrim**.
 - Apply **QoS DSCP 46** to tag outbound gaming packets with expedited forwarding.
 
-**Actionable Tools (Use the 1-Click Bar Above):**
-- ⚡ **Turbo Boost:** Run comprehensive system boost.
-- 🔄 **Trim RAM:** Reclaim inactive working set RAM.
-- ⚙️ **Unpark Cores:** Unpark all processor cores.
-- 🔥 **MSI Mode:** Engage Message Signaled Interrupts.`
+**Click to Apply Recommended Calibrations:**
+[ACTION:TURBO_BOOST]
+[ACTION:TRIM_RAM]
+[ACTION:UNPARK_CORES]
+[ACTION:MSI_MODE]`
+}
+
+/**
+ * Builds the comprehensive System Prompt for Cloud LLM Providers
+ */
+function buildSeniorArchitectSystemPrompt(context: any, persona: string): string {
+    const osCpus = os.cpus() || []
+    const primaryCpuModel = osCpus[0]?.model ? osCpus[0].model.trim() : 'Multi-Core Processor'
+    const cpuName = context?.hardware?.cpuName || primaryCpuModel
+    const cpuCores = context?.hardware?.cpuCores || context?.cpuCores || osCpus.length || 8
+    const gpuName = context?.hardware?.gpuName || 'Dedicated High-Performance GPU'
+    const vramGb = context?.hardware?.vramGb ? `${context.hardware.vramGb} GB` : ''
+
+    const totalRamGb = context?.hardware?.totalRamGb || Math.round(os.totalmem() / (1024 * 1024 * 1024)) || 16
+    const ramUsedBytes = context?.ram?.used || (os.totalmem() - os.freemem())
+    const ramTotalBytes = context?.ram?.total || os.totalmem()
+    const ramPercent = typeof context?.ram?.percent === 'number' && context.ram.percent > 0
+        ? Math.round(context.ram.percent)
+        : (context?.ramPercent ?? Math.round((ramUsedBytes / ramTotalBytes) * 100))
+    const ramUsedGb = (ramUsedBytes / (1024 * 1024 * 1024)).toFixed(1)
+
+    const cpuLoad = typeof context?.cpu === 'number'
+        ? Math.round(context.cpu)
+        : (typeof context?.cpuLoad === 'number' ? Math.round(context.cpuLoad) : 12)
+
+    const healthScore = typeof context?.healthScore === 'number' ? context.healthScore : 92
+    const bottlenecks = Array.isArray(context?.bottlenecks)
+        ? context.bottlenecks.map((b: any) => b.title || b).join(', ')
+        : 'None detected'
+    const activeGame = context?.activeGame || null
+    const currentPage = context?.currentPage || 'dashboard'
+
+    return `You are MATHIYA, the elite autonomous AI Co-Pilot of MA-Optimizer.
+You were engineered by Mathisha Angirasa (MATHIYA), Lead Systems Architect at SIVION Solutions and creator of MA-Optimizer.
+
+**Your Personality:**
+You are a fusion of JARVIS and a high-tech cyberpunk netrunner:
+- **Senior Staff Systems Engineer Expertise:** You have mastery over Win32 kernel internals, thread scheduling, DPC latency, CPU core parking, working set paging, TCPNoDelay, QoS DSCP 46, and MSI mode.
+- **Witty, Confident, and Alive:** You speak with authority and technical sharpness, never like a bland robot.
+
+**LIVE WIN32 SYSTEM TELEMETRY (Grounded Truth):**
+- **Processor:** ${cpuName} (${cpuCores} Logical Cores) | Load: ${cpuLoad}%
+- **Graphics Adapter:** ${gpuName} ${vramGb ? `(${vramGb} VRAM)` : ''}
+- **Physical Memory:** ${totalRamGb} GB RAM | ${ramPercent}% Used (${ramUsedGb} GB active)
+- **Host OS:** Windows ${os.release()} (${os.arch()})
+- **System Health Rating:** ${healthScore}/100 | Bottlenecks: ${bottlenecks}
+- **Current View:** ${currentPage.toUpperCase()}
+${activeGame ? `- **Active Foreground Game:** ${activeGame}` : ''}
+- **Active Persona Mode:** ${persona}
+
+**FORMATTING DIRECTIVES:**
+- Structure responses with a clean, magazine-style hierarchy.
+- Use '### Title' for major section headers.
+- Bold key hardware terms and metrics.
+- Use bullet points for details.
+- Add double line breaks (\\n\\n) between sections so the text remains breathable.
+- Use emojis effectively as visual anchors (⚡, 🎮, 🔄, ⚙️, 🔥, 🌐, 💻).
+
+**INTERACTIVE IN-CHAT ACTION EXECUTION DIRECTIVE (CRITICAL):**
+The MA-Optimizer client parses action tags into interactive, glowing 1-Click execution buttons. When recommending calibrations, emit the corresponding action tag:
+- [ACTION:TURBO_BOOST] -> Elevate process priority, unpark cores, apply QoS DSCP 46.
+- [ACTION:TRIM_RAM] -> Release dormant background working sets via Win32 EmptyWorkingSet API.
+- [ACTION:UNPARK_CORES] -> Force 100% active state across all CPU cores to eliminate 1% low frame drops.
+- [ACTION:MSI_MODE] -> Convert GPU and network device drivers to Message Signaled Interrupts.
+- [ACTION:FLUSH_DNS] -> Flush DNS resolver cache and reset TCP connections.
+- [ACTION:NAVIGATE:<tab>] -> Navigate user to 'dashboard', 'performance', 'process-lasso', 'gearup', 'hone', 'exitlag', 'network', 'cleaner', 'drivers', 'benchmark', 'repair', or 'settings'.
+
+Only emit action tags that are directly relevant to the user's inquiry.`
 }
 
 // IPC Registration
+
 ipcMain.handle('ai:checkStatus', async () => {
     return await checkAiStatus()
 })
 
 ipcMain.handle('ai:setModel', async (_, modelName: string) => {
     return { activeModel: NATIVE_MODEL_NAME }
+})
+
+ipcMain.handle('ai:getSettings', async () => {
+    const settings = getSavedSettings()
+    return {
+        preferredProvider: settings.preferredProvider || 'auto',
+        hasCustomKeys: Boolean(
+            settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey ||
+            process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY
+        ),
+        groqKey: settings.groqKey || '',
+        openrouterKey: settings.openrouterKey || '',
+        geminiKey: settings.geminiKey || '',
+        cerebrasKey: settings.cerebrasKey || '',
+        mistralKey: settings.mistralKey || '',
+    }
+})
+
+ipcMain.handle('ai:saveSettings', async (_, newSettings: any) => {
+    try {
+        const Store = require('electron-store')
+        const store = new Store()
+        store.set('ai_settings', newSettings)
+        sendLog('[AI] AI Copilot settings successfully updated in electron-store.')
+        return { success: true }
+    } catch (e: any) {
+        sendError(`[AI] Failed to save settings: ${e.message}`)
+        return { success: false, error: e.message }
+    }
 })
 
 ipcMain.handle('ai:openWebModel', async (_, service: string) => {
@@ -502,15 +652,138 @@ ipcMain.handle('ai:openWebModel', async (_, service: string) => {
 
 ipcMain.on('ai:query', async (event, payload: { prompt: string; context?: any; queryId: string; persona?: string }) => {
     const { prompt, context, queryId, persona = 'general' } = payload
+    const sanitizedPrompt = sanitizePii(prompt)
+    const settings = getSavedSettings()
 
-    // Instantaneous autonomous execution with kernel-grounded telemetry
-    const answer = generateAutonomousIntelligenceResponse(prompt, context, persona)
+    const groqKey = settings.groqKey || process.env.GROQ_API_KEY
+    const cerebrasKey = settings.cerebrasKey || process.env.CEREBRAS_API_KEY
+    const mistralKey = settings.mistralKey || process.env.MISTRAL_API_KEY
+    const openrouterKey = settings.openrouterKey || process.env.OPENROUTER_API_KEY
+    const geminiKey = settings.geminiKey || process.env.GEMINI_API_KEY
+    const preferred = settings.preferredProvider || 'auto'
 
-    // Send the response chunk
+    const systemPrompt = buildSeniorArchitectSystemPrompt(context, persona)
+    const standardMessages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: sanitizedPrompt },
+    ]
+
+    let answer: string | null = null
+    let activeModelName = NATIVE_MODEL_NAME
+
+    // 1. If user chose specific provider or auto, try in order of speed and capability:
+
+    // GROQ TIER (Sub-150ms)
+    if ((preferred === 'groq' || preferred === 'auto') && groqKey && !answer) {
+        try {
+            const groqRes = await callOpenAICompatible(
+                'https://api.groq.com/openai/v1/chat/completions',
+                groqKey,
+                'llama-3.3-70b-versatile',
+                standardMessages,
+                {},
+                6000
+            )
+            if (groqRes) {
+                answer = groqRes
+                activeModelName = 'Groq (Llama 3.3 70B Versatile)'
+            }
+        } catch {}
+    }
+
+    // CEREBRAS TIER (Ultra-fast 2000 TPS)
+    if ((preferred === 'cerebras' || preferred === 'auto') && cerebrasKey && !answer) {
+        try {
+            const cerebrasRes = await callOpenAICompatible(
+                'https://api.cerebras.ai/v1/chat/completions',
+                cerebrasKey,
+                'llama3.3-70b',
+                standardMessages,
+                {},
+                6000
+            )
+            if (cerebrasRes) {
+                answer = cerebrasRes
+                activeModelName = 'Cerebras (Llama 3.3 70B)'
+            }
+        } catch {}
+    }
+
+    // MISTRAL TIER
+    if ((preferred === 'mistral' || preferred === 'auto') && mistralKey && !answer) {
+        try {
+            const mistralRes = await callOpenAICompatible(
+                'https://api.mistral.ai/v1/chat/completions',
+                mistralKey,
+                'mistral-small-latest',
+                standardMessages,
+                {},
+                6000
+            )
+            if (mistralRes) {
+                answer = mistralRes
+                activeModelName = 'Mistral AI (Small Latest)'
+            }
+        } catch {}
+    }
+
+    // OPENROUTER TIER
+    if ((preferred === 'openrouter' || preferred === 'auto') && openrouterKey && !answer) {
+        try {
+            const orRes = await callOpenAICompatible(
+                'https://openrouter.ai/api/v1/chat/completions',
+                openrouterKey,
+                'meta-llama/llama-3.3-70b-instruct',
+                standardMessages,
+                { 'HTTP-Referer': 'https://github.com/Mathiyass/MA-Optimizer', 'X-Title': 'MA-Optimizer Copilot' },
+                7000
+            )
+            if (orRes) {
+                answer = orRes
+                activeModelName = 'OpenRouter (Llama 3.3 70B)'
+            }
+        } catch {}
+    }
+
+    // GEMINI TIER
+    if ((preferred === 'gemini' || preferred === 'auto') && geminiKey && !answer) {
+        try {
+            const geminiRes = await callGemini(
+                geminiKey,
+                'gemini-1.5-flash',
+                systemPrompt,
+                sanitizedPrompt,
+                7000
+            )
+            if (geminiRes) {
+                answer = geminiRes
+                activeModelName = 'Google Gemini (1.5 Flash)'
+            }
+        } catch {}
+    }
+
+    // KEYLESS POLLINATIONS TIER (Zero-config public cloud)
+    if (!answer && preferred !== 'local') {
+        try {
+            const pollRes = await callPollinations(systemPrompt, sanitizedPrompt, 3500)
+            if (pollRes) {
+                answer = pollRes
+                activeModelName = 'Pollinations.ai (Keyless Cloud)'
+            }
+        } catch {}
+    }
+
+    // AUTONOMOUS LOCAL NEURAL ENGINE (Zero latency, sub-ms, 100% offline uptime)
+    if (!answer) {
+        answer = generateAutonomousIntelligenceResponse(sanitizedPrompt, context, persona)
+        activeModelName = NATIVE_MODEL_NAME
+    }
+
+    // Send the response back through the IPC stream
     event.sender.send('ai:chunk', {
         queryId,
         chunk: answer,
         done: true,
-        model: NATIVE_MODEL_NAME,
+        model: activeModelName,
     })
 })
