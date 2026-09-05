@@ -61,7 +61,7 @@
     "appId": "com.maoptimizer.app",
     "productName": "MA-Optimizer",
     "directories": {
-      "output": "dist-electron"
+      "output": "release-builds"
     },
     "win": {
       "target": [

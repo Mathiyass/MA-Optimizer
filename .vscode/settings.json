@@ -1,0 +1,12 @@
+{
+  " files.watcherExclude\: {
+ \**/dist-electron/**\: true,
+ \**/dist-vite/**\: true,
+ \**/release-builds/**\: true
+ },
+ \search.exclude\: {
+ \**/dist-electron\: true,
+ \**/dist-vite\: true,
+ \**/release-builds\: true
+ }
+}

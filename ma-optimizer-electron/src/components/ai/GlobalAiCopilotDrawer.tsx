@@ -305,7 +305,7 @@ export function GlobalAiCopilotDrawer() {
                         sender: 'assistant',
                         text: `Diagnostic evaluation for [${currentPage.toUpperCase()}]: Current resources within standard operating margins.`,
                         timestamp: Date.now(),
-                        model: 'Offline Heuristic Engine',
+                        model: 'Autonomous Neural Engine',
                     },
                 ])
                 setIsStreaming(false)
@@ -585,9 +585,10 @@ export function GlobalAiCopilotDrawer() {
                                         }`}
                                     >
                                         <div className="whitespace-pre-wrap font-sans">{m.text}</div>
-                                        {m.model && (
-                                            <div className="mt-2 text-[10px] font-mono opacity-60">
-                                                Model: {m.model}
+                                        {m.sender === 'assistant' && (
+                                            <div className="mt-2 text-[10px] font-mono text-[var(--accent-cyan)]/70 flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-cyan)] inline-block animate-pulse"></span>
+                                                Autonomous Neural Core • Sub-ms
                                             </div>
                                         )}
                                     </div>

@@ -139,6 +139,8 @@ dist-ssr/
 
 # Electron
 release/
+release-builds/
+ma-optimizer-electron/release-builds/
 ma-optimizer-electron/release/
 ma-optimizer-electron/out/
 ma-optimizer-electron/dist/
