@@ -310,6 +310,10 @@ contextBridge.exposeInMainWorld('api', {
         maximize: () => ipcRenderer.send('window:maximize'),
         close: () => ipcRenderer.send('window:close'),
         isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+        toggleCompactMode: (isCompact: boolean) => {
+            validate([isCompact], ['boolean'])
+            return ipcRenderer.invoke('window:toggleCompactMode', isCompact)
+        },
     },
     updates: {
         checkForUpdates: () => ipcRenderer.invoke('updates:check'),
@@ -371,6 +375,7 @@ contextBridge.exposeInMainWorld('api', {
     },
     hone: {
         enableMsiMode: () => ipcRenderer.invoke('hone:enableMsiMode'),
+        disableMsiMode: () => ipcRenderer.invoke('hone:disableMsiMode'),
         disableMouseAccel: () => ipcRenderer.invoke('hone:disableMouseAccel'),
         applyPreset: () => ipcRenderer.invoke('hone:applyPreset'),
     },
@@ -389,6 +394,40 @@ contextBridge.exposeInMainWorld('api', {
             return ipcRenderer.invoke('exitlag:enableMultipathRoute', gameExe)
         },
         stopRoute: () => ipcRenderer.invoke('exitlag:stopRoute'),
+    },
+    heuristic: {
+        getState: () => ipcRenderer.invoke('heuristic:getState'),
+        updateConfig: (cfg: any) => {
+            validate([cfg], ['object'])
+            return ipcRenderer.invoke('heuristic:updateConfig', cfg)
+        },
+        runSmartTrim: () => ipcRenderer.invoke('heuristic:runSmartTrim'),
+        turboBoost: () => ipcRenderer.invoke('heuristic:turboBoost'),
+    },
+    ai: {
+        checkStatus: () => ipcRenderer.invoke('ai:checkStatus'),
+        setModel: (modelName: string) => {
+            validate([modelName], ['string'])
+            return ipcRenderer.invoke('ai:setModel', modelName)
+        },
+        query: (prompt: string, context?: any, queryId?: string, persona?: string) => {
+            validate([prompt], ['string'])
+            ipcRenderer.send('ai:query', { prompt, context, queryId: queryId || Date.now().toString(), persona })
+        },
+        openWebModel: (service: string) => {
+            validate([service], ['string'])
+            return ipcRenderer.invoke('ai:openWebModel', service)
+        },
+    },
+    onAiChunk: (cb: (data: { queryId: string; chunk: string; done: boolean; model?: string }) => void) => {
+        const listener = (_: any, data: any) => cb(data)
+        ipcRenderer.on('ai:chunk', listener)
+        return () => ipcRenderer.removeListener('ai:chunk', listener)
+    },
+    onActivityState: (cb: (state: { activeGame: string | null; isGaming: boolean }) => void) => {
+        const listener = (_: any, state: any) => cb(state)
+        ipcRenderer.on('heuristic:activity', listener)
+        return () => ipcRenderer.removeListener('heuristic:activity', listener)
     },
     onLogLine: (cb: (line: string) => void) => {
         const listener = (_: any, line: string) => cb(line)

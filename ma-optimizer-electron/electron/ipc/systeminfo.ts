@@ -12,15 +12,14 @@ function getSi() {
 
 let lastCpus = os.cpus()
 
-function calculateCpuLoad() {
+export function calculateCpuMetrics(): { currentLoad: number; cpus: number[] } {
     const currentCpus = os.cpus()
     let totalDiff = 0
     let idleDiff = 0
 
-    for (let i = 0; i < currentCpus.length; i++) {
+    const cpuCpus = currentCpus.map((currentCpu, i) => {
         const lastCpu = lastCpus[i]
-        const currentCpu = currentCpus[i]
-        if (!lastCpu || !currentCpu) continue
+        if (!lastCpu) return 0
 
         const lastTotal = Object.values(lastCpu.times).reduce((acc, t) => acc + t, 0)
         const currentTotal = Object.values(currentCpu.times).reduce((acc, t) => acc + t, 0)
@@ -30,12 +29,21 @@ function calculateCpuLoad() {
 
         totalDiff += total
         idleDiff += idle
-    }
+
+        if (total <= 0) return 0
+        const load = Math.round((1 - idle / total) * 100 * 10) / 10
+        return Math.max(0, Math.min(100, load))
+    })
 
     lastCpus = currentCpus
 
-    if (totalDiff === 0) return 0
-    return Math.round((1 - idleDiff / totalDiff) * 100 * 10) / 10
+    let currentLoad = 0
+    if (totalDiff > 0) {
+        currentLoad = Math.round((1 - idleDiff / totalDiff) * 100 * 10) / 10
+        currentLoad = Math.max(0, Math.min(100, currentLoad))
+    }
+
+    return { currentLoad, cpus: cpuCpus }
 }
 
 let lastNetBytes = { rx: 0, tx: 0, time: Date.now() }
@@ -95,23 +103,10 @@ async function getNetworkStats(): Promise<{ rxSec: number, txSec: number }> {
 
 ipcMain.handle('system:cpuUsage', async () => {
     try {
-        const load = calculateCpuLoad()
-        const currentCpus = os.cpus()
-        const cpuCpus = currentCpus.map((cpu, index) => {
-            const lastCpu = lastCpus[index]
-            if (!lastCpu) return 0
-            const lastTotal = Object.values(lastCpu.times).reduce((acc, t) => acc + t, 0)
-            const currentTotal = Object.values(cpu.times).reduce((acc, t) => acc + t, 0)
-            const total = currentTotal - lastTotal
-            const idle = cpu.times.idle - lastCpu.times.idle
-            return total === 0 ? 0 : Math.round((1 - idle / total) * 100 * 10) / 10
-        })
-        lastCpus = currentCpus
-        return {
-            currentLoad: load,
-            cpus: cpuCpus,
-        }
-    } catch { return { currentLoad: 0, cpus: [] } }
+        return calculateCpuMetrics()
+    } catch {
+        return { currentLoad: 0, cpus: [] }
+    }
 })
 
 ipcMain.handle('system:ramUsage', async () => {
@@ -341,11 +336,21 @@ ipcMain.handle('system:setPriority', async (_, pid: number, priority: number) =>
         const safePid = parseInt(String(pid))
         const safePriority = parseInt(String(priority))
         if (isNaN(safePid) || isNaN(safePriority)) return false
-        const ps = `(Get-Process -Id ${safePid}).PriorityClass = ${safePriority}`
+        
+        const priorityMap: Record<number, string> = {
+            64: 'Idle',
+            16384: 'BelowNormal',
+            32: 'Normal',
+            32768: 'AboveNormal',
+            128: 'High',
+            256: 'RealTime',
+        }
+        const priorityName = priorityMap[safePriority] || 'Normal'
+        const ps = `(Get-Process -Id ${safePid} -ErrorAction Stop).PriorityClass = [System.Diagnostics.ProcessPriorityClass]::${priorityName}`
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
             timeout: 5000, encoding: 'utf-8',
         })
-        sendLog(`[System] Set process ${pid} priority to ${priority}`)
+        sendLog(`[System] Set process ${pid} priority to ${priorityName} (${priority})`)
         return true
     } catch (e: any) {
         sendError(`Failed to set priority for ${pid}: ${e.message}`)
@@ -393,18 +398,7 @@ export function startSystemStatsPolling() {
 
         try {
             // CPU: Pure JS
-            const cpuLoad = calculateCpuLoad()
-            const currentCpus = os.cpus()
-            const cpuCpus = currentCpus.map((cpu, index) => {
-                const lastCpu = lastCpus[index]
-                if (!lastCpu) return 0
-                const lastTotal = Object.values(lastCpu.times).reduce((acc, t) => acc + t, 0)
-                const currentTotal = Object.values(cpu.times).reduce((acc, t) => acc + t, 0)
-                const total = currentTotal - lastTotal
-                const idle = cpu.times.idle - lastCpu.times.idle
-                return total === 0 ? 0 : Math.round((1 - idle / total) * 100 * 10) / 10
-            })
-            lastCpus = currentCpus
+            const cpuData = calculateCpuMetrics()
 
             // Memory: Pure JS
             const totalMem = os.totalmem()
@@ -442,10 +436,7 @@ export function startSystemStatsPolling() {
             const netData = await getNetworkStats()
 
             const stats = {
-                cpu: {
-                    currentLoad: cpuLoad,
-                    cpus: cpuCpus,
-                },
+                cpu: cpuData,
                 ram: {
                     total: totalMem,
                     used: usedMem,

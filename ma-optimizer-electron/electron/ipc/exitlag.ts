@@ -88,8 +88,10 @@ Set-NetIPInterface -MultipathEnabled Enabled -ErrorAction SilentlyContinue
 Remove-NetQosPolicy -Name 'MA_Multipath_${safeExe}' -Confirm:$false -ErrorAction SilentlyContinue
 New-NetQosPolicy -Name 'MA_Multipath_${safeExe}' -AppPathNameMatchCondition '${safeExe}' -DSCPAction 46 -PriorityValue 7 -ErrorAction SilentlyContinue
 Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters' -Name 'DisableTaskOffload' -Value 0 -Type DWord -ErrorAction SilentlyContinue
-Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' -Name 'TcpAckFrequency' -Value 1 -Type DWord -ErrorAction SilentlyContinue
-Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' -Name 'TCPNoDelay' -Value 1 -Type DWord -ErrorAction SilentlyContinue
+Get-ChildItem -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' -ErrorAction SilentlyContinue | ForEach-Object {
+    Set-ItemProperty -Path $_.PSPath -Name 'TcpAckFrequency' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $_.PSPath -Name 'TCPNoDelay' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+}
 `
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 8000 })
         sendLog(`[Multi-Path Engine] Engaged Multipath Connection & Jitter Guard for ${gameExe}`)
@@ -152,6 +154,9 @@ ipcMain.handle('exitlag:enableMultipathRoute', async (_, gameExe: string) => {
 
 ipcMain.handle('exitlag:stopRoute', async () => {
     exitLagConfig.activeGameRoute = null
+    try {
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', "Get-NetQosPolicy -Name 'MA_Multipath_*' -ErrorAction SilentlyContinue | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue"], { timeout: 4000 }).catch(() => {})
+    } catch {}
     sendLog('[Multi-Path Engine] Multipath game route deactivated.')
     return true
 })

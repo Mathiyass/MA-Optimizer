@@ -39,8 +39,52 @@ const categories: CleanerCategory[] = [
     { id: 'vscode', name: 'VS Code Cache', paths: [path.join(getEnv('APPDATA'), 'Code', 'Cache'), path.join(getEnv('APPDATA'), 'Code', 'CachedData'), path.join(getEnv('APPDATA'), 'Code', 'Code Cache')] },
     { id: 'slack', name: 'Slack Cache', paths: [path.join(getEnv('APPDATA'), 'Slack', 'Cache'), path.join(getEnv('APPDATA'), 'Slack', 'GPUCache')] },
     { id: 'spotify', name: 'Spotify Cache', paths: [path.join(getEnv('LOCALAPPDATA'), 'Spotify', 'Storage')] },
-    { id: 'steam', name: 'Steam Caches', paths: [path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'appcache'), path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'depotcache'), path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'userdata')] }
+    {
+        id: 'steam',
+        name: 'Steam Caches',
+        paths: [
+            path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'appcache'),
+            path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'depotcache'),
+            path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'htmlcache'),
+            path.join(getEnv('LOCALAPPDATA'), 'Steam', 'htmlcache')
+        ]
+    }
 ]
+
+export function isDangerousPath(dirPath: string): boolean {
+    if (!dirPath || typeof dirPath !== 'string' || !dirPath.trim()) return true
+    const trimmed = dirPath.trim()
+    // Block drive roots like C:, C:\, D:, D:\
+    if (/^[a-zA-Z]:\\?$/.test(trimmed)) return true
+
+    const normalized = path.resolve(trimmed).toLowerCase()
+    const root = path.parse(normalized).root.toLowerCase()
+    if (normalized === root || normalized.length <= 3) return true
+    const userProfile = (getEnv('USERPROFILE') || '').toLowerCase()
+    const appData = (getEnv('APPDATA') || '').toLowerCase()
+    const localAppData = (getEnv('LOCALAPPDATA') || '').toLowerCase()
+    const winDir = (getEnv('WINDIR') || 'c:\\windows').toLowerCase()
+    const progFiles = (getEnv('PROGRAMFILES') || 'c:\\program files').toLowerCase()
+    const progFilesX86 = (getEnv('PROGRAMFILES(X86)') || 'c:\\program files (x86)').toLowerCase()
+
+    const blockedRoots = [
+        'c:\\', 'd:\\', 'e:\\',
+        winDir,
+        path.join(winDir, 'system32').toLowerCase(),
+        progFiles,
+        progFilesX86,
+        userProfile,
+        appData,
+        localAppData,
+        path.join(appData, 'mozilla', 'firefox', 'profiles').toLowerCase(),
+        path.join(progFilesX86, 'steam', 'userdata').toLowerCase(),
+        path.join(progFiles, 'steam', 'userdata').toLowerCase()
+    ]
+    if (blockedRoots.some(b => b && normalized === b)) {
+        return true
+    }
+    return false
+}
 
 async function getDirSize(dirPath: string, pattern?: string): Promise<number> {
     let size = 0
@@ -74,6 +118,10 @@ async function getDirSize(dirPath: string, pattern?: string): Promise<number> {
 }
 
 async function deleteDir(dirPath: string, pattern?: string): Promise<number> {
+    if (isDangerousPath(dirPath)) {
+        sendError(`[Cleaner] Blocked attempt to delete protected path: ${dirPath}`)
+        return 0
+    }
     let freed = 0
     try {
         if (!fs.existsSync(dirPath)) return 0
@@ -106,6 +154,42 @@ async function deleteDir(dirPath: string, pattern?: string): Promise<number> {
         freed = results.reduce((acc, f) => acc + f, 0)
     } catch { }
     return freed
+}
+
+function getFirefoxCacheDirs(): string[] {
+    const localProfiles = path.join(getEnv('LOCALAPPDATA'), 'Mozilla', 'Firefox', 'Profiles')
+    const dirs: string[] = []
+    if (fs.existsSync(localProfiles)) {
+        try {
+            const entries = fs.readdirSync(localProfiles, { withFileTypes: true })
+            for (const entry of entries) {
+                if (entry.isDirectory()) {
+                    const c2 = path.join(localProfiles, entry.name, 'cache2')
+                    const sc = path.join(localProfiles, entry.name, 'startupCache')
+                    if (fs.existsSync(c2)) dirs.push(c2)
+                    if (fs.existsSync(sc)) dirs.push(sc)
+                }
+            }
+        } catch { }
+    }
+    return dirs
+}
+
+function getFirefoxRoamingFiles(filename: string): string[] {
+    const roamingProfiles = path.join(getEnv('APPDATA'), 'Mozilla', 'Firefox', 'Profiles')
+    const files: string[] = []
+    if (fs.existsSync(roamingProfiles)) {
+        try {
+            const entries = fs.readdirSync(roamingProfiles, { withFileTypes: true })
+            for (const entry of entries) {
+                if (entry.isDirectory()) {
+                    const f = path.join(roamingProfiles, entry.name, filename)
+                    if (fs.existsSync(f)) files.push(f)
+                }
+            }
+        } catch { }
+    }
+    return files
 }
 
 // Scan categories for sizes
@@ -156,7 +240,7 @@ ipcMain.handle('cleaner:scanBrowsers', async () => {
     const localAppData = getEnv('LOCALAPPDATA')
     const appData = getEnv('APPDATA')
 
-    const browsers = [
+    const chromiumBrowsers = [
         {
             id: 'chrome', name: 'Google Chrome', profiles: [path.join(localAppData, 'Google', 'Chrome', 'User Data', 'Default')],
             items: [
@@ -204,17 +288,10 @@ ipcMain.handle('cleaner:scanBrowsers', async () => {
                 { id: 'cookies', name: 'Cookies', sub: ['Network\\Cookies'] },
                 { id: 'history', name: 'History', sub: ['History'] }
             ]
-        },
-        // Firefox uses dynamic profiles, simplified for now
-        {
-            id: 'firefox', name: 'Firefox', profiles: [path.join(appData, 'Mozilla', 'Firefox', 'Profiles')],
-            items: [
-                { id: 'cache', name: 'Internet Cache', sub: [] }
-            ]
         }
     ]
 
-    const results = await Promise.all(browsers.map(async b => {
+    const results = await Promise.all(chromiumBrowsers.map(async b => {
         let detected = false
         const scanItems = await Promise.all(b.items.map(async item => {
             let itemSize = 0
@@ -222,10 +299,11 @@ ipcMain.handle('cleaner:scanBrowsers', async () => {
             for (const profile of b.profiles) {
                 if (fs.existsSync(profile)) {
                     detected = true
-                    // if sub is empty, it means we scan the profile root itself (like Firefox)
-                    const targets = item.sub.length > 0 ? item.sub.map(s => path.join(profile, s)) : [profile]
-                    for (const t of targets) {
-                        promises.push(getDirSize(t))
+                    if (item.sub.length > 0) {
+                        const targets = item.sub.map(s => path.join(profile, s))
+                        for (const t of targets) {
+                            promises.push(getDirSize(t))
+                        }
                     }
                 }
             }
@@ -236,6 +314,47 @@ ipcMain.handle('cleaner:scanBrowsers', async () => {
         const totalSize = scanItems.reduce((acc, curr) => acc + curr.size, 0)
         return { id: b.id, name: b.name, detected, size: totalSize, items: scanItems }
     }))
+
+    // Add Firefox specifically with safe path resolution
+    const ffLocal = path.join(localAppData, 'Mozilla', 'Firefox')
+    const ffRoaming = path.join(appData, 'Mozilla', 'Firefox')
+    const ffDetected = fs.existsSync(ffLocal) || fs.existsSync(ffRoaming)
+
+    let ffCacheSize = 0
+    for (const cDir of getFirefoxCacheDirs()) {
+        ffCacheSize += await getDirSize(cDir)
+    }
+
+    let ffCookiesSize = 0
+    for (const cFile of getFirefoxRoamingFiles('cookies.sqlite')) {
+        try {
+            const st = await fs.promises.stat(cFile)
+            ffCookiesSize += st.size
+        } catch { }
+    }
+
+    let ffHistorySize = 0
+    for (const hFile of getFirefoxRoamingFiles('places.sqlite')) {
+        try {
+            const st = await fs.promises.stat(hFile)
+            ffHistorySize += st.size
+        } catch { }
+    }
+
+    const ffItems = [
+        { id: 'cache', name: 'Internet Cache', size: ffCacheSize },
+        { id: 'cookies', name: 'Cookies', size: ffCookiesSize },
+        { id: 'history', name: 'History', size: ffHistorySize }
+    ]
+
+    results.push({
+        id: 'firefox',
+        name: 'Firefox',
+        detected: ffDetected,
+        size: ffCacheSize + ffCookiesSize + ffHistorySize,
+        items: ffItems
+    })
+
     return results
 })
 
@@ -245,7 +364,7 @@ ipcMain.handle('cleaner:cleanBrowsers', async (_, browserSelections: { id: strin
     const appData = getEnv('APPDATA')
     let totalFreed = 0
 
-    const browsers = [
+    const chromiumBrowsers = [
         {
             id: 'chrome', profiles: [path.join(localAppData, 'Google', 'Chrome', 'User Data', 'Default')],
             items: { cache: ['Cache', 'Code Cache'], cookies: ['Network\\Cookies'], history: ['History'] }
@@ -269,10 +388,6 @@ ipcMain.handle('cleaner:cleanBrowsers', async (_, browserSelections: { id: strin
         {
             id: 'operagx', profiles: [path.join(appData, 'Opera Software', 'Opera GX Stable', 'Default')],
             items: { cache: ['Cache', 'Code Cache'], cookies: ['Network\\Cookies'], history: ['History'] }
-        },
-        {
-            id: 'firefox', profiles: [path.join(appData, 'Mozilla', 'Firefox', 'Profiles')],
-            items: { cache: [] }
         }
     ]
 
@@ -280,14 +395,52 @@ ipcMain.handle('cleaner:cleanBrowsers', async (_, browserSelections: { id: strin
 
     for (const selection of browserSelections) {
         const bid = selection.id
-        const browserDef = browsers.find(b => b.id === bid)
+
+        if (bid === 'firefox') {
+            for (const type of selection.types) {
+                if (type === 'cache') {
+                    for (const cDir of getFirefoxCacheDirs()) {
+                        promises.push((async () => {
+                            const freed = await deleteDir(cDir)
+                            if (freed > 0) sendLog(`[Cleaner] Cleaned Firefox cache: ${(freed / 1024 / 1024).toFixed(1)} MB`)
+                            return freed
+                        })())
+                    }
+                } else if (type === 'cookies') {
+                    for (const cFile of getFirefoxRoamingFiles('cookies.sqlite')) {
+                        promises.push((async () => {
+                            try {
+                                const st = await fs.promises.stat(cFile)
+                                await fs.promises.unlink(cFile)
+                                sendLog(`[Cleaner] Cleaned Firefox cookies: ${(st.size / 1024 / 1024).toFixed(1)} MB`)
+                                return st.size
+                            } catch { return 0 }
+                        })())
+                    }
+                } else if (type === 'history') {
+                    for (const hFile of getFirefoxRoamingFiles('places.sqlite')) {
+                        promises.push((async () => {
+                            try {
+                                const st = await fs.promises.stat(hFile)
+                                await fs.promises.unlink(hFile)
+                                sendLog(`[Cleaner] Cleaned Firefox history: ${(st.size / 1024 / 1024).toFixed(1)} MB`)
+                                return st.size
+                            } catch { return 0 }
+                        })())
+                    }
+                }
+            }
+            continue
+        }
+
+        const browserDef = chromiumBrowsers.find(b => b.id === bid)
         if (!browserDef) continue
 
         for (const type of selection.types) {
             const subs = (browserDef.items as any)[type]
-            if (subs) {
+            if (subs && Array.isArray(subs) && subs.length > 0) {
                 for (const profile of browserDef.profiles) {
-                    const targets = subs.length > 0 ? subs.map((s: string) => path.join(profile, s)) : [profile]
+                    const targets = subs.map((s: string) => path.join(profile, s))
                     for (const t of targets) {
                         promises.push((async () => {
                             const freed = await deleteDir(t)

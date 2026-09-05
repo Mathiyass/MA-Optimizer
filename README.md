@@ -61,14 +61,19 @@
 <table align="center" width="100%">
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #00ffff;">📊 Telemetry Dashboard</h3>
-      <p>Monitor your PC's vital stats in real-time. Live CPU, RAM, Disk I/O, and Network telemetry charts wrapped in a sleek glassmorphism UI with low-spec PC optimization.</p>
+      <h3 style="color: #00ffff;">🤖 Ambient AI Copilot &amp; Autonomous Engine</h3>
+      <p>Instantaneous global slide-out assistant (<kbd>Ctrl+Space</kbd>) powered by our sub-millisecond offline heuristic core and Brendan Gregg's USE Method. Zero downloads, zero API keys, and context-aware guidance embedded directly into every single page.</p>
     </td>
+    <td width="50%" valign="top" style="padding: 20px;">
+      <h3 style="color: #00FFDE;">📊 Telemetry Dashboard &amp; AI Radar</h3>
+      <p>Monitor vital hardware stats in real-time. Live CPU, RAM, Disk I/O, and Network telemetry with active game state inference, bottleneck indicators, and one-click smart optimization.</p>
+    </td>
+  </tr>
+  <tr>
     <td width="50%" valign="top" style="padding: 20px;">
       <h3 style="color: #00FFDE;">⚡ MA ProBalance Process Governor</h3>
       <p>Prevents micro-stutters under heavy CPU load by dynamically adjusting thread priority. Features SmartTrim working set RAM purging and CPU Core Unparking.</p>
     </td>
-  </tr>
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
       <h3 style="color: #FF003C;">🎮 Low Latency &amp; FPS Engine</h3>

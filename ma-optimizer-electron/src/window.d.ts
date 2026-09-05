@@ -139,6 +139,7 @@ export interface WindowApi {
         maximize: () => void
         close: () => void
         isMaximized: () => Promise<boolean>
+        toggleCompactMode: (isCompact: boolean) => Promise<{ isCompact: boolean }>
     }
     updates: {
         checkForUpdates: () => Promise<any>
@@ -170,6 +171,7 @@ export interface WindowApi {
     }
     hone: {
         enableMsiMode: () => Promise<boolean>
+        disableMsiMode: () => Promise<boolean>
         disableMouseAccel: () => Promise<boolean>
         applyPreset: () => Promise<{ success: boolean; appliedTweaks: number; message: string }>
     }
@@ -180,10 +182,25 @@ export interface WindowApi {
         enableMultipathRoute: (gameExe: string) => Promise<boolean>
         stopRoute: () => Promise<boolean>
     }
-    onLogLine: (cb: (line: string) => void) => void
+    heuristic: {
+        getState: () => Promise<any>
+        updateConfig: (cfg: any) => Promise<any>
+        runSmartTrim: () => Promise<{ freedMb: number; success: boolean }>
+        turboBoost: () => Promise<{ success: boolean; freedMb: number }>
+    }
+    ai: {
+        checkStatus: () => Promise<{ online: boolean; endpoint: string; activeModel: string; availableModels: string[] }>
+        setModel: (modelName: string) => Promise<{ activeModel: string }>
+        query: (prompt: string, context?: any, queryId?: string, persona?: string) => void
+        openWebModel: (service: string) => Promise<{ success: boolean; url: string }>
+    }
+    onAiChunk: (cb: (data: { queryId: string; chunk: string; done: boolean; model?: string }) => void) => () => void
+    onActivityState: (cb: (state: { activeGame: string | null; isGaming: boolean }) => void) => () => void
+    onLogLine: (cb: (line: string) => void) => () => void
     offLogLine: () => void
-    onAdminStatus: (cb: (ok: boolean) => void) => void
-    onProgress: (cb: (data: { percent: number; message: string }) => void) => void
+    onAdminStatus: (cb: (ok: boolean) => void) => () => void
+    onProgress: (cb: (data: { percent: number; message: string }) => void) => () => void
+    onSystemStats: (cb: (stats: any) => void) => () => void
     openDialog: (opts: any) => Promise<any>
     saveDialog: (opts: any) => Promise<any>
 }

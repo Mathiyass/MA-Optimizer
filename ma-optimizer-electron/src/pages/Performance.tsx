@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Zap, RefreshCw, Loader2, MemoryStick, Check } from 'lucide-react'
+import { Zap, RefreshCw, Loader2, MemoryStick, Check, Brain, Sparkles, Cpu, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -258,6 +258,92 @@ function MemoryOptimizerPanel() {
     )
 }
 
+function AiCpuAdvisorPanel() {
+    const [cpuInfo, setCpuInfo] = useState<{ brand: string; cores: number; threads: number } | null>(null)
+    const setAiDrawerOpen = useAppStore(s => s.setAiDrawerOpen)
+    const addNotification = useAppStore(s => s.addNotification)
+    const [unparking, setUnparking] = useState(false)
+
+    useEffect(() => {
+        window.api?.system?.getFullInfo?.().then((info: any) => {
+            if (info?.cpu) {
+                setCpuInfo({
+                    brand: info.cpu.brand || 'Processor',
+                    cores: info.cpu.cores || 8,
+                    threads: info.cpu.threads || 16
+                })
+            }
+        }).catch(() => {})
+    }, [])
+
+    const brand = (cpuInfo?.brand || '').toLowerCase()
+    const isAmdX3d = brand.includes('x3d') || (brand.includes('ryzen') && (brand.includes('7800') || brand.includes('7950') || brand.includes('9800')))
+    const isIntelHybrid = brand.includes('intel') && ((cpuInfo?.cores || 0) >= 10 || brand.includes('i7') || brand.includes('i9') || brand.includes('ultra'))
+
+    const handleUnpark = async () => {
+        setUnparking(true)
+        try {
+            await window.api?.processLasso?.toggleCoreParking?.(true)
+            addNotification('success', 'All CPU Cores unparked for 0-latency gaming!')
+        } catch {
+            addNotification('error', 'Core unparking failed')
+        }
+        setUnparking(false)
+    }
+
+    return (
+        <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/25 rounded-[2.5rem] p-8 relative overflow-hidden transition-all hover:bg-[rgba(255,255,255,0.05)]">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.12),transparent_70%)] pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                <div className="flex-1 space-y-2 text-left">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI CPU & Thread Director Intelligence</span>
+                        <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/15 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 tracking-wider font-mono">Neural Core</span>
+                    </div>
+                    <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                        <Cpu className="w-5 h-5 text-[var(--accent-cyan)]" />
+                        {cpuInfo?.brand || 'Multi-Core Processor Architecture'}
+                    </h3>
+                    <div className="text-[var(--text-secondary)] text-xs font-medium leading-relaxed max-w-2xl">
+                        {isAmdX3d ? (
+                            <span className="text-emerald-400 font-semibold">
+                                AMD 3D V-Cache Topology Detected: We recommend parking non-cache CCD cores during gaming to eliminate cross-CCX interconnect latency and maximize L3 cache hits.
+                            </span>
+                        ) : isIntelHybrid ? (
+                            <span className="text-sky-400 font-semibold">
+                                Intel Hybrid Architecture Detected (Thread Director): Foreground game processes should be pinned to Performance Cores (P-Cores) to prevent micro-stutter from background E-Core starvation.
+                            </span>
+                        ) : (
+                            <span>
+                                Symmetrical Multi-Core Architecture ({cpuInfo?.cores || 8}C/{cpuInfo?.threads || 16}T): Unparking CPU cores and optimizing Windows multimedia scheduling ensures instant burst clock frequencies without power-transition spikes.
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                    <button
+                        onClick={handleUnpark}
+                        disabled={unparking}
+                        className="px-6 py-3.5 bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE] text-black text-xs font-black uppercase tracking-wider rounded-2xl shadow-[0_0_20px_rgba(0,255,222,0.3)] hover:brightness-110 transition-all flex items-center gap-2"
+                    >
+                        {unparking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        Unpark All Cores
+                    </button>
+                    <button
+                        onClick={() => setAiDrawerOpen(true)}
+                        className="px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[var(--accent-cyan)]/40 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all flex items-center gap-2"
+                    >
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        Copilot Advice
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export function Performance() {
     const [tab, setTab] = useState('visual')
     const items = getTweaksByCategoryAndTab('performance', tab)
@@ -331,6 +417,10 @@ export function Performance() {
                     </div>
                 </div>
             </motion.div>
+
+            <div className="mt-8">
+                <AiCpuAdvisorPanel />
+            </div>
 
             <div className="mt-8">
                 <TabGroup tabs={tabs} active={tab} onChange={setTab} />

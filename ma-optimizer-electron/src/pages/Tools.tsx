@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
     Terminal, HardDrive, Cog, Settings, Monitor, TerminalSquare, FileCog, Search,
-    Globe, Wifi, Activity, Shield, Eye, LucideIcon
+    Globe, Wifi, Activity, Shield, Eye, LucideIcon, Sparkles
 } from 'lucide-react'
+import { useAppStore } from '../store/appStore'
 
 interface Tool {
     label: string
@@ -106,6 +107,37 @@ export function Tools() {
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* AI System Arsenal Advisor Card */}
+            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/25 rounded-[2rem] p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.12),transparent_70%)] pointer-events-none" />
+                <div className="flex-1 space-y-1.5 relative z-10 text-left">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI Administrative Assistant</span>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                            Verified Win32 Launchers
+                        </span>
+                    </div>
+                    <h3 className="text-white text-base font-black tracking-wide">
+                        Validated Direct-to-Kernel Administrative Tools
+                    </h3>
+                    <p className="text-[var(--text-secondary)] text-xs font-medium leading-relaxed max-w-2xl">
+                        All endpoints are strictly whitelisted and executed as detached administrative processes with UAC elevation preservation. Launch Resource Monitor, Task Manager, Event Viewer, or PowerShell directly without search bar latency.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
+                    <button
+                        onClick={() => useAppStore.getState().setAiDrawerOpen(true)}
+                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--accent-cyan)]/15 to-[var(--accent-violet)]/15 hover:from-[var(--accent-cyan)]/25 hover:to-[var(--accent-violet)]/25 border border-[var(--accent-cyan)]/40 text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,222,0.15)]"
+                    >
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        Ask Arsenal Copilot
+                        <kbd className="text-[8px] bg-black/40 px-1 py-0.5 rounded text-[var(--accent-cyan)]">Ctrl+Space</kbd>
+                    </button>
                 </div>
             </div>
 

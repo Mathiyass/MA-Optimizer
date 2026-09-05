@@ -99,7 +99,7 @@ function startProBalanceLoop() {
 
             // ProBalance dynamic priority adjustment
             if (lassoConfig.proBalanceEnabled) {
-                const psProBalance = `Get-Process | Where-Object { $_.CPU -gt ${lassoConfig.proBalanceCpuThreshold} -and $_.PriorityClass -eq 'Normal' -and $_.MainWindowTitle -eq '' } | ForEach-Object { $_.PriorityClass = 'BelowNormal' }`
+                const psProBalance = `Get-CimInstance Win32_PerfFormattedData_PerfProc_Process -ErrorAction SilentlyContinue | Where-Object { $_.PercentProcessorTime -gt ${lassoConfig.proBalanceCpuThreshold} -and $_.Name -notmatch '_Total|Idle|System|dwm' -and $_.IDProcess -gt 4 } | ForEach-Object { $proc = Get-Process -Id $_.IDProcess -ErrorAction SilentlyContinue; if ($proc -and $proc.PriorityClass -eq 'Normal' -and [string]::IsNullOrEmpty($proc.MainWindowTitle)) { $proc.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::BelowNormal } }`
                 await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psProBalance], { timeout: 5000 }).catch(() => {})
             }
         } catch {}

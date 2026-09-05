@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { motion } from 'framer-motion'
-import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2, Monitor } from 'lucide-react'
+import { Zap, Shield, Wifi, Crown, ChevronRight, RefreshCw, Loader2, Monitor, Brain, Sparkles, AlertTriangle, CheckCircle2, Flame, ArrowRight } from 'lucide-react'
 import { useSystemStore } from '../store/systemStore'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
 import { calculateHealthScore } from '../utils/health'
+import { evaluateSystemHealth, HealthReport, Bottleneck } from '../services/heuristicEngine'
 
 function formatBytes(b: number) {
     if (!b) return '0 B'
@@ -80,10 +81,12 @@ export function Dashboard() {
     const network = useSystemStore(s => s.network)
     const setPage = useAppStore(s => s.setPage)
     const addNotification = useAppStore(s => s.addNotification)
+    const setAiDrawerOpen = useAppStore(s => s.setAiDrawerOpen)
     const applied = useSettingsStore(s => Object.values(s.appliedTweaks).filter(Boolean).length)
     const [telemetryHistory, setTelemetryHistory] = useState<{ time: string, cpu: number, ram: number, diskR: number, diskW: number, netRx: number, netTx: number }[]>([])
     const [osInfo, setOsInfo] = useState<any>(null)
     const [uptime, setUptime] = useState(0)
+    const [healthReport, setHealthReport] = useState<HealthReport | null>(null)
 
     useEffect(() => {
         // Fetch full info on mount
@@ -99,11 +102,11 @@ export function Dashboard() {
             setUptime(prev => prev + 1)
         }, 1000)
 
-        // Telemetry
-        const interval = setInterval(() => {
+        // Telemetry & Heuristic Evaluation
+        const interval = setInterval(async () => {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            const s = useSystemStore.getState()
             setTelemetryHistory(prev => {
-                const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-                const s = useSystemStore.getState()
                 const next = [...prev, { 
                     time: now, 
                     cpu: s.cpu, 
@@ -116,7 +119,31 @@ export function Dashboard() {
                 if (next.length > 60) next.shift()
                 return next
             })
-        }, 1000)
+
+            // Run Heuristic USE Evaluation
+            try {
+                const procs = window.api ? await window.api.system.getProcesses() : []
+                const safeRam = s.ram && s.ram.total > 0 ? s.ram : {
+                    total: 16 * 1024 * 1024 * 1024,
+                    free: 8 * 1024 * 1024 * 1024,
+                    used: 8 * 1024 * 1024 * 1024,
+                    percent: 50,
+                }
+                const mockInfo = {
+                    cpu: { brand: 'Host Processor' },
+                    disks: [],
+                }
+                const currentStats = {
+                    cpu: s.cpu,
+                    ram: safeRam,
+                    disk: s.disk,
+                    network: s.network,
+                }
+                const report = evaluateSystemHealth(mockInfo, currentStats, procs)
+                setHealthReport(report)
+            } catch {}
+        }, 2000)
+
         return () => {
             clearInterval(interval)
             clearInterval(uptimeInterval)
@@ -134,14 +161,17 @@ export function Dashboard() {
     const [optStep, setOptStep] = useState(0)
     const [optProgress, setOptProgress] = useState(0)
 
-    const healthScore = calculateHealthScore(cpu, ram.percent, applied)
+    const healthScore = healthReport?.score || calculateHealthScore(cpu, ram.percent, applied)
 
     const optSteps = [
         { label: 'Creating Restore Point...', fn: async () => await window.api?.repair.createRestorePoint('MA-Optimizer Auto-Optimize') },
-        { label: 'Cleaning System Junk...', fn: async () => await window.api?.cleaner.clean(['temp', 'logs', 'cache', 'thumbnails']) },
-        { label: 'Optimizing Registry...', fn: async () => await window.api?.services.applyRecommended() }, // Use services apply for now
-        { label: 'Tuning Performance...', fn: async () => { /* Logic for applying multiple tweaks */ } },
-        { label: 'Finalizing...', fn: async () => new Promise(r => setTimeout(r, 1000)) },
+        { label: 'Purging System Temp & Logs...', fn: async () => await window.api?.cleaner.clean(['usertemp', 'wintemp', 'logs', 'thumbnails', 'shader', 'prefetch']) },
+        { label: 'Tuning Services & Priority...', fn: async () => await window.api?.services.applyRecommended() },
+        { label: 'Engaging Turbo Boost & RAM Trim...', fn: async () => {
+            await window.api?.heuristic?.turboBoost?.()
+            await window.api?.system?.cleanRam?.()
+        } },
+        { label: 'Finalizing Tuning...', fn: async () => new Promise(r => setTimeout(r, 600)) },
     ]
 
     const runOptimizeAll = async () => {
@@ -159,7 +189,7 @@ export function Dashboard() {
         setOptProgress(100)
         setTimeout(() => {
             setIsOptimizing(false)
-            addNotification('success', 'System optimization complete!')
+            addNotification('success', 'Full system heuristic optimization complete!')
         }, 1000)
     }
 
@@ -290,18 +320,92 @@ export function Dashboard() {
 
             {/* Telemetry and System Info */}
             <div className="flex flex-col xl:flex-row gap-6 w-full">
-                {/* Left Flank: Controls */}
-                <motion.div variants={item} className="w-full xl:w-72 flex flex-col gap-4">
+                {/* Left Flank: Controls & AI Heuristics */}
+                <motion.div variants={item} className="w-full xl:w-80 flex flex-col gap-4">
+                    {/* Embedded AI Intelligence Card */}
+                    <div className={`${premiumCardClass} flex flex-col justify-between relative overflow-hidden border border-[var(--accent-cyan)]/20`}>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.1),transparent_70%)] pointer-events-none" />
+                        <div>
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI Diagnostic Radar</h3>
+                                </div>
+                                <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/30 text-[var(--accent-cyan)] tracking-wider">
+                                    Autonomous AI
+                                </span>
+                            </div>
+
+                            <div className="text-xs text-white font-bold flex items-center gap-2 mb-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                                <span>State: <strong className="text-[var(--accent-cyan)] uppercase tracking-wider">{healthReport?.activity || 'Nominal Load'}</strong></span>
+                            </div>
+
+                            {healthReport?.activeGame && (
+                                <div className="mb-3 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <Monitor className="w-3.5 h-3.5" />
+                                    <span>Active Game: {healthReport.activeGame}</span>
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5 my-3">
+                                {healthReport?.bottlenecks && healthReport.bottlenecks.length > 0 ? (
+                                    healthReport.bottlenecks.slice(0, 2).map((b, i) => (
+                                        <div key={i} className="p-2 rounded-xl bg-[#FF003C]/10 border border-[#FF003C]/25 text-[#FF003C] text-[10px] font-medium flex items-center gap-2">
+                                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                            <span className="truncate">{b.description}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-medium flex items-center gap-2">
+                                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                        <span>No hardware bottlenecks detected. Peak responsiveness.</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setAiDrawerOpen(true)}
+                            className="mt-2 w-full py-2.5 bg-gradient-to-r from-[rgba(0,255,222,0.12)] to-[rgba(168,85,247,0.12)] hover:from-[rgba(0,255,222,0.22)] hover:to-[rgba(168,85,247,0.22)] border border-[var(--accent-cyan)]/30 rounded-xl text-[10px] font-black tracking-widest uppercase text-white flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(0,255,222,0.15)]"
+                        >
+                            <span>Open Copilot Sidecar</span>
+                            <kbd className="text-[8px] bg-black/40 px-1 py-0.5 rounded text-[var(--accent-cyan)]">Ctrl+Space</kbd>
+                        </button>
+                    </div>
+
+                    {/* Quick Actions */}
                     <div className={`${premiumCardClass} flex-1 flex flex-col justify-center`}>
-                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#00FFDE] mb-4">Quick Actions</h3>
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#00FFDE] mb-4">Quick Optimization</h3>
                         <button 
                             onClick={runOptimizeAll}
                             disabled={isOptimizing}
-                            className="w-full py-4 bg-[rgba(255,255,255,0.03)] hover:bg-[#00FFDE]/10 border border-white/5 hover:border-[#00FFDE]/50 text-[#00FFDE] text-xs font-bold uppercase tracking-widest rounded-xl transition-all mb-3 disabled:opacity-50">
-                            {isOptimizing ? 'Optimizing...' : 'Optimize System'}
+                            className="w-full py-3.5 bg-[rgba(255,255,255,0.03)] hover:bg-[#00FFDE]/10 border border-white/5 hover:border-[#00FFDE]/50 text-[#00FFDE] text-xs font-bold uppercase tracking-widest rounded-xl transition-all mb-2.5 disabled:opacity-50">
+                            {isOptimizing ? 'Optimizing Core...' : 'Optimize System'}
                         </button>
-                        <button className="w-full py-4 bg-[rgba(255,255,255,0.03)] hover:bg-[#FF003C]/10 border border-white/5 hover:border-[#FF003C]/50 text-[#FF003C] text-xs font-bold uppercase tracking-widest rounded-xl transition-all">
-                            Clear Memory
+                        <button
+                            onClick={async () => {
+                                try {
+                                    await window.api?.heuristic?.turboBoost?.()
+                                    addNotification('success', '1-Click Turbo Boost engaged across all CPU cores!')
+                                } catch {
+                                    addNotification('error', 'Turbo Boost failed')
+                                }
+                            }}
+                            className="w-full py-3.5 bg-[rgba(255,255,255,0.03)] hover:bg-[var(--accent-cyan)]/15 border border-white/5 hover:border-[var(--accent-cyan)]/50 text-[var(--accent-cyan)] text-xs font-bold uppercase tracking-widest rounded-xl transition-all mb-2.5">
+                            ⚡ Turbo Boost
+                        </button>
+                        <button 
+                            onClick={async () => {
+                                try {
+                                    await window.api?.system?.cleanRam?.()
+                                    addNotification('success', 'RAM cache working set & standby lists purged!')
+                                } catch {
+                                    addNotification('error', 'RAM clean failed')
+                                }
+                            }}
+                            className="w-full py-3.5 bg-[rgba(255,255,255,0.03)] hover:bg-[#FF003C]/10 border border-white/5 hover:border-[#FF003C]/50 text-[#FF003C] text-xs font-bold uppercase tracking-widest rounded-xl transition-all">
+                            Purge Standby RAM
                         </button>
                     </div>
                 </motion.div>

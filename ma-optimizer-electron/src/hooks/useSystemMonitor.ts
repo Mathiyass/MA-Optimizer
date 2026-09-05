@@ -8,10 +8,10 @@ export function useSystemMonitor(enabled = true) {
     const updateNetwork = useSystemStore((s) => s.updateNetwork)
 
     useEffect(() => {
-        // 🔧 FIX: Listen to IPC pushed stats instead of polling independently on renderer
-        if (!enabled || !window.api || !(window.api as any).onSystemStats) return
+        // Listen to IPC pushed stats instead of polling independently on renderer
+        if (!enabled || !window.api?.onSystemStats) return
 
-        const unsubscribe = (window.api as any).onSystemStats((stats: any) => {
+        const unsubscribe = window.api.onSystemStats((stats: any) => {
             updateCpu(stats.cpu.currentLoad, stats.cpu.cpus)
             updateRam(stats.ram)
             updateDisk(stats.disk)

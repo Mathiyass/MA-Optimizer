@@ -26,7 +26,7 @@ async function runPowerShell(script: string) {
 ipcMain.handle('drivers:getInstalled', async () => {
     try {
         const script = `
-            $drivers = Get-WmiObject Win32_PnPSignedDriver | Where-Object { 
+            $drivers = Get-CimInstance Win32_PnPSignedDriver -ErrorAction SilentlyContinue | Where-Object { 
                 $_.DeviceName -ne $null -and 
                 $_.DriverVersion -ne $null -and 
                 $_.DeviceClass -notmatch 'System|Computer|Processor|BluetoothVirtual|Volume|Battery'
@@ -356,8 +356,13 @@ ipcMain.handle('drivers:backup', async (_, folderPath: string) => {
     try {
         const safeFolderPath = String(folderPath)
         await mkdir(safeFolderPath, { recursive: true })
-        const command = `dism /online /export-driver /destination:'${escapePS(safeFolderPath)}'`
-        await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile -Command ${command}' -Verb RunAs -Wait`])
+        if (checkIsAdmin()) {
+            await spawnPromise('dism.exe', ['/online', '/export-driver', `/destination:${safeFolderPath}`], { timeout: 180000 })
+        } else {
+            const psScript = `dism.exe /online /export-driver /destination:"${escapePS(safeFolderPath)}"`
+            const b64 = Buffer.from(psScript, 'utf16le').toString('base64')
+            await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile', '-EncodedCommand', '${b64}' -Verb RunAs -Wait`], { timeout: 180000 })
+        }
         return true
     } catch (error) {
         console.error('Failed to backup drivers:', error)
@@ -369,8 +374,13 @@ ipcMain.handle('drivers:backup', async (_, folderPath: string) => {
 ipcMain.handle('drivers:restore', async (_, folderPath: string) => {
     try {
         const safeFolderPath = String(folderPath)
-        const command = `pnputil.exe /add-driver "${escapePS(safeFolderPath)}\\*.inf" /subdirs /install`
-        await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile -Command "${command}"' -Verb RunAs -Wait`])
+        if (checkIsAdmin()) {
+            await spawnPromise('pnputil.exe', ['/add-driver', `${safeFolderPath}\\*.inf`, '/subdirs', '/install'], { timeout: 180000 })
+        } else {
+            const psScript = `pnputil.exe /add-driver "${escapePS(safeFolderPath)}\\*.inf" /subdirs /install`
+            const b64 = Buffer.from(psScript, 'utf16le').toString('base64')
+            await spawnPromise('powershell', ['-NoProfile', '-Command', `Start-Process powershell -ArgumentList '-NoProfile', '-EncodedCommand', '${b64}' -Verb RunAs -Wait`], { timeout: 180000 })
+        }
         return true
     } catch (error) {
         console.error('Failed to restore drivers:', error)

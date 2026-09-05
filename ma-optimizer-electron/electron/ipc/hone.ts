@@ -8,13 +8,17 @@ export interface HonePresetResult {
     message: string
 }
 
-// Enable MSI (Message Signaled Interrupts) Mode on GPU & NICs for ultra-low DPC latency
+// Enable MSI (Message Signaled Interrupts) Mode specifically on GPU & NICs for ultra-low DPC latency
 async function enableMsiModeForGpuAndNic(): Promise<boolean> {
     try {
         const ps = `
 $devices = Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\PCI\\*\\*\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties' -ErrorAction SilentlyContinue
 foreach ($dev in $devices) {
-    Set-ItemProperty -Path $dev.PSPath -Name 'MSISupported' -Value 1 -Type DWord -ErrorAction SilentlyContinue
+    $parent = Split-Path (Split-Path (Split-Path $dev.PSPath))
+    $devProps = Get-ItemProperty -Path $parent -ErrorAction SilentlyContinue
+    if ($devProps.Class -match 'Display|Net' -or $parent -match 'CC_03|CC_02') {
+        Set-ItemProperty -Path $dev.PSPath -Name 'MSISupported' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+    }
 }
 `
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 10000 })
@@ -22,6 +26,28 @@ foreach ($dev in $devices) {
         return true
     } catch (e: any) {
         sendError(`[Hone Engine] MSI Mode failed: ${e.message}`)
+        return false
+    }
+}
+
+// Revert/Disable MSI Mode on GPU & NICs
+async function disableMsiModeForGpuAndNic(): Promise<boolean> {
+    try {
+        const ps = `
+$devices = Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\PCI\\*\\*\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties' -ErrorAction SilentlyContinue
+foreach ($dev in $devices) {
+    $parent = Split-Path (Split-Path (Split-Path $dev.PSPath))
+    $devProps = Get-ItemProperty -Path $parent -ErrorAction SilentlyContinue
+    if ($devProps.Class -match 'Display|Net' -or $parent -match 'CC_03|CC_02') {
+        Set-ItemProperty -Path $dev.PSPath -Name 'MSISupported' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+    }
+}
+`
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 10000 })
+        sendLog('[Hone Engine] Disabled Message Signaled Interrupts (MSI Mode) for GPU and Network Adapters')
+        return true
+    } catch (e: any) {
+        sendError(`[Hone Engine] Disable MSI Mode failed: ${e.message}`)
         return false
     }
 }
@@ -93,6 +119,10 @@ Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR' 
 // IPC Handlers
 ipcMain.handle('hone:enableMsiMode', async () => {
     return await enableMsiModeForGpuAndNic()
+})
+
+ipcMain.handle('hone:disableMsiMode', async () => {
+    return await disableMsiModeForGpuAndNic()
 })
 
 ipcMain.handle('hone:disableMouseAccel', async () => {

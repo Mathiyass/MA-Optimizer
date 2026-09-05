@@ -105,5 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 sliderInterval = setInterval(() => goToSlide(currentSlide + 1), 6000);
             });
         }
+
+        // Keyboard navigation for slider
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                goToSlide(currentSlide - 1);
+            } else if (e.key === 'ArrowRight') {
+                goToSlide(currentSlide + 1);
+            }
+        });
     }
 });

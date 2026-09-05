@@ -3,7 +3,7 @@ import { create } from 'zustand'
 export type PageId =
     | 'dashboard' | 'performance' | 'process-lasso' | 'hone' | 'exitlag' | 'ma-power' | 'network' | 'privacy'
     | 'gaming' | 'cleaner' | 'startup' | 'apps' | 'tools'
-    | 'repair' | 'advanced' | 'benchmark' | 'about' | 'drivers'
+    | 'repair' | 'advanced' | 'benchmark' | 'about' | 'drivers' | 'ai-advisor'
 
 interface Notification {
     id: string
@@ -69,6 +69,16 @@ interface AppStore {
     // Profile selector
     profilesOpen: boolean
     setProfilesOpen: (val: boolean) => void
+
+    // Surface Mode (Full vs Compact Mini-HUD)
+    surfaceMode: 'full' | 'compact'
+    setSurfaceMode: (mode: 'full' | 'compact') => void
+    toggleSurfaceMode: () => Promise<void>
+
+    // Global AI Copilot Sidecar Drawer
+    isAiDrawerOpen: boolean
+    setAiDrawerOpen: (val: boolean) => void
+    toggleAiDrawer: () => void
 
     // Log console
     logOpen: boolean
@@ -164,6 +174,20 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     profilesOpen: false,
     setProfilesOpen: (val) => set({ profilesOpen: val }),
+
+    surfaceMode: 'full',
+    setSurfaceMode: (mode) => set({ surfaceMode: mode }),
+    toggleSurfaceMode: async () => {
+        const next = get().surfaceMode === 'full' ? 'compact' : 'full'
+        if (window.api?.window?.toggleCompactMode) {
+            await window.api.window.toggleCompactMode(next === 'compact')
+        }
+        set({ surfaceMode: next })
+    },
+
+    isAiDrawerOpen: false,
+    setAiDrawerOpen: (val) => set({ isAiDrawerOpen: val }),
+    toggleAiDrawer: () => set((s) => ({ isAiDrawerOpen: !s.isAiDrawerOpen })),
 
     logOpen: false,
     setLogOpen: (val) => set({ logOpen: val }),

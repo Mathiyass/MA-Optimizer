@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, Search, HardDrive, Globe, Recycle, Loader2, FileText, Image, File, Database, ChevronDown, ChevronRight, Check, LucideIcon } from 'lucide-react'
+import { Trash2, Search, HardDrive, Globe, Recycle, Loader2, FileText, Image, File, Database, ChevronDown, ChevronRight, Check, LucideIcon, Sparkles, ShieldCheck } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore } from '../store/settingsStore'
 
@@ -228,6 +228,37 @@ export function Cleaner() {
                     </div>
                 </div>
             </motion.div>
+
+            {/* AI Storage & Cache Doctor Card */}
+            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/25 rounded-[2rem] p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.12),transparent_70%)] pointer-events-none" />
+                <div className="flex-1 space-y-1.5 relative z-10 text-left">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI Storage Safety Doctor</span>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> Zero-Risk Guardrails
+                        </span>
+                    </div>
+                    <h3 className="text-white text-base font-black tracking-wide">
+                        Verified Safe Cleaning & NVMe Health Preservation
+                    </h3>
+                    <p className="text-[var(--text-secondary)] text-xs font-medium leading-relaxed max-w-2xl">
+                        Unlike blunt cleaner utilities that break games and corrupt profile caches, MA-Optimizer enforces rigorous safety rules: system roots, Steam save directories (`userdata`), browser sessions, and registry COM classes are mathematically protected from accidental erasure.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
+                    <button
+                        onClick={() => useAppStore.getState().setAiDrawerOpen(true)}
+                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--accent-cyan)]/15 to-[var(--accent-violet)]/15 hover:from-[var(--accent-cyan)]/25 hover:to-[var(--accent-violet)]/25 border border-[var(--accent-cyan)]/40 text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,222,0.15)]"
+                    >
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        Storage Copilot
+                        <kbd className="text-[8px] bg-black/40 px-1 py-0.5 rounded text-[var(--accent-cyan)]">Ctrl+Space</kbd>
+                    </button>
+                </div>
+            </div>
 
             <ScanProgressRing scanning={scanning} />
 

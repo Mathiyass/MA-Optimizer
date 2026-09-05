@@ -7,18 +7,22 @@ import { app } from 'electron'
 import { escapePS, spawnPromise } from './utils'
 
 let restorePointCreated = false
-async function ensureRestorePoint() {
-    if (restorePointCreated) return
-    try {
-        const ps = `Checkpoint-Computer -Description 'MA-Optimizer Auto-Backup' -RestorePointType 'MODIFY_SETTINGS'`
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-            timeout: 120000, encoding: 'utf-8',
-        })
+let restorePointInProgress = false
+
+export function ensureRestorePointAsync() {
+    if (restorePointCreated || restorePointInProgress) return
+    restorePointInProgress = true
+    const ps = `Checkpoint-Computer -Description 'MA-Optimizer Auto-Backup' -RestorePointType 'MODIFY_SETTINGS' -ErrorAction SilentlyContinue`
+    spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
+        timeout: 120000, encoding: 'utf-8',
+    }).then(() => {
         restorePointCreated = true
-        sendLog('[Backup] Automatic restore point created before modification')
-    } catch (e) {
+        restorePointInProgress = false
+        sendLog('[Backup] Automatic restore point created in background')
+    }).catch(() => {
+        restorePointInProgress = false
         sendLog('[Backup] Skipping restore point (missing privileges or disabled)')
-    }
+    })
 }
 
 const backupPath = path.join(app.getPath('userData'), 'backups', 'registry_backup.json')
@@ -63,71 +67,80 @@ export async function backupOriginalValue(hive: string, regPath: string, name: s
     }
 }
 
-// Registry GET via PowerShell
-ipcMain.handle('registry:get', async (_, hive: string, regPath: string, name: string) => {
-    try {
-        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
-        const ps = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
-        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-            encoding: 'utf-8',
-            timeout: 10000,
-        })
-        const result = stdout.trim()
-        if (result === '' || result === 'True' || result === 'False') {
-            if (result === 'True') return 1
-            if (result === 'False') return 0
-            return null
+export function parseRegQueryOutput(stdout: string): { type: string; value: any } | null {
+    if (!stdout) return null
+    const lines = stdout.split(/\r?\n/)
+    for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed || trimmed.startsWith('HKEY_')) continue
+        // Match: [optional name] REG_TYPE [optional value]
+        const match = trimmed.match(/^(?:(\(Default\)|[^\t]+?)\s+)?(REG_[A-Z_]+)(?:\s+(.*))?$/i)
+        if (match) {
+            const regType = match[2].toUpperCase()
+            const rawVal = match[3] !== undefined ? match[3].trim() : ''
+            if (rawVal === '(value not set)') {
+                return null
+            }
+            if (regType === 'REG_DWORD' || regType === 'REG_QWORD') {
+                const parsed = parseInt(rawVal, rawVal.startsWith('0x') ? 16 : 10)
+                return { type: regType, value: isNaN(parsed) ? 0 : parsed }
+            } else {
+                return { type: regType, value: rawVal }
+            }
         }
-        const num = parseInt(result)
-        return isNaN(num) ? result : num
+    }
+    return null
+}
+
+export async function queryRegistry(hive: string, regPath: string, name: string): Promise<any> {
+    const fullKey = `${hive}\\${regPath}`
+    const isDefault = !name || name === '@' || name === '(Default)'
+    const args = isDefault ? ['query', fullKey, '/ve'] : ['query', fullKey, '/v', name]
+    try {
+        const { stdout } = await spawnPromise('reg.exe', args, { timeout: 4000 })
+        const parsed = parseRegQueryOutput(stdout)
+        return parsed ? parsed.value : null
     } catch {
         return null
     }
+}
+
+// Registry GET via native reg.exe (100x faster than PowerShell)
+ipcMain.handle('registry:get', async (_, hive: string, regPath: string, name: string) => {
+    return await queryRegistry(hive, regPath, name)
 })
 
-// Registry SET via PowerShell — with automatic backup
+// Registry SET via native reg.exe — with automatic backup & async restore point
 ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: string, value: any, type: string) => {
     try {
-        // Read current value first for backup
-        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
-        let currentValue: any = null
-        try {
-            const psGet = `(Get-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -ErrorAction SilentlyContinue).'${escapePS(name)}'`
-            const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psGet], {
-                encoding: 'utf-8', timeout: 10000,
-            })
-            currentValue = stdout.trim()
-            if (currentValue === '') currentValue = null
-        } catch { }
+        const fullKey = `${hive}\\${regPath}`
+        const isDefault = !name || name === '@' || name === '(Default)'
 
-        // Backup original value
+        // Read current value first for backup
+        const currentValue = await queryRegistry(hive, regPath, name)
         await backupOriginalValue(hive, regPath, name, currentValue)
 
-        // Map type names
+        // Queue background restore point
+        ensureRestorePointAsync()
+
         const typeMap: Record<string, string> = {
-            'DWord': 'DWord',
-            'QWord': 'QWord',
-            'String': 'String',
-            'ExpandString': 'ExpandString',
-            'Binary': 'Binary',
+            'DWord': 'REG_DWORD',
+            'QWord': 'REG_QWORD',
+            'String': 'REG_SZ',
+            'ExpandString': 'REG_EXPAND_SZ',
+            'Binary': 'REG_BINARY',
         }
-        const psType = typeMap[type] || 'DWord'
+        const regType = typeMap[type] || 'REG_DWORD'
 
-        // Ensure path and restore point
-        await ensureRestorePoint()
-        const psEnsure = `if(!(Test-Path '${fullPath}')){New-Item -Path '${fullPath}' -Force | Out-Null}`
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psEnsure], {
-            timeout: 10000, encoding: 'utf-8',
-        })
+        let addArgs: string[] = []
+        if (isDefault) {
+            addArgs = ['add', fullKey, '/ve', '/d', String(value), '/f']
+        } else {
+            addArgs = ['add', fullKey, '/v', name, '/t', regType, '/d', String(value), '/f']
+        }
 
-        // Set value
-        const valEscaped = typeof value === 'string' ? `'${escapePS(value)}'` : value
-        const psSet = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Type ${psType} -Force`
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psSet], {
-            timeout: 10000, encoding: 'utf-8',
-        })
-
-        sendLog(`[Registry] SET ${hive}\\${regPath}\\${name} = ${value} (was: ${currentValue})`)
+        await spawnPromise('reg.exe', addArgs, { timeout: 5000 })
+        sendLog(`[Registry] SET ${fullKey}\\${name} = ${value} (was: ${currentValue})`)
         return true
     } catch (e: any) {
         sendError(`[Registry] Failed to set ${hive}\\${regPath}\\${name}: ${e.message}`)
@@ -135,15 +148,14 @@ ipcMain.handle('registry:set', async (_, hive: string, regPath: string, name: st
     }
 })
 
-// Registry DELETE
+// Registry DELETE via native reg.exe
 ipcMain.handle('registry:delete', async (_, hive: string, regPath: string, name: string) => {
     try {
-        const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
-        const ps = `Remove-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Force -ErrorAction SilentlyContinue`
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-            timeout: 10000, encoding: 'utf-8',
-        })
-        sendLog(`[Registry] DELETED ${hive}\\${regPath}\\${name}`)
+        const fullKey = `${hive}\\${regPath}`
+        const isDefault = !name || name === '@' || name === '(Default)'
+        const deleteArgs = isDefault ? ['delete', fullKey, '/ve', '/f'] : ['delete', fullKey, '/v', name, '/f']
+        await spawnPromise('reg.exe', deleteArgs, { timeout: 5000 })
+        sendLog(`[Registry] DELETED ${fullKey}\\${name}`)
         return true
     } catch (e: any) {
         sendError(`[Registry] Failed to delete ${hive}\\${regPath}\\${name}: ${e.message}`)
@@ -156,7 +168,7 @@ ipcMain.handle('registry:backup', async () => {
     return await loadBackups()
 })
 
-// Restore all backed up values
+// Restore all backed up values using native reg.exe
 ipcMain.handle('registry:restoreAll', async () => {
     const backups = await loadBackups()
     let restored = 0
@@ -164,12 +176,12 @@ ipcMain.handle('registry:restoreAll', async () => {
         try {
             const { hive, path: regPath, name, originalValue } = entry as any
             if (originalValue !== null && originalValue !== undefined) {
-                const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
-                const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
-                const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
-                await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-                    timeout: 10000, encoding: 'utf-8',
-                })
+                const fullKey = `${hive}\\${regPath}`
+                const isDefault = !name || name === '@' || name === '(Default)'
+                const addArgs = isDefault
+                    ? ['add', fullKey, '/ve', '/d', String(originalValue), '/f']
+                    : ['add', fullKey, '/v', name, '/d', String(originalValue), '/f']
+                await spawnPromise('reg.exe', addArgs, { timeout: 5000 })
                 restored++
             }
         } catch (e: any) {
@@ -195,12 +207,12 @@ ipcMain.handle('registry:restoreLast', async () => {
 
     try {
         if (originalValue !== null && originalValue !== undefined) {
-            const fullPath = `${escapePS(hive)}:\\${escapePS(regPath)}`
-            const valEscaped = typeof originalValue === 'string' ? `'${escapePS(originalValue)}'` : originalValue
-            const ps = `Set-ItemProperty -Path '${fullPath}' -Name '${escapePS(name)}' -Value ${valEscaped} -Force`
-            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], {
-                timeout: 10000, encoding: 'utf-8',
-            })
+            const fullKey = `${hive}\\${regPath}`
+            const isDefault = !name || name === '@' || name === '(Default)'
+            const addArgs = isDefault
+                ? ['add', fullKey, '/ve', '/d', String(originalValue), '/f']
+                : ['add', fullKey, '/v', name, '/d', String(originalValue), '/f']
+            await spawnPromise('reg.exe', addArgs, { timeout: 5000 })
         }
         // Remove from backups
         delete backups[key]

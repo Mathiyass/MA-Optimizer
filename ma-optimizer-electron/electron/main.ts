@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, dialog, screen } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -34,8 +34,9 @@ require('./ipc/advanced')
 require('./ipc/driverUpdater')
 require('./ipc/processLasso')
 require('./ipc/gearup')
-require('./ipc/hone')
 require('./ipc/exitlag')
+require('./ipc/heuristicGovernor')
+require('./ipc/aiAssistant')
 
 
 
@@ -210,6 +211,37 @@ ipcMain.on('window:maximize', () => {
 ipcMain.on('window:close', () => mainWindow?.close())
 ipcMain.handle('window:isMaximized', () => mainWindow?.isMaximized() ?? false)
 
+let normalWindowBounds: { x: number; y: number; width: number; height: number } | null = null
+
+ipcMain.handle('window:toggleCompactMode', async (_, isCompact: boolean) => {
+    if (!mainWindow) return { isCompact: false }
+
+    if (isCompact) {
+        normalWindowBounds = mainWindow.getBounds()
+        mainWindow.setMinimumSize(320, 140)
+        mainWindow.setSize(380, 160)
+        mainWindow.setAlwaysOnTop(true, 'screen-saver')
+
+        try {
+            const primary = screen.getPrimaryDisplay()
+            const { width } = primary.workAreaSize
+            mainWindow.setPosition(width - 400, 40)
+        } catch {}
+
+        return { isCompact: true }
+    } else {
+        mainWindow.setAlwaysOnTop(false)
+        mainWindow.setMinimumSize(1100, 720)
+        if (normalWindowBounds) {
+            mainWindow.setBounds(normalWindowBounds)
+        } else {
+            mainWindow.setSize(1280, 800)
+            mainWindow.center()
+        }
+        return { isCompact: false }
+    }
+})
+
 // Dialog IPC
 ipcMain.handle('dialog:open', async (_, opts) => {
     if (!mainWindow) return null
@@ -242,23 +274,53 @@ ipcMain.handle('system:openPath', async (_, p: string) => {
     return true
 })
 
-// 🔧 FIX: Sanitize tool commands via Strict Whitelist instead of allowing arbitrary execution
-const ALLOWED_TOOLS = [
-    'resmon', 'taskmgr', 'cleanmgr', 'dfrgui', 'eventvwr',
-    'compmgmt.msc', 'mdsched', 'control', 'sysdm.cpl',
-    'appwiz.cpl', 'ncpa.cpl', 'mmsys.cpl', 'perfmon', 'regedit', 'msconfig'
-]
+// 🔧 FIX: Sanitize tool commands via Strict Whitelist and safely spawn administrative tools
+const ALLOWED_TOOLS = new Set([
+    'cmd', 'cmd.exe',
+    'powershell', 'powershell.exe',
+    'taskmgr', 'taskmgr.exe',
+    'regedit', 'regedit.exe',
+    'resmon', 'resmon.exe',
+    'perfmon', 'perfmon.exe',
+    'cleanmgr', 'cleanmgr.exe',
+    'msconfig', 'msconfig.exe',
+    'msinfo32', 'msinfo32.exe',
+    'dxdiag', 'dxdiag.exe',
+    'dfrgui', 'dfrgui.exe',
+    'mdsched', 'mdsched.exe',
+    'control', 'control.exe',
+    'compmgmt.msc',
+    'devmgmt.msc',
+    'diskmgmt.msc',
+    'gpedit.msc',
+    'services.msc',
+    'eventvwr', 'eventvwr.msc',
+    'sysdm.cpl',
+    'appwiz.cpl',
+    'ncpa.cpl',
+    'firewall.cpl',
+    'powercfg.cpl',
+    'mmsys.cpl',
+])
 
 ipcMain.handle('system:runTool', async (_, cmd: string) => {
     try {
-        if (!ALLOWED_TOOLS.includes(cmd)) {
+        const cleanCmd = String(cmd).trim().toLowerCase()
+        if (!ALLOWED_TOOLS.has(cleanCmd)) {
             console.warn(`[Security] Blocked unauthorized tool execution: ${cmd}`)
             return false
         }
-        const { exec } = require('child_process')
-        exec(cmd, { windowsHide: false })
+        const { spawn } = require('child_process')
+        if (cleanCmd.endsWith('.msc')) {
+            spawn('mmc.exe', [cleanCmd], { windowsHide: false, detached: true, stdio: 'ignore' }).unref()
+        } else if (cleanCmd.endsWith('.cpl')) {
+            spawn('control.exe', [cleanCmd], { windowsHide: false, detached: true, stdio: 'ignore' }).unref()
+        } else {
+            spawn(cleanCmd, [], { windowsHide: false, detached: true, shell: true, stdio: 'ignore' }).unref()
+        }
         return true
-    } catch {
+    } catch (e: any) {
+        console.error(`[System] Failed to run tool ${cmd}:`, e)
         return false
     }
 })

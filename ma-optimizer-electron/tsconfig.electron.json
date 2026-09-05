@@ -27,6 +27,7 @@
         "node_modules",
         "dist",
         "electron/dist",
-        "src"
+        "src",
+        "**/*.test.ts"
     ]
 }

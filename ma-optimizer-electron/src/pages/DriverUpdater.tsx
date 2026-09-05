@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Cpu, HardDrive, Download, ShieldAlert, MonitorPlay, Usb, Loader2, Save, DownloadCloud, FolderInput, ShieldCheck, Search, Filter } from 'lucide-react'
+import { Cpu, HardDrive, Download, ShieldAlert, MonitorPlay, Usb, Loader2, Save, DownloadCloud, FolderInput, ShieldCheck, Search, Filter, Sparkles } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 
 type DriverInfo = {
@@ -212,6 +212,37 @@ export function DriverUpdater() {
                             <ShieldCheck className="w-4 h-4 text-[#00FFDE]" /> Create Restore Point
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {/* AI Driver Stability & DPC Latency Advisor Card */}
+            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/25 rounded-[2rem] p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.12),transparent_70%)] pointer-events-none" />
+                <div className="flex-1 space-y-1.5 relative z-10 text-left">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI Driver Stability & Latency Advisor</span>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                            DPC Watchdog Guard
+                        </span>
+                    </div>
+                    <h3 className="text-white text-base font-black tracking-wide">
+                        Real-Time Device Driver Pnputil & Interrupt Health
+                    </h3>
+                    <p className="text-[var(--text-secondary)] text-xs font-medium leading-relaxed max-w-2xl">
+                        Kernel driver routines (`.sys`) execute at elevated IRQL levels. Stale GPU display and wireless network drivers trigger Deferred Procedure Call (DPC) spikes that disrupt Windows audio threads and induce micro-stutters during high refresh-rate gaming. Always create a driver backup before installing updates.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
+                    <button
+                        onClick={() => useAppStore.getState().setAiDrawerOpen(true)}
+                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--accent-cyan)]/15 to-[var(--accent-violet)]/15 hover:from-[var(--accent-cyan)]/25 hover:to-[var(--accent-violet)]/25 border border-[var(--accent-cyan)]/40 text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,222,0.15)]"
+                    >
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        Driver Copilot
+                        <kbd className="text-[8px] bg-black/40 px-1 py-0.5 rounded text-[var(--accent-cyan)]">Ctrl+Space</kbd>
+                    </button>
                 </div>
             </div>
 

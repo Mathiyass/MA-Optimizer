@@ -4,7 +4,7 @@ import { useAppStore, PageId } from '../../store/appStore'
 import {
     LayoutDashboard, Zap, Crown, Globe, ShieldCheck, Gamepad2,
     Trash2, Rocket, Package, Wrench, HeartPulse, SlidersHorizontal,
-    BarChart3, Info, LucideIcon,
+    BarChart3, Info, Brain, LucideIcon,
 } from 'lucide-react'
 import logoVideo from '../../../img/logo.mp4'
 

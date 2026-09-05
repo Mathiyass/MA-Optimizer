@@ -12,7 +12,9 @@ import { useAppStore } from './store/appStore'
 import { useLogStore } from './store/logStore'
 import { useSystemMonitor } from './hooks/useSystemMonitor'
 
+import { CompactHud } from './components/ui/CompactHud'
 import { Dashboard } from './pages/Dashboard'
+import { GlobalAiCopilotDrawer } from './components/ai/GlobalAiCopilotDrawer'
 
 const Performance = lazy(() => import('./pages/Performance').then(m => ({ default: m.Performance })))
 const MaPowerPlan = lazy(() => import('./pages/MaPowerPlan').then(m => ({ default: m.MaPowerPlan })))
@@ -99,6 +101,7 @@ const LoadingFallback = () => (
 
 export default function App() {
     const currentPage = useAppStore((s) => s.currentPage)
+    const surfaceMode = useAppStore((s) => s.surfaceMode)
     const setIsAdmin = useAppStore((s) => s.setIsAdmin)
     const setSearchOpen = useAppStore((s) => s.setSearchOpen)
     const setLogOpen = useAppStore((s) => s.setLogOpen)
@@ -129,9 +132,20 @@ export default function App() {
                 e.preventDefault()
                 setSearchOpen(true)
             }
+            if ((e.ctrlKey || e.metaKey) && (e.code === 'Space' || e.key === ' ')) {
+                e.preventDefault()
+                useAppStore.getState().toggleAiDrawer()
+            }
+            if (e.key === 'Escape' && useAppStore.getState().isAiDrawerOpen) {
+                useAppStore.getState().setAiDrawerOpen(false)
+            }
             if (e.ctrlKey && e.key === 'l') {
                 e.preventDefault()
                 setLogOpen(useAppStore.getState().logOpen ? false : true)
+            }
+            if (e.ctrlKey && (e.key === 'm' || e.key === 'M')) {
+                e.preventDefault()
+                useAppStore.getState().toggleSurfaceMode()
             }
             if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
                 e.preventDefault()
@@ -145,6 +159,10 @@ export default function App() {
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
     }, [])
+
+    if (surfaceMode === 'compact') {
+        return <CompactHud />
+    }
 
     const PageComponent = pages[currentPage] || Dashboard
 
@@ -181,6 +199,7 @@ export default function App() {
                 <GlobalProgressBar />
                 <SearchOverlay />
                 <ProfileSelector />
+                <GlobalAiCopilotDrawer />
 
                 {/* Toast notifications */}
                 <div className="fixed bottom-12 right-4 z-50 flex flex-col gap-2 max-w-sm">

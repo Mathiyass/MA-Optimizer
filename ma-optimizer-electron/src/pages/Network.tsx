@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Globe, RefreshCw, Loader2, Wifi, Activity, Sliders, Shield, Download, Upload, Cpu, Zap } from 'lucide-react'
+import { Globe, RefreshCw, Loader2, Wifi, Activity, Sliders, Shield, Download, Upload, Cpu, Zap, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
@@ -586,6 +586,37 @@ export function Network() {
                     </div>
                 </div>
             </motion.div>
+
+            {/* AI TCP/IP & Bufferbloat Tuner Card */}
+            <div className="mt-8 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-[var(--accent-cyan)]/25 rounded-[2rem] p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,rgba(0,255,222,0.12),transparent_70%)] pointer-events-none" />
+                <div className="flex-1 space-y-1.5 relative z-10 text-left">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)] animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--accent-cyan)]">AI Network Intelligence</span>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                            BBR / CUBIC Engine
+                        </span>
+                    </div>
+                    <h3 className="text-white text-base font-black tracking-wide">
+                        Bufferbloat Suppression & 0-Delay Packet Pacing
+                    </h3>
+                    <p className="text-[var(--text-secondary)] text-xs font-medium leading-relaxed max-w-2xl">
+                        Standard Windows TCP stacks use legacy compound congestion algorithms with delayed acknowledgments (200ms ACK timers). Applying <strong className="text-[var(--accent-cyan)]">TCPNoDelay</strong>, setting <strong className="text-[var(--accent-cyan)]">TcpAckFrequency = 1</strong>, and tuning Auto-Tuning to <strong className="text-white">Normal</strong> eliminates queuing delays in FPS netcode.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 relative z-10 shrink-0">
+                    <button
+                        onClick={() => useAppStore.getState().setAiDrawerOpen(true)}
+                        className="px-5 py-3 rounded-xl bg-gradient-to-r from-[var(--accent-cyan)]/15 to-[var(--accent-violet)]/15 hover:from-[var(--accent-cyan)]/25 hover:to-[var(--accent-violet)]/25 border border-[var(--accent-cyan)]/40 text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,222,0.15)]"
+                    >
+                        <Sparkles className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        Network Copilot
+                        <kbd className="text-[8px] bg-black/40 px-1 py-0.5 rounded text-[var(--accent-cyan)]">Ctrl+Space</kbd>
+                    </button>
+                </div>
+            </div>
 
             <div className="mt-8">
                 <TabGroup tabs={tabs} active={tab} onChange={setTab} />
