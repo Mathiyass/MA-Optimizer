@@ -215,8 +215,8 @@ irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" 
 ### 📦 Manual Install
 
 If you prefer to install things manually:
-1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases/tag/v11.0) page.
-2. Download `v11.0.MA-Optimizer.Installer.Setup.exe` (Installer) or `v11.0.MA-Optimizer.Portable.exe` (Portable).
+1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases/tag/v11.1.0) page.
+2. Download `v11.1.MA-Optimizer.Installer.Setup.exe` (Installer) or `v11.1.MA-Optimizer.Portable.exe` (Portable).
 3. Run the application (Administrator privileges are required for system tweaks to take effect).
 
 ---
