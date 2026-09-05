@@ -185,13 +185,20 @@ export function GlobalAiCopilotDrawer() {
         geminiKey: '',
         cerebrasKey: '',
         mistralKey: '',
+        sambanovaKey: '',
     })
+    const [catalogInfo, setCatalogInfo] = useState<{
+        lastSynced: number
+        openrouterFreeModels: string[]
+        pollinationsModels: string[]
+    } | null>(null)
+    const [isSyncingCatalog, setIsSyncingCatalog] = useState(false)
     const [isSavingSettings, setIsSavingSettings] = useState(false)
     const chatEndRef = useRef<HTMLDivElement>(null)
 
-    // Load AI Settings on mount
+    // Load AI Settings & Catalog info on mount
     useEffect(() => {
-        const loadSettings = async () => {
+        const loadSettingsAndCatalog = async () => {
             if (window.api?.ai?.getSettings) {
                 try {
                     const s = await window.api.ai.getSettings()
@@ -203,14 +210,23 @@ export function GlobalAiCopilotDrawer() {
                             geminiKey: s.geminiKey || '',
                             cerebrasKey: s.cerebrasKey || '',
                             mistralKey: s.mistralKey || '',
+                            sambanovaKey: s.sambanovaKey || '',
                         })
                     }
                 } catch (e) {
                     console.error('Failed to load AI settings', e)
                 }
             }
+            if (window.api?.ai?.getCatalogInfo) {
+                try {
+                    const c = await window.api.ai.getCatalogInfo()
+                    if (c) setCatalogInfo(c)
+                } catch (e) {
+                    console.error('Failed to load catalog info', e)
+                }
+            }
         }
-        loadSettings()
+        loadSettingsAndCatalog()
     }, [])
 
     // Set persona based on active page whenever drawer opens or page changes
@@ -478,6 +494,21 @@ export function GlobalAiCopilotDrawer() {
             addNotification('error', `Failed to save AI settings: ${e.message || e}`)
         } finally {
             setIsSavingSettings(false)
+        }
+    }
+
+    const handleRefreshCatalog = async () => {
+        setIsSyncingCatalog(true)
+        try {
+            if (window.api?.ai?.refreshCatalog) {
+                const fresh = await window.api.ai.refreshCatalog()
+                if (fresh) setCatalogInfo(fresh)
+                addNotification('success', 'Dynamic zero-cost catalog refreshed!')
+            }
+        } catch (e: any) {
+            addNotification('error', `Catalog sync failed: ${e.message || e}`)
+        } finally {
+            setIsSyncingCatalog(false)
         }
     }
 
@@ -978,27 +1009,82 @@ export function GlobalAiCopilotDrawer() {
                                                 className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white outline-none"
                                             >
                                                 <option value="auto" className="bg-[#0c0e17]">
-                                                    ⚡ Auto Cascade (Groq → Cerebras → Mistral → OpenRouter → Gemini → Pollinations → Kernel)
+                                                    ⚡ Auto Cascade (Groq → Cerebras → SambaNova → OpenRouter Free → Gemini → Pollinations → AI Horde → Kernel)
                                                 </option>
                                                 <option value="groq" className="bg-[#0c0e17]">
-                                                    Groq (Sub-150ms High Speed)
+                                                    Groq LPU (Sub-150ms High Speed • 14.4K RPD)
                                                 </option>
                                                 <option value="cerebras" className="bg-[#0c0e17]">
-                                                    Cerebras (Ultra-Fast 2000 TPS)
+                                                    Cerebras WSE (Ultra-Fast 2000 TPS • 14.4K RPD)
+                                                </option>
+                                                <option value="sambanova" className="bg-[#0c0e17]">
+                                                    SambaNova RDU (DeepSeek R1 Reasoning)
                                                 </option>
                                                 <option value="openrouter" className="bg-[#0c0e17]">
-                                                    OpenRouter (Global Gateway)
+                                                    OpenRouter Dynamic Free Pool & Meta-Router
                                                 </option>
                                                 <option value="gemini" className="bg-[#0c0e17]">
-                                                    Google Gemini (1.5 Flash)
+                                                    Google Gemini (2.0 Flash)
                                                 </option>
                                                 <option value="mistral" className="bg-[#0c0e17]">
                                                     Mistral AI (Small Latest)
                                                 </option>
+                                                <option value="keyless" className="bg-[#0c0e17]">
+                                                    Public Keyless Ingress (Pollinations Gen V1 & AI Horde P2P)
+                                                </option>
                                                 <option value="local" className="bg-[#0c0e17]">
-                                                    Autonomous Neural Core (Zero Latency Offline)
+                                                    Autonomous Neural Core (Sub-ms Offline Kernel)
                                                 </option>
                                             </select>
+                                        </div>
+
+                                        {/* Dynamic Zero-Cost Model Roster & Catalog Panel */}
+                                        <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 space-y-2.5">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Globe className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                                                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                                                        Zero-Cost Dynamic Catalog
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRefreshCatalog}
+                                                    disabled={isSyncingCatalog}
+                                                    className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-bold text-[var(--accent-cyan)] border border-white/10 flex items-center gap-1 transition-all"
+                                                >
+                                                    <RefreshCw className={`w-3 h-3 ${isSyncingCatalog ? 'animate-spin' : ''}`} />
+                                                    <span>{isSyncingCatalog ? 'Syncing...' : 'Sync Roster'}</span>
+                                                </button>
+                                            </div>
+
+                                            <div className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                                                Automatically scans unauthenticated registries to discover active zero-cost endpoints, preventing HTTP 404 deprecations and multi-model rotation failover.
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                                {(catalogInfo?.openrouterFreeModels || [
+                                                    'deepseek-r1:free',
+                                                    'llama-3.3-70b-instruct:free',
+                                                    'qwen3-coder-480b:free',
+                                                    'gemma-3-27b-it:free',
+                                                    'openrouter/free',
+                                                ]).slice(0, 6).map((m, idx) => (
+                                                    <span
+                                                        key={idx}
+                                                        className="px-2 py-0.5 rounded-md bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/25 text-[10px] font-mono text-[var(--accent-cyan)]"
+                                                    >
+                                                        {m.replace(':free', '').split('/').pop()}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <div className="text-[10px] font-mono text-white/40 pt-1 flex items-center justify-between">
+                                                <span>Ingress: Pollinations Gen V1 & AI Horde P2P</span>
+                                                <span>
+                                                    Synced: {catalogInfo?.lastSynced ? new Date(catalogInfo.lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Ready'}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         {/* Optional API Keys */}
@@ -1010,7 +1096,7 @@ export function GlobalAiCopilotDrawer() {
 
                                             <div>
                                                 <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
-                                                    Groq API Key
+                                                    Groq API Key (14.4K Daily Free Requests)
                                                 </label>
                                                 <input
                                                     type="password"
@@ -1023,7 +1109,33 @@ export function GlobalAiCopilotDrawer() {
 
                                             <div>
                                                 <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
-                                                    OpenRouter API Key
+                                                    Cerebras API Key (14.4K Daily Free Requests)
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.cerebrasKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, cerebrasKey: e.target.value })}
+                                                    placeholder="csk-..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    SambaNova API Key (DeepSeek R1 Hardware Accelerator)
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    value={aiSettings.sambanovaKey || ''}
+                                                    onChange={(e) => setAiSettings({ ...aiSettings, sambanovaKey: e.target.value })}
+                                                    placeholder="samba_..."
+                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
+                                                    OpenRouter API Key (Expands Free Daily Volume)
                                                 </label>
                                                 <input
                                                     type="password"
@@ -1036,26 +1148,13 @@ export function GlobalAiCopilotDrawer() {
 
                                             <div>
                                                 <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
-                                                    Google Gemini API Key
+                                                    Google Gemini API Key (1M Context Flash)
                                                 </label>
                                                 <input
                                                     type="password"
                                                     value={aiSettings.geminiKey || ''}
                                                     onChange={(e) => setAiSettings({ ...aiSettings, geminiKey: e.target.value })}
                                                     placeholder="AIza..."
-                                                    className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-[11px] font-medium text-[var(--text-muted)] mb-1">
-                                                    Cerebras API Key
-                                                </label>
-                                                <input
-                                                    type="password"
-                                                    value={aiSettings.cerebrasKey || ''}
-                                                    onChange={(e) => setAiSettings({ ...aiSettings, cerebrasKey: e.target.value })}
-                                                    placeholder="csk-..."
                                                     className="w-full bg-white/5 border border-white/10 focus:border-[var(--accent-cyan)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 outline-none font-mono"
                                                 />
                                             </div>

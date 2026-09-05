@@ -1,6 +1,15 @@
 import { ipcMain, shell } from 'electron'
 import { sendLog, sendError } from './logger'
 import * as os from 'os'
+import {
+    synchronizeModelCatalog,
+    getModelCatalog,
+    isProviderInCooldown,
+    markProviderCooldown,
+    clampContextMessages,
+    DEFAULT_OPENROUTER_FREE_MODELS,
+    DEFAULT_POLLINATIONS_MODELS,
+} from './modelCatalogSync'
 
 export interface AiStatus {
     online: boolean
@@ -16,6 +25,7 @@ export interface AiSettings {
     geminiKey?: string
     cerebrasKey?: string
     mistralKey?: string
+    sambanovaKey?: string
 }
 
 const NATIVE_MODEL_NAME = 'Autonomous Neural Core (Sub-ms)'
@@ -27,6 +37,13 @@ const AVAILABLE_PERSONAS = [
     'Network Bufferbloat & QoS Packet Pacing Specialist',
     'DPC / ISR Audio & Driver Interrupt Specialist',
 ]
+
+// Trigger asynchronous background catalog sync on startup
+setTimeout(() => {
+    synchronizeModelCatalog(false).catch((e) =>
+        sendLog(`[AI Catalog] Initial sync deferred: ${e.message || e}`)
+    )
+}, 2000)
 
 /**
  * PII Sanitizer for prompt telemetry
@@ -52,6 +69,7 @@ function getSavedSettings(): AiSettings {
             geminiKey: '',
             cerebrasKey: '',
             mistralKey: '',
+            sambanovaKey: '',
         }) as AiSettings
     } catch {
         return {
@@ -61,6 +79,7 @@ function getSavedSettings(): AiSettings {
             geminiKey: '',
             cerebrasKey: '',
             mistralKey: '',
+            sambanovaKey: '',
         }
     }
 }
@@ -71,7 +90,7 @@ function getSavedSettings(): AiSettings {
 export async function checkAiStatus(): Promise<AiStatus> {
     const settings = getSavedSettings()
     const hasKeys = Boolean(
-        settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey ||
+        settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey || settings.sambanovaKey ||
         process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY
     )
 
@@ -87,7 +106,7 @@ export async function checkAiStatus(): Promise<AiStatus> {
 export const checkOllamaStatus = checkAiStatus
 
 /**
- * Call OpenAI-compatible REST API with timeout
+ * Call OpenAI-compatible REST API with timeout & cooldown tracking
  */
 async function callOpenAICompatible(
     endpoint: string,
@@ -96,7 +115,7 @@ async function callOpenAICompatible(
     messages: any[],
     extraHeaders: Record<string, string> = {},
     timeoutMs: number = 7000
-): Promise<string | null> {
+): Promise<{ text: string | null; status?: number }> {
     try {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -116,11 +135,22 @@ async function callOpenAICompatible(
             signal: controller.signal,
         })
         clearTimeout(timeout)
-        if (!res.ok) return null
+
+        if (res.status === 429) {
+            markProviderCooldown(endpoint, 60 * 1000)
+            markProviderCooldown(model, 60 * 1000)
+            return { text: null, status: 429 }
+        }
+
+        if (!res.ok) {
+            return { text: null, status: res.status }
+        }
+
         const data = (await res.json()) as any
-        return data?.choices?.[0]?.message?.content || null
+        const content = data?.choices?.[0]?.message?.content || null
+        return { text: content, status: 200 }
     } catch {
-        return null
+        return { text: null }
     }
 }
 
@@ -158,39 +188,104 @@ async function callGemini(
 }
 
 /**
- * Call Pollinations.ai free keyless tier
+ * Modern Pollinations.ai Public Network Ingress (Keyless)
+ * Uses modern endpoint gen.pollinations.ai/v1 with fallback to text.pollinations.ai
  */
-async function callPollinations(
-    systemPrompt: string,
-    userPrompt: string,
-    timeoutMs: number = 3500
+async function callPollinationsModern(
+    messages: any[],
+    model: string = 'gemini-2.0-flash',
+    timeoutMs: number = 4000
 ): Promise<string | null> {
+    // 1. Primary: gen.pollinations.ai/v1
     try {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        const res = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model,
+                messages,
+                temperature: 0.7,
+                max_tokens: 1200,
+            }),
+            signal: controller.signal,
+        })
+        clearTimeout(timeout)
+
+        if (res.ok) {
+            const data = (await res.json()) as any
+            const content = data?.choices?.[0]?.message?.content
+            if (content && typeof content === 'string' && !content.includes('402 Payment Required')) {
+                return content
+            }
+        }
+    } catch {}
+
+    // 2. Fallback: text.pollinations.ai/openai
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 3500)
         const res = await fetch('https://text.pollinations.ai/openai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt },
-                ],
+                messages,
                 model: 'openai',
             }),
             signal: controller.signal,
         })
         clearTimeout(timeout)
-        if (!res.ok) return null
-        const data = (await res.json()) as any
-        const content = data?.choices?.[0]?.message?.content
-        if (content && typeof content === 'string' && !content.includes('402 Payment Required') && !content.includes('Rate limit')) {
-            return content
+
+        if (res.ok) {
+            const data = (await res.json()) as any
+            const content = data?.choices?.[0]?.message?.content
+            if (content && typeof content === 'string' && !content.includes('402 Payment Required')) {
+                return content
+            }
         }
-        return null
-    } catch {
-        return null
-    }
+    } catch {}
+
+    return null
+}
+
+/**
+ * Call AI Horde OpenAI-Compatible Translation Proxy (Anonymous P2P Mesh)
+ * Uses public anonymous bearer key: 0000000000
+ */
+async function callAIHordeProxy(
+    messages: any[],
+    timeoutMs: number = 7000
+): Promise<string | null> {
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), timeoutMs)
+        const res = await fetch('https://oai.aihorde.net/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 0000000000',
+                'Client-Agent': 'MA-Optimizer:11.1.0:github.com/Mathiyass/MA-Optimizer',
+            },
+            body: JSON.stringify({
+                model: 'meta-llama/llama-3.3-70b-instruct',
+                messages,
+                temperature: 0.7,
+                max_tokens: 900,
+            }),
+            signal: controller.signal,
+        })
+        clearTimeout(timeout)
+
+        if (res.ok) {
+            const data = (await res.json()) as any
+            const content = data?.choices?.[0]?.message?.content
+            if (content && typeof content === 'string') {
+                return content
+            }
+        }
+    } catch {}
+    return null
 }
 
 /**
@@ -318,7 +413,7 @@ Hello! I am your ambient system optimization copilot, engineered by Mathisha Ang
 - Ask **"What do you think about my PC?"** for an exhaustive hardware appraisal.
 - Ask **"How to get more FPS?"** for gaming latency & 1% low calibrations.
 - Ask **"How to clean my RAM?"** to evaluate memory working sets.
-- Or trigger instant optimizations using the actions below:
+- Or trigger instant calibrations directly below:
 
 [ACTION:TURBO_BOOST]
 [ACTION:TRIM_RAM]`
@@ -607,12 +702,20 @@ ipcMain.handle('ai:setModel', async (_, modelName: string) => {
     return { activeModel: NATIVE_MODEL_NAME }
 })
 
+ipcMain.handle('ai:getCatalogInfo', async () => {
+    return getModelCatalog()
+})
+
+ipcMain.handle('ai:refreshCatalog', async () => {
+    return await synchronizeModelCatalog(true)
+})
+
 ipcMain.handle('ai:getSettings', async () => {
     const settings = getSavedSettings()
     return {
         preferredProvider: settings.preferredProvider || 'auto',
         hasCustomKeys: Boolean(
-            settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey ||
+            settings.groqKey || settings.openrouterKey || settings.geminiKey || settings.cerebrasKey || settings.mistralKey || settings.sambanovaKey ||
             process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY
         ),
         groqKey: settings.groqKey || '',
@@ -620,6 +723,7 @@ ipcMain.handle('ai:getSettings', async () => {
         geminiKey: settings.geminiKey || '',
         cerebrasKey: settings.cerebrasKey || '',
         mistralKey: settings.mistralKey || '',
+        sambanovaKey: settings.sambanovaKey || '',
     }
 })
 
@@ -660,21 +764,25 @@ ipcMain.on('ai:query', async (event, payload: { prompt: string; context?: any; q
     const mistralKey = settings.mistralKey || process.env.MISTRAL_API_KEY
     const openrouterKey = settings.openrouterKey || process.env.OPENROUTER_API_KEY
     const geminiKey = settings.geminiKey || process.env.GEMINI_API_KEY
+    const sambanovaKey = settings.sambanovaKey || process.env.SAMBANOVA_API_KEY
     const preferred = settings.preferredProvider || 'auto'
 
     const systemPrompt = buildSeniorArchitectSystemPrompt(context, persona)
-    const standardMessages = [
+    const rawMessages = [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: sanitizedPrompt },
     ]
 
+    // Apply Ingress Context Clamping to prevent silent drops
+    const standardMessages = clampContextMessages(rawMessages, 10000)
+
     let answer: string | null = null
     let activeModelName = NATIVE_MODEL_NAME
 
-    // 1. If user chose specific provider or auto, try in order of speed and capability:
+    // ── TIER 0: Hardware Accelerators & Direct Accounts (Sub-150ms) ──
 
-    // GROQ TIER (Sub-150ms)
-    if ((preferred === 'groq' || preferred === 'auto') && groqKey && !answer) {
+    // GROQ LPU TIER (30 RPM / 14,400 RPD)
+    if ((preferred === 'groq' || preferred === 'auto') && groqKey && !isProviderInCooldown('groq') && !answer) {
         try {
             const groqRes = await callOpenAICompatible(
                 'https://api.groq.com/openai/v1/chat/completions',
@@ -684,15 +792,15 @@ ipcMain.on('ai:query', async (event, payload: { prompt: string; context?: any; q
                 {},
                 6000
             )
-            if (groqRes) {
-                answer = groqRes
-                activeModelName = 'Groq (Llama 3.3 70B Versatile)'
+            if (groqRes.text) {
+                answer = groqRes.text
+                activeModelName = 'Groq LPU (Llama 3.3 70B Versatile)'
             }
         } catch {}
     }
 
-    // CEREBRAS TIER (Ultra-fast 2000 TPS)
-    if ((preferred === 'cerebras' || preferred === 'auto') && cerebrasKey && !answer) {
+    // CEREBRAS WSE TIER (Wafer-Scale Engine 2000 TPS)
+    if ((preferred === 'cerebras' || preferred === 'auto') && cerebrasKey && !isProviderInCooldown('cerebras') && !answer) {
         try {
             const cerebrasRes = await callOpenAICompatible(
                 'https://api.cerebras.ai/v1/chat/completions',
@@ -702,15 +810,33 @@ ipcMain.on('ai:query', async (event, payload: { prompt: string; context?: any; q
                 {},
                 6000
             )
-            if (cerebrasRes) {
-                answer = cerebrasRes
-                activeModelName = 'Cerebras (Llama 3.3 70B)'
+            if (cerebrasRes.text) {
+                answer = cerebrasRes.text
+                activeModelName = 'Cerebras WSE (Llama 3.3 70B)'
+            }
+        } catch {}
+    }
+
+    // SAMBANOVA RDU TIER (Reconfigurable Dataflow Units - DeepSeek R1)
+    if ((preferred === 'sambanova' || preferred === 'auto') && sambanovaKey && !isProviderInCooldown('sambanova') && !answer) {
+        try {
+            const sambaRes = await callOpenAICompatible(
+                'https://api.sambanova.ai/v1/chat/completions',
+                sambanovaKey,
+                'DeepSeek-R1-Distill-Llama-70B',
+                standardMessages,
+                {},
+                7000
+            )
+            if (sambaRes.text) {
+                answer = sambaRes.text
+                activeModelName = 'SambaNova RDU (DeepSeek R1)'
             }
         } catch {}
     }
 
     // MISTRAL TIER
-    if ((preferred === 'mistral' || preferred === 'auto') && mistralKey && !answer) {
+    if ((preferred === 'mistral' || preferred === 'auto') && mistralKey && !isProviderInCooldown('mistral') && !answer) {
         try {
             const mistralRes = await callOpenAICompatible(
                 'https://api.mistral.ai/v1/chat/completions',
@@ -720,60 +846,94 @@ ipcMain.on('ai:query', async (event, payload: { prompt: string; context?: any; q
                 {},
                 6000
             )
-            if (mistralRes) {
-                answer = mistralRes
+            if (mistralRes.text) {
+                answer = mistralRes.text
                 activeModelName = 'Mistral AI (Small Latest)'
             }
         } catch {}
     }
 
-    // OPENROUTER TIER
-    if ((preferred === 'openrouter' || preferred === 'auto') && openrouterKey && !answer) {
-        try {
-            const orRes = await callOpenAICompatible(
-                'https://openrouter.ai/api/v1/chat/completions',
-                openrouterKey,
-                'meta-llama/llama-3.3-70b-instruct',
-                standardMessages,
-                { 'HTTP-Referer': 'https://github.com/Mathiyass/MA-Optimizer', 'X-Title': 'MA-Optimizer Copilot' },
-                7000
-            )
-            if (orRes) {
-                answer = orRes
-                activeModelName = 'OpenRouter (Llama 3.3 70B)'
-            }
-        } catch {}
-    }
-
-    // GEMINI TIER
-    if ((preferred === 'gemini' || preferred === 'auto') && geminiKey && !answer) {
+    // GEMINI TIER (Google AI Studio 1M Context)
+    if ((preferred === 'gemini' || preferred === 'auto') && geminiKey && !isProviderInCooldown('gemini') && !answer) {
         try {
             const geminiRes = await callGemini(
                 geminiKey,
-                'gemini-1.5-flash',
+                'gemini-2.0-flash',
                 systemPrompt,
                 sanitizedPrompt,
                 7000
             )
             if (geminiRes) {
                 answer = geminiRes
-                activeModelName = 'Google Gemini (1.5 Flash)'
+                activeModelName = 'Google Gemini (2.0 Flash)'
             }
         } catch {}
     }
 
-    // KEYLESS POLLINATIONS TIER (Zero-config public cloud)
+    // ── TIER 1: OpenRouter Dynamic Free Pool & Meta-Router (Sequential Multi-Model Rotation) ──
+    if ((preferred === 'openrouter' || preferred === 'auto') && openrouterKey && !answer) {
+        const catalog = getModelCatalog()
+        const candidateModels = [
+            ...catalog.openrouterFreeModels.filter((m) => !isProviderInCooldown(m)),
+            'openrouter/free',
+        ]
+
+        for (const candidate of candidateModels) {
+            try {
+                const orRes = await callOpenAICompatible(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    openrouterKey,
+                    candidate,
+                    standardMessages,
+                    {
+                        'HTTP-Referer': 'https://github.com/Mathiyass/MA-Optimizer',
+                        'X-Title': 'MA-Optimizer Copilot',
+                    },
+                    6000
+                )
+                if (orRes.text) {
+                    answer = orRes.text
+                    activeModelName = `OpenRouter (${candidate.replace(':free', '')})`
+                    break
+                }
+                // If 429 or 404, candidate already cooled down by callOpenAICompatible, loops to next!
+            } catch {}
+        }
+    }
+
+    // ── TIER 2: Unauthenticated Public Keyless Ingress (Zero Config Required) ──
+
+    // 2A. Modern Pollinations Ingress (gen.pollinations.ai/v1)
+    if (!answer && preferred !== 'local') {
+        const catalog = getModelCatalog()
+        const candidateModels = catalog.pollinationsModels.length > 0
+            ? catalog.pollinationsModels
+            : DEFAULT_POLLINATIONS_MODELS
+
+        for (const pModel of candidateModels.slice(0, 3)) {
+            try {
+                const pollRes = await callPollinationsModern(standardMessages, pModel, 3500)
+                if (pollRes) {
+                    answer = pollRes
+                    activeModelName = `Pollinations Gen V1 (${pModel})`
+                    break
+                }
+            } catch {}
+        }
+    }
+
+    // 2B. AI Horde Distributed P2P Translation Proxy (Bearer 0000000000)
     if (!answer && preferred !== 'local') {
         try {
-            const pollRes = await callPollinations(systemPrompt, sanitizedPrompt, 3500)
-            if (pollRes) {
-                answer = pollRes
-                activeModelName = 'Pollinations.ai (Keyless Cloud)'
+            const hordeRes = await callAIHordeProxy(standardMessages, 5000)
+            if (hordeRes) {
+                answer = hordeRes
+                activeModelName = 'AI Horde P2P Mesh (Volunteer Compute)'
             }
         } catch {}
     }
 
-    // AUTONOMOUS LOCAL NEURAL ENGINE (Zero latency, sub-ms, 100% offline uptime)
+    // ── TIER 3: Autonomous Local Neural Engine (Sub-ms Latency, 100% Offline Anchor) ──
     if (!answer) {
         answer = generateAutonomousIntelligenceResponse(sanitizedPrompt, context, persona)
         activeModelName = NATIVE_MODEL_NAME

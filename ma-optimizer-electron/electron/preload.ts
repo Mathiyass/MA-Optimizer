@@ -423,6 +423,8 @@ contextBridge.exposeInMainWorld('api', {
             validate([settings], ['object'])
             return ipcRenderer.invoke('ai:saveSettings', settings)
         },
+        getCatalogInfo: () => ipcRenderer.invoke('ai:getCatalogInfo'),
+        refreshCatalog: () => ipcRenderer.invoke('ai:refreshCatalog'),
     },
     onAiChunk: (cb: (data: { queryId: string; chunk: string; done: boolean; model?: string }) => void) => {
         const listener = (_: any, data: any) => cb(data)
