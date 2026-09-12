@@ -1,0 +1,94 @@
+# ==============================================================================
+# Token Optimization: Ignore massive lockfiles, builds, caches & generated files
+# ==============================================================================
+
+# Package Lockfiles (30k+ lines, major token drains)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+Cargo.lock
+Gemfile.lock
+poetry.lock
+composer.lock
+flake.lock
+*.lock
+
+# Package & Dependency Directories
+node_modules/
+bower_components/
+.pnpm-store/
+vendor/
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build Outputs, Bundles & Compilations
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+target/
+bin/
+obj/
+*.tsbuildinfo
+*.min.js
+*.min.css
+*.map
+*.bundle.js
+*.chunk.js
+
+# Test Coverage, Reports & Logs
+coverage/
+.nyc_output/
+*.lcov
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cache & Temporary Directories
+.cache/
+.turbo/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+tmp/
+temp/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.sass-cache/
+
+# Binary, Archives & Media
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.exe
+*.dll
+*.so
+*.dylib
+*.iso
+*.bin
+*.mp4
+*.mov
+*.avi
+*.mp3
+*.wav
+*.pdf
+*.wasm
+
+# Antigravity working memory ledger
+.agy/

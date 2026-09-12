@@ -178,3 +178,6 @@ github_release_notes.md
 
 # Orphan root package-lock (no root package.json)
 /package-lock.json
+
+# Antigravity working memory ledger
+.agy/
