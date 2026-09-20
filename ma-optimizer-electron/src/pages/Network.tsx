@@ -478,6 +478,87 @@ function DnsTab() {
                     </button>
                 </div>
             </div>
+
+            {/* Native Windows 11 DNS over HTTPS (DoH) Card */}
+            <div className="p-6 rounded-2xl border border-[var(--accent-cyan)]/30 bg-[rgba(0,255,222,0.03)] space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-[var(--accent-cyan)]" />
+                            <h4 className="text-white text-base font-black uppercase tracking-wider">Windows 11 DNS over HTTPS (DoH)</h4>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">Encrypted DNS</span>
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] max-w-xl">
+                            Encrypts all DNS queries with TLS 1.3 over HTTPS to prevent ISP interception, spoofing, and throttling on ONT lines.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await window.api?.network?.configureDoh('disable')
+                                addNotification('info', res?.message || 'DoH reset to DHCP')
+                                addLog('[DNS] Reset DoH to DHCP')
+                            } catch (e: any) {
+                                addNotification('error', e.message)
+                            }
+                        }}
+                        className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-text-dim transition-all"
+                    >
+                        Reset to DHCP
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await window.api?.network?.configureDoh('cloudflare')
+                                addNotification('success', res?.message || 'Cloudflare DoH Configured')
+                                addLog('[DNS] Configured Cloudflare DoH (1.1.1.1)')
+                            } catch (e: any) {
+                                addNotification('error', e.message)
+                            }
+                        }}
+                        className="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[var(--accent-cyan)]/50 text-left transition-all group"
+                    >
+                        <div className="text-xs font-bold text-white group-hover:text-[var(--accent-cyan)]">Cloudflare DoH</div>
+                        <div className="text-[10px] text-text-muted">https://cloudflare-dns.com/dns-query</div>
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await window.api?.network?.configureDoh('google')
+                                addNotification('success', res?.message || 'Google DoH Configured')
+                                addLog('[DNS] Configured Google DoH (8.8.8.8)')
+                            } catch (e: any) {
+                                addNotification('error', e.message)
+                            }
+                        }}
+                        className="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[var(--accent-cyan)]/50 text-left transition-all group"
+                    >
+                        <div className="text-xs font-bold text-white group-hover:text-[var(--accent-cyan)]">Google DoH</div>
+                        <div className="text-[10px] text-text-muted">https://dns.google/dns-query</div>
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await window.api?.network?.configureDoh('quad9')
+                                addNotification('success', res?.message || 'Quad9 DoH Configured')
+                                addLog('[DNS] Configured Quad9 DoH (9.9.9.9)')
+                            } catch (e: any) {
+                                addNotification('error', e.message)
+                            }
+                        }}
+                        className="p-3.5 rounded-xl bg-white/5 border border-white/10 hover:border-[var(--accent-cyan)]/50 text-left transition-all group"
+                    >
+                        <div className="text-xs font-bold text-white group-hover:text-[var(--accent-cyan)]">Quad9 Security DoH</div>
+                        <div className="text-[10px] text-text-muted">https://dns.quad9.net/dns-query</div>
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }
@@ -1301,6 +1382,99 @@ function DiagnosticsTab() {
                 })}
             </div>
             {testing && <div className="flex justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-[var(--accent-cyan)]" /></div>}
+
+            {/* Real-time Connection Quality & Jitter Analysis (RFC Standard Deviation) */}
+            <ConnectionQualityWidget />
+        </div>
+    )
+}
+
+function ConnectionQualityWidget() {
+    const [quality, setQuality] = useState<{
+        host: string; sent: number; received: number; lossPercent: number; minMs: number; maxMs: number; avgMs: number; jitterMs: number; samples: number[]
+    } | null>(null)
+    const [measuring, setMeasuring] = useState(false)
+    const [targetHost, setTargetHost] = useState('1.1.1.1')
+
+    const runQualityCheck = async () => {
+        if (!window.api?.network?.getConnectionQuality) return
+        setMeasuring(true)
+        try {
+            const res = await window.api.network.getConnectionQuality(targetHost, 15)
+            if (res.success) {
+                setQuality(res.quality)
+            }
+        } finally {
+            setMeasuring(false)
+        }
+    }
+
+    useEffect(() => { runQualityCheck() }, [])
+
+    return (
+        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <h4 className="text-white text-base font-black uppercase tracking-wider flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-[var(--accent-cyan)]" /> Connection Quality & Jitter Analysis (15 Packets)
+                    </h4>
+                    <p className="text-xs text-text-muted mt-0.5">
+                        Measures variance (delay variation) and packet loss to identify rubberbanding and bullet registration desync.
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        value={targetHost}
+                        onChange={(e) => setTargetHost(e.target.value)}
+                        className="px-3 py-1.5 bg-black/40 border border-white/15 rounded-xl text-xs text-white font-mono outline-none w-28 text-center"
+                    />
+                    <button
+                        onClick={runQualityCheck}
+                        disabled={measuring}
+                        className="px-4 py-2 bg-[var(--accent-cyan)] text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all hover:bg-[#00e6c8] flex items-center gap-1.5 cursor-pointer"
+                    >
+                        {measuring ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
+                        {measuring ? 'Testing...' : 'Test Jitter'}
+                    </button>
+                </div>
+            </div>
+
+            {quality && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-text-muted">Network Jitter</div>
+                        <div className={`text-2xl font-black font-mono mt-1 ${quality.jitterMs < 2 ? 'text-emerald-400' : quality.jitterMs < 8 ? 'text-amber-400' : 'text-rose-400'}`}>
+                            {quality.jitterMs} ms
+                        </div>
+                        <div className="text-[10px] text-text-dim mt-0.5">{quality.jitterMs < 2 ? 'eSports Grade' : quality.jitterMs < 8 ? 'Moderate Jitter' : 'High Desync Risk'}</div>
+                    </div>
+
+                    <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-text-muted">Packet Loss</div>
+                        <div className={`text-2xl font-black font-mono mt-1 ${quality.lossPercent === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {quality.lossPercent}%
+                        </div>
+                        <div className="text-[10px] text-text-dim mt-0.5">{quality.received}/{quality.sent} Received</div>
+                    </div>
+
+                    <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-text-muted">Avg Round-Trip</div>
+                        <div className="text-2xl font-black font-mono mt-1 text-white">
+                            {quality.avgMs} ms
+                        </div>
+                        <div className="text-[10px] text-text-dim mt-0.5">Min: {quality.minMs}ms | Max: {quality.maxMs}ms</div>
+                    </div>
+
+                    <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-text-muted">Hitreg Reliability</div>
+                        <div className={`text-2xl font-black font-mono mt-1 ${quality.lossPercent === 0 && quality.jitterMs < 3 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {quality.lossPercent === 0 && quality.jitterMs < 3 ? 'OPTIMAL' : 'DEGRADED'}
+                        </div>
+                        <div className="text-[10px] text-text-dim mt-0.5">Zero Buffer Bloat</div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

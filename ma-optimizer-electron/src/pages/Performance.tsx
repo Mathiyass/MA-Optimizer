@@ -200,60 +200,335 @@ function formatGb(bytes: number) {
 function MemoryOptimizerPanel() {
     const ram = useSystemStore(s => s.ram)
     const [cleaning, setCleaning] = useState(false)
+    const [autoPurge, setAutoPurge] = useState(false)
+    const [compression, setCompression] = useState(true)
+    const [pageCombining, setPageCombining] = useState(true)
+    const [optPagefileLoading, setOptPagefileLoading] = useState(false)
     const addLog = useLogStore(s => s.addLine)
     const addNotification = useAppStore(s => s.addNotification)
 
-    const cleanRam = async () => {
-        setCleaning(true)
-        addLog('[Memory] Initializing RAM Cache Optimization...')
+    const fetchMemStatus = useCallback(async () => {
+        if (!window.api?.memory) return
         try {
-            const success = await window.api?.system.cleanRam()
-            if (success) {
-                addNotification('success', 'RAM cache optimization complete!')
-                addLog('[Memory] RAM working sets and standby list released')
+            const comp = await window.api.memory.getCompressionStatus()
+            if (comp.success) {
+                setCompression(comp.compression)
+                setPageCombining(comp.pageCombining)
+            }
+        } catch {}
+    }, [])
+
+    useEffect(() => {
+        fetchMemStatus()
+    }, [fetchMemStatus])
+
+    const purgeStandby = async () => {
+        setCleaning(true)
+        addLog('[Memory] Executing ISLC Standby List Cache Purge...')
+        try {
+            const res = await window.api?.memory?.purgeStandbyList()
+            if (res?.success) {
+                addNotification('success', 'Purged Standby Cache! Frame time consistency restored.')
+                addLog(`[Memory] ${res.message}`)
+                await fetchMemStatus()
             } else {
-                addNotification('error', 'Failed to optimize RAM cache')
+                addNotification('error', res?.message || 'Purge failed')
             }
         } catch (e: any) {
-            addLog(`[ERROR] RAM optimization failed: ${e.message}`)
+            addLog(`[ERROR] Standby purge failed: ${e.message}`)
         } finally {
             setCleaning(false)
+        }
+    }
+
+    const toggleAutoPurge = async () => {
+        const next = !autoPurge
+        setAutoPurge(next)
+        try {
+            await window.api?.memory?.configureAutoPurge(next, 2048, 60)
+            addNotification('success', next ? 'Auto Standby Purge (ISLC Mode) enabled' : 'Auto Standby Purge disabled')
+        } catch {}
+    }
+
+    const toggleComp = async () => {
+        const next = !compression
+        setCompression(next)
+        try {
+            const res = await window.api?.memory?.toggleCompression(next)
+            addNotification('success', res.message)
+        } catch {}
+    }
+
+    const togglePageComb = async () => {
+        const next = !pageCombining
+        setPageCombining(next)
+        try {
+            const res = await window.api?.memory?.togglePageCombining(next)
+            addNotification('success', res.message)
+        } catch {}
+    }
+
+    const optimizePagefile = async () => {
+        setOptPagefileLoading(true)
+        try {
+            const res = await window.api?.memory?.optimizePagefile()
+            if (res.success) {
+                addNotification('success', res.message)
+            } else {
+                addNotification('error', res.message)
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        } finally {
+            setOptPagefileLoading(false)
         }
     }
 
     const percent = ram.percent || 0
 
     return (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex-1 w-full space-y-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
-                            <MemoryStick className="w-5 h-5 text-[var(--accent-cyan)]" /> Real-time RAM Optimizer
-                        </h3>
-                        <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Reclaim standby cache and working sets from inactive applications.</p>
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="flex-1 w-full space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                                <MemoryStick className="w-5 h-5 text-[var(--accent-cyan)]" /> Real-time RAM & ISLC Standby Optimizer
+                            </h3>
+                            <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">Reclaim standby cache, trim working sets, and prevent micro-stuttering in memory-heavy titles.</p>
+                        </div>
+                        <span className="text-white text-sm font-mono font-bold">{formatGb(ram.used)} / {formatGb(ram.total)} ({percent}%)</span>
                     </div>
-                    <span className="text-white text-sm font-mono font-bold">{formatGb(ram.used)} / {formatGb(ram.total)} ({percent}%)</span>
+                    
+                    <div className="w-full h-3 bg-black/40 border border-white/5 rounded-full overflow-hidden relative">
+                        <motion.div 
+                            className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.4)]"
+                            style={{ width: `${percent}%` }}
+                            animate={{ width: `${percent}%` }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                        />
+                    </div>
                 </div>
-                
-                <div className="w-full h-3 bg-black/40 border border-white/5 rounded-full overflow-hidden relative">
-                    <motion.div 
-                        className="h-full bg-gradient-to-r from-[var(--accent-cyan)] to-[#00FFDE]/50 shadow-[0_0_15px_rgba(0,255,222,0.4)]"
-                        style={{ width: `${percent}%` }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                    />
+
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <button
+                        onClick={purgeStandby}
+                        disabled={cleaning}
+                        className="px-6 py-3.5 bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full md:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap border flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        {cleaning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        {cleaning ? 'Purging...' : 'Purge Standby Cache (ISLC)'}
+                    </button>
                 </div>
             </div>
 
-            <button
-                onClick={cleanRam}
-                disabled={cleaning}
-                className="px-8 py-4 bg-[var(--accent-cyan)] border-[var(--accent-cyan)]/50 rounded-2xl text-black text-xs font-black tracking-widest uppercase hover:bg-[#00e6c8] transition-all disabled:opacity-40 disabled:cursor-not-allowed w-full md:w-auto shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap border flex items-center justify-center gap-2 cursor-pointer"
-            >
-                {cleaning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {cleaning ? 'Releasing...' : 'Release RAM Cache'}
-            </button>
+            {/* Granular Memory Toggles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-white/5">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <div className="text-xs font-bold text-white">Auto ISLC Loop</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Purge when free RAM &lt; 2GB</div>
+                    </div>
+                    <button
+                        onClick={toggleAutoPurge}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${autoPurge ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-white/10 text-text-dim'}`}
+                    >
+                        {autoPurge ? 'ACTIVE' : 'OFF'}
+                    </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <div className="text-xs font-bold text-white">Memory Compression</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Saves CPU decompress cycles</div>
+                    </div>
+                    <button
+                        onClick={toggleComp}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${!compression ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-white/10 text-text-dim'}`}
+                    >
+                        {!compression ? 'DISABLED' : 'ENABLED'}
+                    </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <div className="text-xs font-bold text-white">Page Combining</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Deduplicate identical pages</div>
+                    </div>
+                    <button
+                        onClick={togglePageComb}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${!pageCombining ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-white/10 text-text-dim'}`}
+                    >
+                        {!pageCombining ? 'DISABLED' : 'ENABLED'}
+                    </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                        <div className="text-xs font-bold text-white">Fixed NVMe Pagefile</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Eliminate resize stutter</div>
+                    </div>
+                    <button
+                        onClick={optimizePagefile}
+                        disabled={optPagefileLoading}
+                        className="px-3 py-1 rounded-lg text-xs font-bold bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30 hover:bg-accent-cyan/25 transition-all"
+                    >
+                        {optPagefileLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Optimize'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function AdvancedCpuPanel() {
+    const [boostMode, setBoostMode] = useState<number>(2)
+    const [cStateDisabled, setCStateDisabled] = useState<boolean>(false)
+    const [freqLocked, setFreqLocked] = useState<boolean>(false)
+    const [prioritySeparation, setPrioritySeparation] = useState<number>(38)
+    const [loading, setLoading] = useState(false)
+    const addNotification = useAppStore(s => s.addNotification)
+
+    const fetchCpuControls = useCallback(async () => {
+        if (!window.api?.powerPlan || !window.api?.performance) return
+        try {
+            const [b, c, t, p] = await Promise.all([
+                window.api.powerPlan.getBoostMode(),
+                window.api.powerPlan.getCStateConfig(),
+                window.api.powerPlan.getProcessorThrottle(),
+                window.api.performance.getWin32PrioritySeparation()
+            ])
+            if (b.success) setBoostMode(b.mode)
+            if (c.success) setCStateDisabled(c.idleDisabled)
+            if (t.success) setFreqLocked(t.minPercent === 100)
+            if (p.success) setPrioritySeparation(p.value)
+        } catch {}
+    }, [])
+
+    useEffect(() => {
+        fetchCpuControls()
+    }, [fetchCpuControls])
+
+    const handleSetBoost = async (val: number) => {
+        setLoading(true)
+        try {
+            const res = await window.api?.powerPlan?.setBoostMode(val)
+            if (res.success) {
+                setBoostMode(val)
+                addNotification('success', res.message)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleToggleCState = async () => {
+        const next = !cStateDisabled
+        setLoading(true)
+        try {
+            const res = await window.api?.powerPlan?.setCStateDisabled(next)
+            if (res.success) {
+                setCStateDisabled(next)
+                addNotification('success', res.message)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleToggleFreqLock = async () => {
+        const next = !freqLocked
+        setLoading(true)
+        try {
+            const res = await window.api?.powerPlan?.lockMaxFrequency(next)
+            if (res.success) {
+                setFreqLocked(next)
+                addNotification('success', res.message)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSetPriority = async () => {
+        setLoading(true)
+        try {
+            const res = await window.api?.performance?.setWin32PrioritySeparation(38)
+            if (res.success) {
+                setPrioritySeparation(38)
+                addNotification('success', 'Foreground Priority 3:1 Boost applied!')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                        <Cpu className="w-5 h-5 text-[var(--accent-cyan)]" /> Advanced CPU Governor & Clock Latency Killer
+                    </h3>
+                    <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">
+                        Direct kernel and ACPI power management controls to eliminate frequency scaling downclock stutter and idle wakeup delay.
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="text-xs font-bold text-white">Processor Boost Mode</div>
+                    <p className="text-[11px] text-text-muted">Controls aggressiveness of AMD Precision Boost / Intel Turbo Boost.</p>
+                    <select
+                        value={boostMode}
+                        onChange={(e) => handleSetBoost(parseInt(e.target.value, 10))}
+                        disabled={loading}
+                        className="w-full py-2 px-3 bg-black/40 border border-white/15 rounded-xl text-xs text-white font-semibold outline-none"
+                    >
+                        <option value={2}>Aggressive (Recommended)</option>
+                        <option value={4}>Efficient Aggressive</option>
+                        <option value={1}>Enabled (Standard)</option>
+                        <option value={0}>Disabled</option>
+                    </select>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="text-xs font-bold text-white">CPU Idle C-States</div>
+                    <p className="text-[11px] text-text-muted">Disables CPU sleep states. Eliminates microsecond wake latency spikes.</p>
+                    <button
+                        onClick={handleToggleCState}
+                        disabled={loading}
+                        className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border ${cStateDisabled ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-white/10 text-text-dim border-white/10'}`}
+                    >
+                        {cStateDisabled ? 'Idle States Disabled (Fast)' : 'Idle States Allowed (Default)'}
+                    </button>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="text-xs font-bold text-white">100% Minimum Frequency</div>
+                    <p className="text-[11px] text-text-muted">Locks CPU clocks to maximum state. Stops downclocking during match loading.</p>
+                    <button
+                        onClick={handleToggleFreqLock}
+                        disabled={loading}
+                        className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border ${freqLocked ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-white/10 text-text-dim border-white/10'}`}
+                    >
+                        {freqLocked ? 'Locked at 100% (No Drops)' : 'Dynamic 5%-100%'}
+                    </button>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                    <div className="text-xs font-bold text-white">Foreground Quantum 3:1</div>
+                    <p className="text-[11px] text-text-muted">Win32PrioritySeparation = 38 (0x26). 3:1 CPU time dedicated to game window.</p>
+                    <button
+                        onClick={handleSetPriority}
+                        disabled={loading || prioritySeparation === 38}
+                        className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border ${prioritySeparation === 38 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/30 hover:bg-accent-cyan/25'}`}
+                    >
+                        {prioritySeparation === 38 ? '3:1 Boost Active (38)' : 'Apply 3:1 Boost (38)'}
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }
@@ -435,6 +710,13 @@ export function Performance() {
                     <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] hover:border-white/10 border">
                         <MemoryOptimizerPanel />
                     </div>
+                    <div className="grid gap-4">
+                        {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
+                    </div>
+                </div>
+            ) : tab === 'cpu' ? (
+                <div className="space-y-6 mt-6">
+                    <AdvancedCpuPanel />
                     <div className="grid gap-4">
                         {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
                     </div>

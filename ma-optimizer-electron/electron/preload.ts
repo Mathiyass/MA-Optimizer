@@ -73,6 +73,21 @@ contextBridge.exposeInMainWorld('api', {
             return ipcRenderer.invoke('powerplan:import', path)
         },
         delete: () => ipcRenderer.invoke('powerplan:delete'),
+        getBoostMode: () => ipcRenderer.invoke('powerplan:getBoostMode'),
+        setBoostMode: (mode: number) => {
+            validate([mode], ['number'])
+            return ipcRenderer.invoke('powerplan:setBoostMode', mode)
+        },
+        getCStateConfig: () => ipcRenderer.invoke('powerplan:getCStateConfig'),
+        setCStateDisabled: (disable: boolean) => {
+            validate([disable], ['boolean'])
+            return ipcRenderer.invoke('powerplan:setCStateDisabled', disable)
+        },
+        getProcessorThrottle: () => ipcRenderer.invoke('powerplan:getProcessorThrottle'),
+        lockMaxFrequency: (lock: boolean) => {
+            validate([lock], ['boolean'])
+            return ipcRenderer.invoke('powerplan:lockMaxFrequency', lock)
+        },
     },
     system: {
         getCpuUsage: () => ipcRenderer.invoke('system:cpuUsage'),
@@ -190,6 +205,19 @@ contextBridge.exposeInMainWorld('api', {
         discoverOptimalMtu: () => ipcRenderer.invoke('network:discoverOptimalMtu'),
         getNicStatistics: () => ipcRenderer.invoke('network:getNicStatistics'),
         auditWfpCallouts: () => ipcRenderer.invoke('network:auditWfpCallouts'),
+        enableTcpFastOpen: () => ipcRenderer.invoke('network:enableTcpFastOpen'),
+        getTcpFastOpenStatus: () => ipcRenderer.invoke('network:getTcpFastOpenStatus'),
+        configureDoh: (provider: string) => {
+            validate([provider], ['string'])
+            return ipcRenderer.invoke('network:configureDoh', provider)
+        },
+        getDohStatus: () => ipcRenderer.invoke('network:getDohStatus'),
+        getConnectionQuality: (host?: string, count?: number) => ipcRenderer.invoke('network:getConnectionQuality', host, count),
+        getCongestionProvider: () => ipcRenderer.invoke('network:getCongestionProvider'),
+        setCongestionProvider: (provider: string) => {
+            validate([provider], ['string'])
+            return ipcRenderer.invoke('network:setCongestionProvider', provider)
+        },
     },
     cleaner: {
         scan: (categories: string[]) => {
@@ -438,6 +466,78 @@ contextBridge.exposeInMainWorld('api', {
         },
         runSmartTrim: () => ipcRenderer.invoke('heuristic:runSmartTrim'),
         turboBoost: () => ipcRenderer.invoke('heuristic:turboBoost'),
+    },
+    performance: {
+        getWin32PrioritySeparation: () => ipcRenderer.invoke('performance:getWin32PrioritySeparation'),
+        setWin32PrioritySeparation: (value: number) => {
+            validate([value], ['number'])
+            return ipcRenderer.invoke('performance:setWin32PrioritySeparation', value)
+        },
+        getSpectreMitigationsStatus: () => ipcRenderer.invoke('performance:getSpectreMitigationsStatus'),
+        toggleSpectreMitigations: (disable: boolean) => {
+            validate([disable], ['boolean'])
+            return ipcRenderer.invoke('performance:toggleSpectreMitigations', disable)
+        },
+        getHagsStatus: () => ipcRenderer.invoke('performance:getHagsStatus'),
+        toggleHags: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('performance:toggleHags', enable)
+        },
+        getMpoStatus: () => ipcRenderer.invoke('performance:getMpoStatus'),
+        disableMpo: () => ipcRenderer.invoke('performance:disableMpo'),
+        enableMpo: () => ipcRenderer.invoke('performance:enableMpo'),
+        disableFullscreenOptimizations: () => ipcRenderer.invoke('performance:disableFullscreenOptimizations'),
+        killGameDvr: () => ipcRenderer.invoke('performance:killGameDvr'),
+        getGpuInfo: () => ipcRenderer.invoke('performance:getGpuInfo'),
+    },
+    security: {
+        getVbsStatus: () => ipcRenderer.invoke('security:getVbsStatus'),
+        toggleVbs: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('security:toggleVbs', enable)
+        },
+        getHvciStatus: () => ipcRenderer.invoke('security:getHvciStatus'),
+        toggleHvci: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('security:toggleHvci', enable)
+        },
+        getExploitProtection: () => ipcRenderer.invoke('security:getExploitProtection'),
+        toggleCfg: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('security:toggleCfg', enable)
+        },
+        getSecurityOverview: () => ipcRenderer.invoke('security:getSecurityOverview'),
+    },
+    memory: {
+        getCompressionStatus: () => ipcRenderer.invoke('memory:getCompressionStatus'),
+        toggleCompression: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('memory:toggleCompression', enable)
+        },
+        togglePageCombining: (enable: boolean) => {
+            validate([enable], ['boolean'])
+            return ipcRenderer.invoke('memory:togglePageCombining', enable)
+        },
+        getMemoryPressure: () => ipcRenderer.invoke('memory:getMemoryPressure'),
+        purgeStandbyList: () => ipcRenderer.invoke('memory:purgeStandbyList'),
+        configureAutoPurge: (enabled: boolean, thresholdMB?: number, intervalSec?: number) => {
+            return ipcRenderer.invoke('memory:configureAutoPurge', enabled, thresholdMB, intervalSec)
+        },
+        getPagefileConfig: () => ipcRenderer.invoke('memory:getPagefileConfig'),
+        optimizePagefile: () => ipcRenderer.invoke('memory:optimizePagefile'),
+    },
+    monitor: {
+        getDpcMetrics: () => ipcRenderer.invoke('monitor:getDpcMetrics'),
+        getNetworkJitter: (target?: string) => ipcRenderer.invoke('monitor:getNetworkJitter', target),
+        getOptimizationScore: () => ipcRenderer.invoke('monitor:getOptimizationScore'),
+        getSystemSnapshot: () => ipcRenderer.invoke('monitor:getSystemSnapshot'),
+        startLiveMonitor: () => ipcRenderer.invoke('monitor:startLiveMonitor'),
+        stopLiveMonitor: () => ipcRenderer.invoke('monitor:stopLiveMonitor'),
+    },
+    onLiveMonitorUpdate: (cb: (data: any) => void) => {
+        const listener = (_: any, data: any) => cb(data)
+        ipcRenderer.on('monitor:liveUpdate', listener)
+        return () => ipcRenderer.removeListener('monitor:liveUpdate', listener)
     },
     ai: {
         checkStatus: () => ipcRenderer.invoke('ai:checkStatus'),

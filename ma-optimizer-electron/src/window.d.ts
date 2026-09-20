@@ -25,6 +25,12 @@ export interface WindowApi {
         exportPlan: (path: string) => Promise<boolean>
         importPlan: (path: string) => Promise<boolean>
         delete: () => Promise<boolean>
+        getBoostMode: () => Promise<{ success: boolean; mode: number }>
+        setBoostMode: (mode: number) => Promise<{ success: boolean; message: string }>
+        getCStateConfig: () => Promise<{ success: boolean; idleDisabled: boolean }>
+        setCStateDisabled: (disable: boolean) => Promise<{ success: boolean; message: string }>
+        getProcessorThrottle: () => Promise<{ success: boolean; minPercent: number; maxPercent: number }>
+        lockMaxFrequency: (lock: boolean) => Promise<{ success: boolean; message: string }>
     }
     system: {
         getCpuUsage: () => Promise<{ currentLoad: number; cpus: number[] }>
@@ -85,6 +91,13 @@ export interface WindowApi {
         discoverOptimalMtu: () => Promise<{ adapter: string; optimalPayload: number; mtu: number; success: boolean }>
         getNicStatistics: () => Promise<{ adapter: string; receivedDiscarded: number; outboundDiscarded: number; receivedPacketErrors: number; outboundPacketErrors: number }>
         auditWfpCallouts: () => Promise<{ count: number; offenders: string[] }>
+        enableTcpFastOpen: () => Promise<{ success: boolean; message: string }>
+        getTcpFastOpenStatus: () => Promise<{ success: boolean; enabled: boolean; raw: string }>
+        configureDoh: (provider: 'cloudflare' | 'google' | 'quad9' | 'disable') => Promise<{ success: boolean; message: string }>
+        getDohStatus: () => Promise<{ success: boolean; hasDoh: boolean; entries: any[] }>
+        getConnectionQuality: (host?: string, count?: number) => Promise<{ success: boolean; quality: { host: string; sent: number; received: number; lossPercent: number; minMs: number; maxMs: number; avgMs: number; jitterMs: number; samples: number[] } }>
+        getCongestionProvider: () => Promise<{ success: boolean; provider: string }>
+        setCongestionProvider: (provider: 'CUBIC' | 'CTCP' | 'NewReno') => Promise<{ success: boolean; message: string }>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>
@@ -211,6 +224,48 @@ export interface WindowApi {
         runSmartTrim: () => Promise<{ freedMb: number; success: boolean }>
         turboBoost: () => Promise<{ success: boolean; freedMb: number }>
     }
+    performance: {
+        getWin32PrioritySeparation: () => Promise<{ success: boolean; value: number }>
+        setWin32PrioritySeparation: (value: number) => Promise<{ success: boolean; message: string }>
+        getSpectreMitigationsStatus: () => Promise<{ success: boolean; disabled: boolean }>
+        toggleSpectreMitigations: (disable: boolean) => Promise<{ success: boolean; message: string }>
+        getHagsStatus: () => Promise<{ success: boolean; enabled: boolean; supported: boolean }>
+        toggleHags: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        getMpoStatus: () => Promise<{ success: boolean; disabled: boolean }>
+        disableMpo: () => Promise<{ success: boolean; message: string }>
+        enableMpo: () => Promise<{ success: boolean; message: string }>
+        disableFullscreenOptimizations: () => Promise<{ success: boolean; message: string }>
+        killGameDvr: () => Promise<{ success: boolean; message: string }>
+        getGpuInfo: () => Promise<{ success: boolean; gpus: Array<{ name: string; vram: string; driverVersion: string; driverDate: string }> }>
+    }
+    security: {
+        getVbsStatus: () => Promise<{ success: boolean; enabled: boolean; hypervisorType: string }>
+        toggleVbs: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        getHvciStatus: () => Promise<{ success: boolean; enabled: boolean }>
+        toggleHvci: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        getExploitProtection: () => Promise<{ success: boolean; cfgEnabled: boolean; depEnabled: boolean; aslrEnabled: boolean }>
+        toggleCfg: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        getSecurityOverview: () => Promise<{ success: boolean; status: { vbsEnabled: boolean; hvciEnabled: boolean; spectreDisabled: boolean; cfgEnabled: boolean; hypervisorType: string; securityScore: number } }>
+    }
+    memory: {
+        getCompressionStatus: () => Promise<{ success: boolean; compression: boolean; pageCombining: boolean }>
+        toggleCompression: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        togglePageCombining: (enable: boolean) => Promise<{ success: boolean; message: string }>
+        getMemoryPressure: () => Promise<{ success: boolean; metrics: { totalPhysicalMB: number; freePhysicalMB: number; standbyCacheMB: number; committedMB: number; commitLimitMB: number; memoryCompression: boolean; pageCombining: boolean } }>
+        purgeStandbyList: () => Promise<{ success: boolean; freedMB: number; message: string }>
+        configureAutoPurge: (enabled: boolean, thresholdMB?: number, intervalSec?: number) => Promise<{ success: boolean; message: string }>
+        getPagefileConfig: () => Promise<{ success: boolean; automatic: boolean; files: Array<{ path: string; initialMB: number; maxMB: number }> }>
+        optimizePagefile: () => Promise<{ success: boolean; message: string }>
+    }
+    monitor: {
+        getDpcMetrics: () => Promise<{ dpcPercent: number; interruptsPerSec: number; estimatedDpcLatencyUs: number }>
+        getNetworkJitter: (target?: string) => Promise<{ latencyMs: number; jitterMs: number }>
+        getOptimizationScore: () => Promise<{ score: number; breakdown: { network: number; kernel: number; gpu: number; memory: number; power: number } }>
+        getSystemSnapshot: () => Promise<{ success: boolean; snapshot: any }>
+        startLiveMonitor: () => Promise<{ success: boolean }>
+        stopLiveMonitor: () => Promise<{ success: boolean }>
+    }
+    onLiveMonitorUpdate: (cb: (data: any) => void) => () => void
     ai: {
         checkStatus: () => Promise<{ online: boolean; endpoint: string; activeModel: string; availableModels: string[] }>
         setModel: (modelName: string) => Promise<{ activeModel: string }>

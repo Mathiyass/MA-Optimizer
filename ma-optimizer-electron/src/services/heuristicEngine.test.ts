@@ -126,10 +126,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 44, `Should evaluate >= 44 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 60, `Should evaluate >= 60 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-44 recommendations exist
+            // Verify Rules 31-60 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
@@ -145,6 +145,22 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(recIds.includes('rec_audio_dac_idle_kill'), 'Should include Audio DAC idle kill rule')
             assert.ok(recIds.includes('rec_nvme_apst_disable'), 'Should include NVMe APST disable rule')
             assert.ok(recIds.includes('rec_advanced_stack_hardening'), 'Should include Advanced Stack Hardening rule')
+            assert.ok(recIds.includes('rec_vbs_mitigation'), 'Should include VBS mitigation rule')
+            assert.ok(recIds.includes('rec_hvci_mitigation'), 'Should include HVCI mitigation rule')
+            assert.ok(recIds.includes('rec_cfg_mitigation'), 'Should include CFG mitigation rule')
+            assert.ok(recIds.includes('rec_spectre_mitigation'), 'Should include Spectre mitigation rule')
+            assert.ok(recIds.includes('rec_memory_compression_audit'), 'Should include Memory compression rule')
+            assert.ok(recIds.includes('rec_page_combining_audit'), 'Should include Page combining rule')
+            assert.ok(recIds.includes('rec_islc_standby_purge'), 'Should include ISLC standby purge rule')
+            assert.ok(recIds.includes('rec_fixed_pagefile_nvme'), 'Should include NVMe fixed pagefile rule')
+            assert.ok(recIds.includes('rec_hags_frame_queue'), 'Should include HAGS frame queue rule')
+            assert.ok(recIds.includes('rec_modern_mpo_disable'), 'Should include MPO disable rule')
+            assert.ok(recIds.includes('rec_fso_dvr_optimization'), 'Should include FSO/DVR teardown rule')
+            assert.ok(recIds.includes('rec_win32_priority_separation'), 'Should include Win32PrioritySeparation rule')
+            assert.ok(recIds.includes('rec_tcp_fast_open'), 'Should include TCP Fast Open rule')
+            assert.ok(recIds.includes('rec_doh_encryption'), 'Should include DNS-over-HTTPS rule')
+            assert.ok(recIds.includes('rec_cpu_boost_mode_lock'), 'Should include CPU boost mode rule')
+            assert.ok(recIds.includes('rec_cstate_idle_mitigation'), 'Should include C-state idle latency rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

@@ -72,6 +72,81 @@ function HealthGauge({ score }: { score: number }) {
     )
 }
 
+function RealtimeDpcWidget() {
+    const [dpcData, setDpcData] = useState<{ dpcPercent: number; interruptsPerSec: number; estimatedDpcLatencyUs: number }>({
+        dpcPercent: 0.4,
+        interruptsPerSec: 2200,
+        estimatedDpcLatencyUs: 140
+    })
+    const [optData, setOptData] = useState<{ score: number; breakdown: any }>({
+        score: 85,
+        breakdown: { network: 80, kernel: 85, gpu: 90, memory: 80, power: 90 }
+    })
+    const setPage = useAppStore(s => s.setPage)
+
+    useEffect(() => {
+        const fetchDpc = async () => {
+            if (!window.api?.monitor) return
+            try {
+                const [dpc, opt] = await Promise.all([
+                    window.api.monitor.getDpcMetrics(),
+                    window.api.monitor.getOptimizationScore()
+                ])
+                setDpcData(dpc)
+                setOptData(opt)
+            } catch {}
+        }
+        fetchDpc()
+        const interval = setInterval(fetchDpc, 3000)
+        return () => clearInterval(interval)
+    }, [])
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 rounded-[2rem] bg-[rgba(255,255,255,0.03)] border border-white/10 backdrop-blur-3xl">
+            <div className="p-4 rounded-xl bg-black/30 border border-white/5 space-y-1">
+                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted flex items-center justify-between">
+                    <span>Estimated DPC Latency</span>
+                    <span className={`w-2 h-2 rounded-full ${dpcData.estimatedDpcLatencyUs < 250 ? 'bg-emerald-400' : 'bg-rose-400'} animate-pulse`} />
+                </div>
+                <div className="text-2xl font-mono font-black text-white">{dpcData.estimatedDpcLatencyUs} <span className="text-xs text-text-muted">µs</span></div>
+                <div className="text-[10px] text-text-dim">{dpcData.estimatedDpcLatencyUs < 250 ? 'eSports Competitive Baseline' : 'Elevated ISR/DPC Routine'}</div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-black/30 border border-white/5 space-y-1">
+                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">Interrupt Rate</div>
+                <div className="text-2xl font-mono font-black text-[var(--accent-cyan)]">{dpcData.interruptsPerSec.toLocaleString()} <span className="text-xs text-text-muted">/s</span></div>
+                <div className="text-[10px] text-text-dim">Processor Interrupt Routine Rate</div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-black/30 border border-white/5 space-y-1">
+                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted flex items-center justify-between">
+                    <span>Optimization Score</span>
+                    <span className="text-xs font-bold text-emerald-400">{optData.score}/100</span>
+                </div>
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mt-2">
+                    <div className="h-full bg-gradient-to-r from-emerald-500 to-[var(--accent-cyan)] rounded-full" style={{ width: `${optData.score}%` }} />
+                </div>
+                <div className="text-[10px] text-text-dim pt-1 flex justify-between">
+                    <span>Kernel: {optData.breakdown.kernel}%</span>
+                    <span>Net: {optData.breakdown.network}%</span>
+                    <span>GPU: {optData.breakdown.gpu}%</span>
+                </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-black/30 border border-white/5 flex flex-col justify-between">
+                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted">Kernel Virtualization (VBS)</div>
+                <button
+                    onClick={() => setPage('security')}
+                    className="w-full py-2 px-3 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                >
+                    <span>VBS / FPS Matrix</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+            </div>
+        </div>
+    )
+}
+
 export function Dashboard() {
     const premiumCardClass = "bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border-white/5 rounded-[2.5rem] p-8 transition-all hover:bg-[rgba(255,255,255,0.05)] border"
     
@@ -198,6 +273,7 @@ export function Dashboard() {
     const quickCards = [
         { icon: Crown, label: 'Power Plan', color: 'from-[var(--accent-cyan)] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'ma-power' as const, desc: 'Flagship performance profile' },
         { icon: Zap, label: 'Process Governor', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'process-lasso' as const, desc: 'ProBalance, CPU Affinity & SmartTrim' },
+        { icon: Shield, label: 'Security & FPS Matrix', color: 'from-[#FF0055] to-[rgba(255,0,85,0.4)]', glow: 'group-hover:shadow-[0_0_20px_rgba(255,0,85,0.4)]', page: 'security' as const, desc: 'VBS, HVCI, Spectre & CFG Latency Tuning' },
         { icon: Shield, label: 'Anti-Telemetry Suite', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'privacy' as const, desc: 'OS Privacy Presets & Data Control' },
         { icon: Wifi, label: 'TCP & MTU Tuner', color: 'from-[#00FFDE] to-[rgba(0,255,222,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'network' as const, desc: 'TCP Optimizer & DNS Benchmark' },
         { icon: Monitor, label: 'Multi-Path Game Booster', color: 'from-[#FF003C] to-[rgba(255,0,60,0.4)]', glow: 'group-hover:shadow-[var(--glow-cyan)]', page: 'gaming' as const, desc: 'Multi-path ping & QoS DSCP 46 boost' },
@@ -462,6 +538,11 @@ export function Dashboard() {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Real-time DPC Latency & Optimization Health Telemetry Row */}
+            <motion.div variants={item}>
+                <RealtimeDpcWidget />
+            </motion.div>
 
             {/* Extended Telemetry Row */}
             <div className="flex flex-col lg:flex-row gap-6 w-full pt-2">

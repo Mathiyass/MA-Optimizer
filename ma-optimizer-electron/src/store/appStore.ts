@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export type PageId =
     | 'dashboard' | 'performance' | 'process-lasso' | 'hone' | 'exitlag' | 'ma-power' | 'network' | 'privacy'
-    | 'gaming' | 'cleaner' | 'startup' | 'apps' | 'tools'
+    | 'security' | 'gaming' | 'cleaner' | 'startup' | 'apps' | 'tools'
     | 'repair' | 'advanced' | 'benchmark' | 'about' | 'drivers' | 'ai-advisor'
 
 interface Notification {

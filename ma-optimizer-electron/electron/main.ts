@@ -37,6 +37,10 @@ require('./ipc/gearup')
 require('./ipc/exitlag')
 require('./ipc/heuristicGovernor')
 require('./ipc/aiAssistant')
+require('./ipc/performance')
+require('./ipc/security')
+require('./ipc/memory')
+require('./ipc/monitor')
 
 
 

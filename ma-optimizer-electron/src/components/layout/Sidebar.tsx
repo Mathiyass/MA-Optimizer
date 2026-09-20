@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { useAppStore, PageId } from '../../store/appStore'
 import {
-    LayoutDashboard, Zap, Crown, Globe, ShieldCheck, Gamepad2,
+    LayoutDashboard, Zap, Crown, Globe, ShieldCheck, ShieldAlert, Gamepad2,
     Trash2, Rocket, Package, Wrench, HeartPulse, SlidersHorizontal,
     BarChart3, Info, Brain, LucideIcon,
 } from 'lucide-react'
@@ -19,6 +19,7 @@ const navItems: Array<{
         { id: 'ma-power', icon: Crown, label: 'Power Plan', accent: 'violet', badge: '★' },
         { id: 'network', icon: Globe, label: 'Network' },
         { id: 'privacy', icon: ShieldCheck, label: 'Privacy' },
+        { id: 'security', icon: ShieldAlert, label: 'Security & FPS', accent: 'rose', badge: 'VBS' },
         { id: 'gaming', icon: Gamepad2, label: 'Gaming Mode' },
         { id: 'cleaner', icon: Trash2, label: 'System Cleaner' },
         { id: 'startup', icon: Rocket, label: 'Boot / Startup' },

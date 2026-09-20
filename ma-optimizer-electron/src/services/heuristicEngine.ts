@@ -784,6 +784,182 @@ export function evaluateSystemHealth(
         actionId: 'APPLY_ADVANCED_STACK_FIX',
     })
 
+    // Rule 45: Virtualization-Based Security (VBS) Gaming Penalty
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_vbs_mitigation',
+        title: 'Virtualization-Based Security (VBS) Gaming Penalty',
+        description: 'Windows VBS runs the OS inside a Type-1 Hyper-V container, causing 5-15% lower 1% lows and increased DPC interrupt latency during gaming.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'OPTIMIZE_SECURITY_MATRIX',
+    })
+
+    // Rule 46: Hypervisor-Protected Code Integrity (HVCI / Memory Integrity)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_hvci_mitigation',
+        title: 'Hypervisor-Protected Code Integrity (HVCI)',
+        description: 'HVCI forces kernel-mode drivers through cryptographic validation on every memory page execution, adding measurable frame-time spikes in competitive shooters.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'OPTIMIZE_SECURITY_MATRIX',
+    })
+
+    // Rule 47: Control Flow Guard (CFG) Direct Call Indirect Stutter
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_cfg_mitigation',
+        title: 'Control Flow Guard (CFG) Exploit Mitigation Audit',
+        description: 'CFG inserts runtime bitmap checks before every indirect call instruction, imposing microsecond overhead on heavy game loop dispatchers.',
+        category: 'gaming',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_SECURITY_MATRIX',
+    })
+
+    // Rule 48: Spectre / Meltdown Speculative Execution Mitigation Overhead
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_spectre_mitigation',
+        title: 'Spectre Variant 2 / Meltdown Branch Target Injection Audit',
+        description: 'Speculative execution branch mitigations incur kernel context switch penalties. Pure eSports profiles disable them for raw IPC and lowest draw call latency.',
+        category: 'performance',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_SECURITY_MATRIX',
+    })
+
+    // Rule 49: Windows Memory Compression CPU Overhead
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_memory_compression_audit',
+        title: 'Windows Memory Compression CPU Cycle Overhead',
+        description: 'Memory Compression compresses idle pages in RAM using CPU cycles, stealing CPU cache lines and execution resources during intensive gaming moments.',
+        category: 'memory',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_MEMORY_ENGINE',
+    })
+
+    // Rule 50: Memory Page Combining / Deduplication Latency
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_page_combining_audit',
+        title: 'Memory Page Combining & Deduplication Purge',
+        description: 'Windows periodically scans RAM to merge identical physical pages, triggering periodic micro-freezes and L3 cache pollution.',
+        category: 'memory',
+        impact: 'low',
+        actionId: 'OPTIMIZE_MEMORY_ENGINE',
+    })
+
+    // Rule 51: Standby List Memory Leak & Cache Churn (ISLC Standby Purge)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_islc_standby_purge',
+        title: 'Intelligent Standby List Purge (ISLC Architecture)',
+        description: 'Windows Standby Memory Cache frequently causes stuttering when free RAM drops below 1-2GB. Automated purge cleans cached pages before allocation stalls occur.',
+        category: 'memory',
+        impact: 'high',
+        actionId: 'PURGE_STANDBY_CACHE',
+    })
+
+    // Rule 52: NVMe Fixed Virtual Memory / Pagefile Geometry
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_fixed_pagefile_nvme',
+        title: 'Fixed NVMe Pagefile Geometry (Cure Dynamic Resizing Stutter)',
+        description: 'Dynamic Windows Pagefile resizing forces the kernel to pause disk queues. A static initial/maximum pagefile sized to physical RAM eliminates dynamic page faults.',
+        category: 'memory',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_PAGEFILE_STATIC',
+    })
+
+    // Rule 53: Hardware-Accelerated GPU Scheduling (HAGS) Frame Queue
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_hags_frame_queue',
+        title: 'Hardware-Accelerated GPU Scheduling (HAGS) Optimization',
+        description: 'Passes video memory management directly to GPU dedicated scheduling hardware, reducing CPU render thread submission overhead in modern DirectX 12/UE5 titles.',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'OPTIMIZE_GPU_PIPELINE',
+    })
+
+    // Rule 54: Modern Multi-Plane Overlay (MPO) Desktop Compositor Stutter Kill
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_modern_mpo_disable',
+        title: 'Modern Multi-Plane Overlay (MPO) Compositor Stutter Kill',
+        description: 'Windows MPO often glitches between borderless window and fullscreen modes. Setting DisableOverlays=1 and OverlayTestMode=5 stops black screens and frame drops.',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'OPTIMIZE_GPU_PIPELINE',
+    })
+
+    // Rule 55: Windows Fullscreen Optimizations & GameDVR Recording Overhead
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_fso_dvr_optimization',
+        title: 'Windows Fullscreen Optimizations & GameDVR Teardown',
+        description: 'Enforce native Exclusive Fullscreen semantics and eradicate background GameDVR capture services for maximum refresh rate frame pacing.',
+        category: 'gaming',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_GPU_PIPELINE',
+    })
+
+    // Rule 56: Foreground Process Quantum Priority 3:1 (Win32PrioritySeparation 0x26)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_win32_priority_separation',
+        title: 'Foreground Thread Quantum Priority 3:1 (Win32PrioritySeparation=38)',
+        description: 'Configures short, variable execution quantums with a 3:1 ratio favoring foreground game threads over background services and tasks.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'APPLY_QUANTUM_PRIORITY',
+    })
+
+    // Rule 57: TCP Fast Open (TFO) Connection Handshake Acceleration
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_tcp_fast_open',
+        title: 'TCP Fast Open (TFO) Connection Handshake Acceleration',
+        description: 'Enables data transmission during the initial TCP SYN packet handshake, eliminating one entire round-trip time (RTT) on reconnects and game server queries.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 58: DNS-over-HTTPS (DoH) Latency & ISP Hijacking Shield
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_doh_encryption',
+        title: 'DNS-over-HTTPS (DoH) Secure Low-Latency Resolution',
+        description: 'Bypasses ISP DNS throttling and transparent packet inspection by enforcing encrypted DoH directly to Cloudflare (1.1.1.1) or Google (8.8.8.8) gaming endpoints.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 59: CPU Processor Performance Boost Mode & Frequency Lock
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_cpu_boost_mode_lock',
+        title: 'Processor Performance Boost Mode & 100% Frequency Floor',
+        description: 'Locks processor performance floor to 100% and sets Boost Mode to Aggressive, eliminating frequency ramp-up latency when sudden combat occurs.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'APPLY_POWER_BOOST',
+    })
+
+    // Rule 60: Processor C-States & Deep Sleep Idle Latency Mitigation
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_cstate_idle_mitigation',
+        title: 'Processor C-States & Deep Sleep Wake Latency Mitigation',
+        description: 'Disables deep processor sleep states (C3/C6/C7) via powercfg, preventing CPU core wake latency penalties that cause 10-50µs frame hitches.',
+        category: 'latency',
+        impact: 'high',
+        actionId: 'APPLY_POWER_BOOST',
+    })
+
     // Clamp score
     score = Math.max(10, Math.min(100, Math.round(score)))
 

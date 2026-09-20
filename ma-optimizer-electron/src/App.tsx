@@ -33,6 +33,7 @@ const DriverUpdater = lazy(() => import('./pages/DriverUpdater').then(m => ({ de
 const ProcessLassoPage = lazy(() => import('./pages/ProcessLasso').then(m => ({ default: m.ProcessLassoPage })))
 const HoneOptimizerPage = lazy(() => import('./pages/HoneOptimizer').then(m => ({ default: m.HoneOptimizerPage })))
 const ExitLagPage = lazy(() => import('./pages/ExitLag').then(m => ({ default: m.ExitLagPage })))
+const Security = lazy(() => import('./pages/Security').then(m => ({ default: m.Security })))
 
 const pages: Record<string, React.ComponentType> = {
     dashboard: Dashboard,
@@ -43,6 +44,7 @@ const pages: Record<string, React.ComponentType> = {
     'ma-power': MaPowerPlan,
     network: Network,
     privacy: Privacy,
+    security: Security,
     gaming: Gaming,
     cleaner: Cleaner,
     startup: Startup,

@@ -794,6 +794,192 @@ if (Test-Path $filePath) {
     }
 })
 
+// --- Phase 5: v11.5.0 Network Stack Final Enhancements ---
 
+// 12. TCP Fast Open (RFC 7413)
+ipcMain.handle('network:enableTcpFastOpen', async () => {
+    try {
+        await runCmd('netsh', ['int', 'tcp', 'set', 'global', 'fastopen=enabled'])
+        sendLog('[Network Engine] TCP Fast Open (RFC 7413) enabled - eliminates 1 RTT on TCP handshake')
+        return { success: true, message: 'TCP Fast Open enabled successfully' }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to enable TCP Fast Open: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
 
+ipcMain.handle('network:getTcpFastOpenStatus', async () => {
+    try {
+        const out = await runCmd('netsh', ['int', 'tcp', 'show', 'global'])
+        const match = out.match(/Fast\s*Open\s*Fallback\s*:\s*(\w+)/i) || out.match(/Fast\s*Open\s*:\s*(\w+)/i)
+        const status = match ? match[1].toLowerCase() : 'unknown'
+        return { success: true, enabled: status === 'enabled' || status === 'true', raw: status }
+    } catch (e: any) {
+        return { success: false, enabled: false, raw: 'error' }
+    }
+})
 
+// 13. DNS over HTTPS (DoH) Management
+ipcMain.handle('network:configureDoh', async (_e, provider: 'cloudflare' | 'google' | 'quad9' | 'disable') => {
+    try {
+        const dohConfigs: Record<string, { ip: string[]; dohTemplate: string }> = {
+            cloudflare: {
+                ip: ['1.1.1.1', '1.0.0.1'],
+                dohTemplate: 'https://cloudflare-dns.com/dns-query'
+            },
+            google: {
+                ip: ['8.8.8.8', '8.8.4.4'],
+                dohTemplate: 'https://dns.google/dns-query'
+            },
+            quad9: {
+                ip: ['9.9.9.9', '149.112.112.112'],
+                dohTemplate: 'https://dns.quad9.net/dns-query'
+            }
+        }
+
+        if (provider === 'disable') {
+            const ps = `
+$adapter = Get-NetAdapter -Physical | Where-Object Status -eq 'Up' | Select-Object -First 1
+if ($adapter) {
+    Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ResetServerAddresses
+}
+`
+            await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+            sendLog('[Network Engine] DNS over HTTPS (DoH) disabled - restored DHCP DNS')
+            return { success: true, message: 'DoH disabled, DHCP DNS restored' }
+        }
+
+        const cfg = dohConfigs[provider]
+        if (!cfg) throw new Error(`Unknown DoH provider: ${provider}`)
+
+        const ps = `
+$adapter = Get-NetAdapter -Physical | Where-Object Status -eq 'Up' | Select-Object -First 1
+if ($adapter) {
+    Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ServerAddresses @('${cfg.ip[0]}', '${cfg.ip[1]}')
+    foreach ($ip in @('${cfg.ip[0]}', '${cfg.ip[1]}')) {
+        $existing = Get-DnsClientDohServerAddress -ServerAddress $ip -ErrorAction SilentlyContinue
+        if ($existing) {
+            Set-DnsClientDohServerAddress -ServerAddress $ip -DohTemplate '${cfg.dohTemplate}' -AllowFallbackToUdp $false -AutoUpgrade $true -ErrorAction SilentlyContinue
+        } else {
+            Add-DnsClientDohServerAddress -ServerAddress $ip -DohTemplate '${cfg.dohTemplate}' -AllowFallbackToUdp $false -AutoUpgrade $true -ErrorAction SilentlyContinue
+        }
+    }
+}
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network Engine] Configured strict DNS over HTTPS (DoH) using ${provider.toUpperCase()} (${cfg.dohTemplate})`)
+        return { success: true, message: `DoH successfully configured with ${provider}` }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to configure DoH: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+ipcMain.handle('network:getDohStatus', async () => {
+    try {
+        const ps = `
+$doh = Get-DnsClientDohServerAddress -ErrorAction SilentlyContinue | Select-Object ServerAddress, DohTemplate, AllowFallbackToUdp, AutoUpgrade
+@($doh) | ConvertTo-Json -Compress
+`
+        const out = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const parsed = JSON.parse(out.trim() || '[]')
+        const entries = Array.isArray(parsed) ? parsed : [parsed]
+        return { success: true, hasDoh: entries.length > 0, entries }
+    } catch (e: any) {
+        return { success: false, hasDoh: false, entries: [] }
+    }
+})
+
+// 14. Real-time Connection Quality & Jitter Analysis
+ipcMain.handle('network:getConnectionQuality', async (_e, host: string = '1.1.1.1', count: number = 15) => {
+    try {
+        const ps = `
+$pings = Test-Connection -ComputerName '${host}' -Count ${Math.min(30, Math.max(5, count))} -ErrorAction SilentlyContinue
+$times = $pings | ForEach-Object { $_.Latency }
+$sent = ${count}
+$received = $times.Count
+$lost = $sent - $received
+$packetLossPercent = [math]::Round(($lost / $sent) * 100, 1)
+
+if ($received -gt 0) {
+    $min = ($times | Measure-Object -Minimum).Minimum
+    $max = ($times | Measure-Object -Maximum).Maximum
+    $avg = [math]::Round(($times | Measure-Object -Average).Average, 2)
+    
+    # Calculate Standard Deviation / Jitter
+    $variance = ($times | ForEach-Object { [math]::Pow($_ - $avg, 2) } | Measure-Object -Average).Average
+    $jitter = [math]::Round([math]::Sqrt($variance), 2)
+    
+    [PSCustomObject]@{
+        Host = '${host}'
+        Sent = $sent
+        Received = $received
+        LossPercent = $packetLossPercent
+        MinMs = $min
+        MaxMs = $max
+        AvgMs = $avg
+        JitterMs = $jitter
+        Samples = @($times)
+    } | ConvertTo-Json -Compress
+} else {
+    [PSCustomObject]@{
+        Host = '${host}'
+        Sent = $sent
+        Received = 0
+        LossPercent = 100.0
+        MinMs = 0
+        MaxMs = 0
+        AvgMs = 0
+        JitterMs = 0
+        Samples = @()
+    } | ConvertTo-Json -Compress
+}
+`
+        const out = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const parsed = JSON.parse(out.trim() || '{}')
+        return {
+            success: true,
+            quality: {
+                host: parsed.Host || host,
+                sent: parsed.Sent || count,
+                received: parsed.Received || 0,
+                lossPercent: parsed.LossPercent || 0,
+                minMs: parsed.MinMs || 0,
+                maxMs: parsed.MaxMs || 0,
+                avgMs: parsed.AvgMs || 0,
+                jitterMs: parsed.JitterMs || 0,
+                samples: parsed.Samples || []
+            }
+        }
+    } catch (e: any) {
+        return {
+            success: false,
+            quality: { host, sent: count, received: 0, lossPercent: 100, minMs: 0, maxMs: 0, avgMs: 0, jitterMs: 0, samples: [] }
+        }
+    }
+})
+
+// 15. TCP Congestion Provider Control
+ipcMain.handle('network:getCongestionProvider', async () => {
+    try {
+        const ps = `(Get-NetTCPSetting -SettingName InternetCustom -ErrorAction SilentlyContinue).CongestionProvider`
+        const out = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const provider = out.trim() || 'CUBIC'
+        return { success: true, provider }
+    } catch (e: any) {
+        return { success: false, provider: 'CUBIC' }
+    }
+})
+
+ipcMain.handle('network:setCongestionProvider', async (_e, provider: 'CUBIC' | 'CTCP' | 'NewReno') => {
+    try {
+        const valid = ['CUBIC', 'CTCP', 'NewReno'].includes(provider) ? provider : 'CUBIC'
+        const ps = `Set-NetTCPSetting -SettingName InternetCustom -CongestionProvider ${valid} -ErrorAction SilentlyContinue`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network Engine] TCP Congestion Provider set to ${valid}`)
+        return { success: true, message: `Congestion provider set to ${valid}` }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to set Congestion Provider: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})

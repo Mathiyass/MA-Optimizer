@@ -314,3 +314,100 @@ ipcMain.handle('powerplan:import', async (_, filePath: string) => {
         return false
     }
 })
+
+// --- Phase 6: v11.5.0 Power Management Advanced Controls ---
+
+// 1. Processor Performance Boost Mode (Turbo / Precision Boost)
+ipcMain.handle('powerplan:getBoostMode', async () => {
+    try {
+        const ps = `
+$res = powercfg /query SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE 2>$null
+$match = ($res | Select-String 'Current AC Power Setting Index:\s*0x([0-9a-fA-F]+)').Matches[0].Groups[1].Value
+if ($match) { [convert]::ToInt32($match, 16) } else { 2 }
+`
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 })
+        const mode = parseInt(stdout.trim(), 10)
+        return { success: true, mode: isNaN(mode) ? 2 : mode }
+    } catch (e: any) {
+        return { success: false, mode: 2 }
+    }
+})
+
+ipcMain.handle('powerplan:setBoostMode', async (_e, mode: number = 2) => {
+    try {
+        const clamped = Math.max(0, Math.min(6, mode))
+        await run('powercfg', ['-attributes', 'SUB_PROCESSOR', 'PERFBOOSTMODE', '-ATTRIB_HIDE'])
+        await run('powercfg', ['-setacvalueindex', 'SCHEME_CURRENT', 'SUB_PROCESSOR', 'PERFBOOSTMODE', clamped.toString()])
+        await run('powercfg', ['-setactive', 'SCHEME_CURRENT'])
+        send(`[Power Plan] Processor Boost Mode set to ${clamped} (0=Disabled, 2=Aggressive, 4=Efficient Aggressive)`)
+        return { success: true, message: `Boost Mode set to ${clamped}` }
+    } catch (e: any) {
+        sendError(`Failed to set Boost Mode: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 2. CPU Idle States (C-States / Wakeup Jitter Elimination)
+ipcMain.handle('powerplan:getCStateConfig', async () => {
+    try {
+        const ps = `
+$res = powercfg /query SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 2>$null
+$match = ($res | Select-String 'Current AC Power Setting Index:\s*0x([0-9a-fA-F]+)').Matches[0].Groups[1].Value
+if ($match) { [convert]::ToInt32($match, 16) } else { 0 }
+`
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 })
+        const idleDisable = parseInt(stdout.trim(), 10)
+        return { success: true, idleDisabled: idleDisable === 1 }
+    } catch (e: any) {
+        return { success: false, idleDisabled: false }
+    }
+})
+
+ipcMain.handle('powerplan:setCStateDisabled', async (_e, disable: boolean) => {
+    try {
+        const val = disable ? '1' : '0'
+        await run('powercfg', ['-attributes', 'SUB_PROCESSOR', 'IDLEDISABLE', '-ATTRIB_HIDE'])
+        await run('powercfg', ['-setacvalueindex', 'SCHEME_CURRENT', 'SUB_PROCESSOR', 'IDLEDISABLE', val])
+        await run('powercfg', ['-setactive', 'SCHEME_CURRENT'])
+        send(`[Power Plan] CPU Idle C-States set to ${disable ? 'Disabled (Zero Wakeup Latency, maximum responsiveness)' : 'Enabled'}`)
+        return { success: true, message: `CPU Idle States ${disable ? 'disabled' : 'enabled'}` }
+    } catch (e: any) {
+        sendError(`Failed to set CPU Idle States: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 3. Lock Processor Frequency to 100% Minimum (Prevent Downclocking Drops)
+ipcMain.handle('powerplan:getProcessorThrottle', async () => {
+    try {
+        const ps = `
+$min = powercfg /query SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 2>$null
+$max = powercfg /query SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 2>$null
+$m1 = ($min | Select-String 'Current AC Power Setting Index:\s*0x([0-9a-fA-F]+)').Matches[0].Groups[1].Value
+$m2 = ($max | Select-String 'Current AC Power Setting Index:\s*0x([0-9a-fA-F]+)').Matches[0].Groups[1].Value
+[PSCustomObject]@{
+    Min = if ($m1) { [convert]::ToInt32($m1, 16) } else { 100 }
+    Max = if ($m2) { [convert]::ToInt32($m2, 16) } else { 100 }
+} | ConvertTo-Json -Compress
+`
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 })
+        const parsed = JSON.parse(stdout.trim() || '{}')
+        return { success: true, minPercent: parsed.Min ?? 100, maxPercent: parsed.Max ?? 100 }
+    } catch (e: any) {
+        return { success: false, minPercent: 100, maxPercent: 100 }
+    }
+})
+
+ipcMain.handle('powerplan:lockMaxFrequency', async (_e, lock: boolean) => {
+    try {
+        const minVal = lock ? '100' : '5'
+        await run('powercfg', ['-setacvalueindex', 'SCHEME_CURRENT', 'SUB_PROCESSOR', 'PROCTHROTTLEMIN', minVal])
+        await run('powercfg', ['-setacvalueindex', 'SCHEME_CURRENT', 'SUB_PROCESSOR', 'PROCTHROTTLEMAX', '100'])
+        await run('powercfg', ['-setactive', 'SCHEME_CURRENT'])
+        send(`[Power Plan] Processor Frequency locked to ${lock ? '100% Minimum (No downclocking)' : '5% Dynamic'}`)
+        return { success: true, message: `Processor frequency ${lock ? 'locked to 100%' : 'set to dynamic'}` }
+    } catch (e: any) {
+        sendError(`Failed to lock processor frequency: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
