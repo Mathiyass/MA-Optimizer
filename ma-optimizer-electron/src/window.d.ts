@@ -74,6 +74,17 @@ export interface WindowApi {
         applyHitregOptimization: () => Promise<{ success: boolean; message: string }>
         healGameFirewall: () => Promise<{ success: boolean; removedBlocks: number }>
         purgeAllQosPolicies: () => Promise<boolean>
+        identifyNicStepping: () => Promise<{ isIntelI225: boolean; stepping: string; isB1B2: boolean; name: string; hwId: string }>
+        applyDeepNicFix: () => Promise<{ success: boolean; message: string }>
+        applyTimerFixes: () => Promise<{ success: boolean; message: string }>
+        applyGpuDpcFix: () => Promise<{ success: boolean; message: string }>
+        applyAudioDpcFix: () => Promise<{ success: boolean; message: string }>
+        applyStoragePowerFix: () => Promise<{ success: boolean; message: string }>
+        enableMsiModeDeep: () => Promise<{ success: boolean; message: string }>
+        applyAdvancedStackFix: () => Promise<{ success: boolean; message: string }>
+        discoverOptimalMtu: () => Promise<{ adapter: string; optimalPayload: number; mtu: number; success: boolean }>
+        getNicStatistics: () => Promise<{ adapter: string; receivedDiscarded: number; outboundDiscarded: number; receivedPacketErrors: number; outboundPacketErrors: number }>
+        auditWfpCallouts: () => Promise<{ count: number; offenders: string[] }>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>

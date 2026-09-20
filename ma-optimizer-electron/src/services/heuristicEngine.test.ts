@@ -126,10 +126,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 37, `Should evaluate >= 37 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 44, `Should evaluate >= 44 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-37 recommendations exist
+            // Verify Rules 31-44 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
@@ -138,6 +138,13 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(recIds.includes('rec_hitreg_afd'), 'Should include Hitreg AFD buffer rule')
             assert.ok(recIds.includes('rec_game_firewall'), 'Should include Game Firewall Whitelist rule')
             assert.ok(recIds.includes('rec_ont_safe_qos'), 'Should include ONT-Safe QoS rule')
+            assert.ok(recIds.includes('rec_i225_stepping_fix'), 'Should include Intel I225-V stepping fix rule')
+            assert.ok(recIds.includes('rec_kernel_timer_resolution'), 'Should include Kernel Timer Resolution rule')
+            assert.ok(recIds.includes('rec_nic_buffer_starvation'), 'Should include NIC buffer starvation rule')
+            assert.ok(recIds.includes('rec_gpu_dpc_clock_lock'), 'Should include GPU DPC clock lock rule')
+            assert.ok(recIds.includes('rec_audio_dac_idle_kill'), 'Should include Audio DAC idle kill rule')
+            assert.ok(recIds.includes('rec_nvme_apst_disable'), 'Should include NVMe APST disable rule')
+            assert.ok(recIds.includes('rec_advanced_stack_hardening'), 'Should include Advanced Stack Hardening rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

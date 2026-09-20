@@ -707,6 +707,83 @@ export function evaluateSystemHealth(
         actionId: 'PURGE_STALE_QOS',
     })
 
+    // Rule 38: Intel I225-V Silicon Flaw Isolation & 1.0G Duplex Lock
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_i225_stepping_fix',
+        title: 'Intel I225-V Hardware Errata & 1.0G Duplex Lock',
+        description: 'Detect Intel I225-V B1/B2 stepping errata (inter-packet gap packet loss at 2.5G) and lock PHY to 1.0 Gbps Full Duplex with clock slave arbitration.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'APPLY_DEEP_NIC_FIX',
+    })
+
+    // Rule 39: Windows 11 Global Timer Resolution & Invariant TSC
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_kernel_timer_resolution',
+        title: 'Windows 11 Global Timer Resolution & Invariant TSC',
+        description: 'Bypass Windows 11 per-process timer throttling with GlobalTimerResolutionRequests=1, disable dynamic tick, and enforce native hardware TSC clock.',
+        category: 'latency',
+        impact: 'high',
+        actionId: 'APPLY_TIMER_FIXES',
+    })
+
+    // Rule 40: NIC 1024 Ring Descriptors Expansion (Cure Buffer Starvation)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nic_buffer_starvation',
+        title: 'NIC Ring Buffer Descriptor Expansion (1024 Descriptors)',
+        description: 'Prevent packet drops during combat microbursts by expanding NIC Receive & Transmit Descriptors from default 256 to 1024 when Interrupt Moderation is disabled.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'APPLY_DEEP_NIC_FIX',
+    })
+
+    // Rule 41: NVIDIA GPU Dynamic P-State Clocks & TDR Delay Lock
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_gpu_dpc_clock_lock',
+        title: 'NVIDIA GPU P0 Clock Lock & TDR Delay Optimization',
+        description: 'Prevent nvlddmkm.sys DPC latency spikes caused by mid-combat GPU clock state drops via DisableDynamicPstate=1 and configure TDR delay recovery.',
+        category: 'performance',
+        impact: 'medium',
+        actionId: 'APPLY_GPU_DPC_FIX',
+    })
+
+    // Rule 42: Realtek / HD Audio DAC D3 Sleep Latency Purge
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_audio_dac_idle_kill',
+        title: 'Realtek / HD Audio DAC D3 Sleep Latency Purge',
+        description: 'Disable Realtek audio driver power state transitions to eliminate 2-5ms DPC latency stalls when gunshots or footsteps wake sleeping audio codecs.',
+        category: 'latency',
+        impact: 'medium',
+        actionId: 'APPLY_AUDIO_DPC_FIX',
+    })
+
+    // Rule 43: NVMe APST Storage Autonomous Sleep Throttling Kill
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nvme_apst_disable',
+        title: 'NVMe APST Storage Autonomous Sleep Throttling Kill',
+        description: 'Disable NVMe Autonomous Power State Transitions (APST) and AHCI link sleep to prevent 50-100ms asset loading micro-stutters during match gameplay.',
+        category: 'performance',
+        impact: 'medium',
+        actionId: 'APPLY_STORAGE_POWER_FIX',
+    })
+
+    // Rule 44: Advanced TCP/UDP Offload Strip, CUBIC & Core Pinning
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_advanced_stack_hardening',
+        title: 'Advanced TCP/UDP Offload Strip, CUBIC & Core Pinning',
+        description: 'Disable USO/URO offloads, enforce CUBIC congestion, set NetworkThrottlingIndex=10 for lowest NDIS DPC spread, and isolate NIC RSS queues away from CPU Core 0.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'APPLY_ADVANCED_STACK_FIX',
+    })
+
     // Clamp score
     score = Math.max(10, Math.min(100, Math.round(score)))
 

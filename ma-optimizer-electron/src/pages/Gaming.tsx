@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi, Plus, X, Monitor, Shield, Trash2 } from 'lucide-react'
+import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi, Plus, X, Monitor, Shield, Trash2, Cpu } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -332,6 +332,45 @@ function GearUpBoosterTab() {
                     </div>
                 </div>
             )}
+
+            {/* Delta Force Pro Netcode & BIOS Guidance Card */}
+            <div className="p-6 rounded-2xl glass-shell border border-[var(--accent-cyan)]/20 space-y-4">
+                <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-[var(--accent-cyan)]" />
+                    <h4 className="text-white text-sm font-black uppercase tracking-wider">Delta Force Ballistic Netcode & ASUS B550-F BIOS Guide</h4>
+                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/40">Pro Tips</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    {/* In-Game Settings */}
+                    <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2.5">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                            <Monitor className="w-3.5 h-3.5" /> Recommended In-Game Settings (DO NOT edit .ini files — AntiCheat ban risk)
+                        </div>
+                        <ul className="space-y-1.5 text-[var(--text-secondary)]">
+                            <li>• <strong className="text-white">Display Mode:</strong> Set to <span className="text-emerald-400 font-bold">Borderless Fullscreen</span> (syncs DX12 swapchain with DWM)</li>
+                            <li>• <strong className="text-white">DLSS / FSR Frame Generation:</strong> Set to <span className="text-red-400 font-bold">OFF</span> (adds 15-30ms frame lag & ghost desync)</li>
+                            <li>• <strong className="text-white">NVIDIA Reflex:</strong> Set to <span className="text-emerald-400 font-bold">On + Boost</span> (samples input on newest server tick)</li>
+                            <li>• <strong className="text-white">In-Game Voice (GVoice):</strong> Turn off if using Discord (frees network processing thread)</li>
+                            <li>• <strong className="text-white">Performance Parameters:</strong> Turn <span className="text-emerald-400 font-bold">ON</span> (distinguishes local spikes vs 30Hz server lag)</li>
+                        </ul>
+                    </div>
+
+                    {/* ASUS B550-F BIOS Settings */}
+                    <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2.5">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                            <Cpu className="w-3.5 h-3.5" /> ASUS B550-F BIOS Settings (Press DEL at boot)
+                        </div>
+                        <ul className="space-y-1.5 text-[var(--text-secondary)]">
+                            <li>• <strong className="text-white">PCIe Native Power Management:</strong> <span className="text-amber-400 font-bold">Disabled</span></li>
+                            <li>• <strong className="text-white">Native ASPM & L1 Substates:</strong> <span className="text-amber-400 font-bold">Disabled</span> (eliminates 20-50µs link sleep)</li>
+                            <li>• <strong className="text-white">Power Supply Idle Control:</strong> <span className="text-amber-400 font-bold">Typical Current Idle</span> (keeps SoC voltage steady)</li>
+                            <li>• <strong className="text-white">Intel LAN OPROM:</strong> <span className="text-amber-400 font-bold">Disabled</span></li>
+                            <li>• <strong className="text-white">ErP Ready:</strong> <span className="text-amber-400 font-bold">Disabled</span> (keeps 3.3V standby rails stable)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

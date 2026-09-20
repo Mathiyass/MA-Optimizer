@@ -161,6 +161,35 @@ contextBridge.exposeInMainWorld('api', {
             return ipcRenderer.invoke('network:importTcpConfig', settings)
         },
         benchmarkDns: () => ipcRenderer.invoke('network:benchmarkDns'),
+        getNicAdvancedProps: (adapter?: string) => ipcRenderer.invoke('network:getNicAdvancedProps', adapter),
+        setNicAdvancedProp: (adapter: string, name: string, value: string) => {
+            validate([adapter, name, value], ['string', 'string', 'string'])
+            return ipcRenderer.invoke('network:setNicAdvancedProp', adapter, name, value)
+        },
+        applyTcpNoDelayToAllInterfaces: () => ipcRenderer.invoke('network:applyTcpNoDelayToAllInterfaces'),
+        getQosPolicies: () => ipcRenderer.invoke('network:getQosPolicies'),
+        addQosPolicy: (name: string, exeName: string) => {
+            validate([name, exeName], ['string', 'string'])
+            return ipcRenderer.invoke('network:addQosPolicy', name, exeName)
+        },
+        removeQosPolicy: (name: string) => {
+            validate([name], ['string'])
+            return ipcRenderer.invoke('network:removeQosPolicy', name)
+        },
+        applyHitregOptimization: () => ipcRenderer.invoke('network:applyHitregOptimization'),
+        healGameFirewall: () => ipcRenderer.invoke('network:healGameFirewall'),
+        purgeAllQosPolicies: () => ipcRenderer.invoke('network:purgeAllQosPolicies'),
+        identifyNicStepping: () => ipcRenderer.invoke('network:identifyNicStepping'),
+        applyDeepNicFix: () => ipcRenderer.invoke('network:applyDeepNicFix'),
+        applyTimerFixes: () => ipcRenderer.invoke('network:applyTimerFixes'),
+        applyGpuDpcFix: () => ipcRenderer.invoke('network:applyGpuDpcFix'),
+        applyAudioDpcFix: () => ipcRenderer.invoke('network:applyAudioDpcFix'),
+        applyStoragePowerFix: () => ipcRenderer.invoke('network:applyStoragePowerFix'),
+        enableMsiModeDeep: () => ipcRenderer.invoke('network:enableMsiModeDeep'),
+        applyAdvancedStackFix: () => ipcRenderer.invoke('network:applyAdvancedStackFix'),
+        discoverOptimalMtu: () => ipcRenderer.invoke('network:discoverOptimalMtu'),
+        getNicStatistics: () => ipcRenderer.invoke('network:getNicStatistics'),
+        auditWfpCallouts: () => ipcRenderer.invoke('network:auditWfpCallouts'),
     },
     cleaner: {
         scan: (categories: string[]) => {
@@ -362,16 +391,22 @@ contextBridge.exposeInMainWorld('api', {
             validate([gameId], ['string'])
             return ipcRenderer.invoke('gearup:pingGameNodes', gameId)
         },
-        enableQosRouting: (gameExe: string) => {
+        enableQosRouting: (gameExe: string, safeMode: boolean = true) => {
             validate([gameExe], ['string'])
-            return ipcRenderer.invoke('gearup:enableQosRouting', gameExe)
+            return ipcRenderer.invoke('gearup:enableQosRouting', gameExe, safeMode)
         },
-        boostGame: (gameId: string) => {
+        boostGame: (gameId: string, safeMode: boolean = true) => {
             validate([gameId], ['string'])
-            return ipcRenderer.invoke('gearup:boostGame', gameId)
+            return ipcRenderer.invoke('gearup:boostGame', gameId, safeMode)
         },
         stopBoost: () => ipcRenderer.invoke('gearup:stopBoost'),
         boostDownloads: () => ipcRenderer.invoke('gearup:boostDownloads'),
+        purgeAllQosPolicies: () => ipcRenderer.invoke('gearup:purgeAllQosPolicies'),
+        syncDisplayRefreshRate: () => ipcRenderer.invoke('gearup:syncDisplayRefreshRate'),
+        addCustomGame: (name: string, exe: string) => {
+            validate([name, exe], ['string', 'string'])
+            return ipcRenderer.invoke('gearup:addCustomGame', name, exe)
+        },
     },
     hone: {
         enableMsiMode: () => ipcRenderer.invoke('hone:enableMsiMode'),

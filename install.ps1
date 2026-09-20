@@ -1,22 +1,23 @@
 # ==============================================================================
-# MA-Optimizer One-Line PowerShell Web Installer (v11.3.0)
-# Repository: https://github.com/Mathiyass/MA-Optimizer
-# Author: Mathisha Angirasa
-# ==============================================================================
+# MA-Optimizer One-Line PowerShell Web Installer (v11.4.0)
+# Usage: irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" | iex
 
-Write-Host ""
-Write-Host "  __  __          ____        _   _           _                  " -ForegroundColor Cyan
-Write-Host " |  \/  |   /\   / __ \      | | (_)         (_)                 " -ForegroundColor Cyan
-Write-Host " | \  / |  /  \ | |  | |_ __ | |_ _ _ __ ___  _ _______ _ __     " -ForegroundColor Cyan
-Write-Host " | |\/| | / /\ \| |  | | '_ \| __| | '_ ` _ \| |_  / _ \ '__|    " -ForegroundColor Cyan
-Write-Host " | |  | |/ ____ \ |__| | |_) | |_| | | | | | | |/ /  __/ |       " -ForegroundColor Cyan
-Write-Host " |_|  |_/_/    \_\____/| .__/ \__|_|_| |_| |_|_/___\___|_|       " -ForegroundColor Cyan
-Write-Host "                       | |                                       " -ForegroundColor Cyan
-Write-Host "                       |_|             v11.3.0 Pro Edition       " -ForegroundColor DarkCyan
-Write-Host ""
+$ErrorActionPreference = 'Stop'
 
-$releaseUrl = 'https://github.com/Mathiyass/MA-Optimizer/releases/download/v11.3.0/v11.3.MA-Optimizer.Installer.Setup.exe'
-$tempInstaller = Join-Path $env:TEMP 'v11.3.MA-Optimizer.Installer.Setup.exe'
+Write-Host "==================================================================" -ForegroundColor Cyan
+Write-Host "   __  __          ____        _   _           _                  " -ForegroundColor Cyan
+Write-Host "  |  \/  |   /\   / __ \      | | (_)         (_)                 " -ForegroundColor Cyan
+Write-Host "  | \  / |  /  \ | |  | |_ __ | |_ _ _ __ ___  _ _______ _ __     " -ForegroundColor Cyan
+Write-Host "  | |\/| | / /\ \| |  | | '_ \| __| | '_ ` _ \| |_  / _ \ '__|    " -ForegroundColor Cyan
+Write-Host "  | |  | |/ ____ \ |__| | |_) | |_| | | | | | | |/ /  __/ |       " -ForegroundColor Cyan
+Write-Host "  |_|  |_/_/    \_\____/| .__/ \__|_|_| |_| |_|_/___\___|_|       " -ForegroundColor Cyan
+Write-Host "                       | |                                        " -ForegroundColor Cyan
+Write-Host "                       |_|             v11.4.0 Pro Edition       " -ForegroundColor DarkCyan
+Write-Host "==================================================================" -ForegroundColor Cyan
+Write-Host "[*] Fetching latest MA-Optimizer v11.4.0 release package..." -ForegroundColor Yellow
+
+$releaseUrl = 'https://github.com/Mathiyass/MA-Optimizer/releases/download/v11.4.0/v11.4.MA-Optimizer.Installer.Setup.exe'
+$tempInstaller = Join-Path $env:TEMP 'v11.4.MA-Optimizer.Installer.Setup.exe'
 
 Write-Host "[-] Initializing installation pipeline..." -ForegroundColor Yellow
 Write-Host "[-] Fetching binary package from GitHub Releases..." -ForegroundColor White

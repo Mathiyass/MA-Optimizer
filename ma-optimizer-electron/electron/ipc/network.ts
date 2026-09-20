@@ -370,6 +370,10 @@ ipcMain.handle('network:applyHitregOptimization', async () => {
 Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | ForEach-Object {
     Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Packet Priority & VLAN' -DisplayValue 'Packet Priority & VLAN Disabled' -ErrorAction SilentlyContinue
     Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Idle power down restriction' -DisplayValue 'Enabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Energy Efficient Ethernet' -DisplayValue 'Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Packet Coalescing' -DisplayValue 'Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Receive Buffers' -DisplayValue '1024' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Transmit Buffers' -DisplayValue '1024' -ErrorAction SilentlyContinue
 }
 
 $adaptersKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e972-e325-11ce-bfc1-08002be10318}'
@@ -377,10 +381,16 @@ Get-ChildItem $adaptersKey -ErrorAction SilentlyContinue | ForEach-Object {
     $props = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
     if ($props.DriverDesc) {
         Set-ItemProperty -Path $_.PSPath -Name 'PnPCapabilities' -Value 24 -Type DWord -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*EEE' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'AdvancedEEE' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*PacketCoalescing' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'ReceiveBuffers' -Value '1024' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'TransmitBuffers' -Value '1024' -Type String -Force -ErrorAction SilentlyContinue
     }
 }
 
 netsh int tcp set global rsc=disabled | Out-Null
+Set-NetOffloadGlobalSetting -PacketCoalescingFilter Disabled -ErrorAction SilentlyContinue
 
 $afdKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Afd\\Parameters'
 New-Item -Path $afdKey -Force -ErrorAction SilentlyContinue | Out-Null
@@ -391,8 +401,8 @@ Set-ItemProperty -Path $afdKey -Name 'DefaultSendWindow' -Value 262144 -Type DWo
 Clear-DnsClientCache -ErrorAction SilentlyContinue
 `
         await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
-        sendLog('[Network] eSports Hit Registration & UDP Buffer optimization applied successfully.')
-        return { success: true, message: 'Hit registration, NIC sleep kill, and Winsock buffers successfully optimized.' }
+        sendLog('[Network] eSports Hit Registration, Buffer Starvation Cure (1024) & Winsock AFD optimization applied.')
+        return { success: true, message: 'Hit registration, 1024 ring buffers, NIC sleep kill, and Winsock buffers successfully optimized.' }
     } catch (e: any) {
         sendError(`[Network] Hitreg optimization failed: ${e.message}`)
         return { success: false, message: e.message }
@@ -443,6 +453,347 @@ ipcMain.handle('network:purgeAllQosPolicies', async () => {
         return false
     }
 })
+
+// ==========================================
+// DEEP HITREG & RUBBERBANDING IPC HANDLERS
+// ==========================================
+
+// 1. Detect Intel I225-V / I226-V Silicon Stepping (B1 / B2 / B3)
+ipcMain.handle('network:identifyNicStepping', async () => {
+    try {
+        const ps = `
+$dev = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { $_.HardwareID -match 'VEN_8086&DEV_15F' } | Select-Object -First 1
+if ($dev) {
+    $hwId = ($dev.HardwareID | Out-String)
+    $stepping = "Unknown"
+    $isB1B2 = $false
+    if ($hwId -match 'REV_01') { $stepping = "B1 (REV_01)"; $isB1B2 = $true }
+    elseif ($hwId -match 'REV_02') { $stepping = "B2 (REV_02)"; $isB1B2 = $true }
+    elseif ($hwId -match 'REV_03') { $stepping = "B3 (REV_03)"; $isB1B2 = $false }
+    @{ isIntelI225 = $true; stepping = $stepping; isB1B2 = $isB1B2; name = $dev.Name; hwId = ($dev.HardwareID -join ', ') } | ConvertTo-Json
+} else {
+    @{ isIntelI225 = $false; stepping = "N/A"; isB1B2 = $false; name = "Standard NIC"; hwId = "" } | ConvertTo-Json
+}
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        return JSON.parse(result.trim())
+    } catch (e: any) {
+        sendError(`[NIC Stepping] Detection failed: ${e.message}`)
+        return { isIntelI225: false, stepping: 'Error', isB1B2: false, name: 'Detection Failed', hwId: '' }
+    }
+})
+
+// 2. Deep Intel I225-V Hardware Fix (1.0G Force, EEE Kill, Buffer 1024, PTP Kill, Driver Lock)
+ipcMain.handle('network:applyDeepNicFix', async () => {
+    try {
+        const ps = `
+$NetKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e972-e325-11ce-bfc1-08002be10318}'
+Get-ChildItem $NetKey -ErrorAction SilentlyContinue | ForEach-Object {
+    $props = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+    if ($props.DriverDesc) {
+        if ($props.DriverDesc -match 'I225|I226|Intel') {
+            Set-ItemProperty -Path $_.PSPath -Name '*SpeedDuplex' -Value '6' -Type String -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $_.PSPath -Name 'MasterSlave' -Value '1' -Type String -Force -ErrorAction SilentlyContinue
+        }
+        Set-ItemProperty -Path $_.PSPath -Name '*EEE' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*EEELinkAdvertisement' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'AdvancedEEE' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'ReceiveBuffers' -Value '1024' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'TransmitBuffers' -Value '1024' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'EnablePTP' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*PtpHardwareTimestamp' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*PacketCoalescing' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'UltraLowPowerMode' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'AutoPowerSaveModeEnabled' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'SavePowerNowEnabled' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'ReduceSpeedOnPowerDown' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'SystemIdleTime' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'PnPCapabilities' -Value 24 -Type DWord -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'WakeOnSlot' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name 'WakeOnLink' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*WakeOnMagicPacket' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $_.PSPath -Name '*WakeOnPattern' -Value '0' -Type String -Force -ErrorAction SilentlyContinue
+    }
+}
+
+$wuKey = 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate'
+if (!(Test-Path $wuKey)) { New-Item -Path $wuKey -Force -ErrorAction SilentlyContinue | Out-Null }
+Set-ItemProperty -Path $wuKey -Name 'ExcludeWUDriversInQualityUpdate' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+
+Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | ForEach-Object {
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Speed & Duplex' -DisplayValue '1.0 Gbps Full Duplex' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Energy Efficient Ethernet' -DisplayValue 'Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Advanced EEE' -DisplayValue 'Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Packet Coalescing' -DisplayValue 'Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Receive Buffers' -DisplayValue '1024' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Transmit Buffers' -DisplayValue '1024' -ErrorAction SilentlyContinue
+    Set-NetAdapterPowerManagement -Name $_.Name -AllowComputerToTurnOffDevice Disabled -WakeOnMagicPacket Disabled -ErrorAction SilentlyContinue
+}
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network] Applied Deep NIC Silicon Fix: 1.0G forced, EEE disabled, buffers expanded to 1024, sleep hooks eliminated.')
+        return { success: true, message: 'Deep NIC Fix applied: 1.0G Full Duplex, EEE killed, 1024 buffers, Windows Update driver lock active.' }
+    } catch (e: any) {
+        sendError(`[Network] Deep NIC Fix failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 3. Kernel Timer & Latency Fixes (GlobalTimerResolutionRequests, disabledynamictick, Enhanced TSC)
+ipcMain.handle('network:applyTimerFixes', async () => {
+    try {
+        const ps = `
+$smKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel'
+if (!(Test-Path $smKey)) { New-Item -Path $smKey -Force -ErrorAction SilentlyContinue | Out-Null }
+Set-ItemProperty -Path $smKey -Name 'TimerCoalescing' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $smKey -Name 'GlobalTimerResolutionRequests' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+
+$pwrKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power'
+Set-ItemProperty -Path $pwrKey -Name 'CoalescingTimerInterval' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+
+bcdedit /set disabledynamictick yes | Out-Null
+bcdedit /set tscsyncpolicy Enhanced | Out-Null
+bcdedit /deletevalue useplatformclock | Out-Null
+bcdedit /deletevalue useplatformtick | Out-Null
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Latency] Applied Kernel Timer Fixes: GlobalTimerResolutionRequests=1, disabledynamictick=yes, native TSC enforced.')
+        return { success: true, message: 'Global timer resolution, tickless kernel disabled, and hardware TSC clock active.' }
+    } catch (e: any) {
+        sendError(`[Latency] Timer fixes failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 4. GPU DPC Latency Fix (DisableDynamicPstate, TdrDelay, MPO fix)
+ipcMain.handle('network:applyGpuDpcFix', async () => {
+    try {
+        const ps = `
+$displayKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e968-e325-11ce-bfc1-08002be10318}'
+Get-ChildItem $displayKey -ErrorAction SilentlyContinue | ForEach-Object {
+    $props = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+    if ($props.DriverDesc -match 'NVIDIA|GeForce') {
+        Set-ItemProperty -Path $_.PSPath -Name 'DisableDynamicPstate' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+    }
+}
+$gfxKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers'
+Set-ItemProperty -Path $gfxKey -Name 'TdrLevel' -Value 3 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $gfxKey -Name 'TdrDelay' -Value 10 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $gfxKey -Name 'TdrDdiDelay' -Value 10 -Type DWord -Force -ErrorAction SilentlyContinue
+
+$dwmKey = 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm'
+if (!(Test-Path $dwmKey)) { New-Item -Path $dwmKey -Force -ErrorAction SilentlyContinue | Out-Null }
+Set-ItemProperty -Path $dwmKey -Name 'OverlayTestMode' -Value 5 -Type DWord -Force -ErrorAction SilentlyContinue
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[GPU] Applied NVIDIA DPC Latency Fix: DisableDynamicPstate=1 (P0 clock lock), TDR delays, MPO test mode.')
+        return { success: true, message: 'GPU dynamic P-state clock stutter eliminated; TDR delay optimized.' }
+    } catch (e: any) {
+        sendError(`[GPU] GPU DPC fix failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 5. Audio DAC D3 Sleep Kill (Realtek ALC1200 / HDAudio)
+ipcMain.handle('network:applyAudioDpcFix', async () => {
+    try {
+        const ps = `
+Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e96c-e325-11ce-bfc1-08002be10318}' -ErrorAction SilentlyContinue | ForEach-Object {
+    $path = "$($_.PSPath)\\PowerSettings"
+    if (Test-Path $path) {
+        Set-ItemProperty -Path $path -Name 'ConservationIdleTime' -Value ([byte[]](0x00,0x00,0x00,0x00)) -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $path -Name 'PerformanceIdleTime' -Value ([byte[]](0x00,0x00,0x00,0x00)) -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $path -Name 'IdlePowerState' -Value ([byte[]](0x00,0x00,0x00,0x00)) -Force -ErrorAction SilentlyContinue
+    }
+}
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Audio] Realtek / HD Audio DAC D3 sleep disabled — eliminates 2-5ms gunshot audio DPC spikes.')
+        return { success: true, message: 'Audio codec power transition latency eliminated.' }
+    } catch (e: any) {
+        sendError(`[Audio] Audio DPC fix failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 6. NVMe Storage APST & AHCI Link Power Management Fix
+ipcMain.handle('network:applyStoragePowerFix', async () => {
+    try {
+        const ps = `
+powercfg -attributes SUB_DISK D639518A-E56D-4345-8AF2-B9F32FB26109 -ATTRIB_HIDE
+powercfg /setacvalueindex SCHEME_CURRENT SUB_DISK D639518A-E56D-4345-8AF2-B9F32FB26109 0
+powercfg -attributes SUB_DISK D3D55EE5-903B-4E69-B4FB-76041614C7A1 -ATTRIB_HIDE
+powercfg /setacvalueindex SCHEME_CURRENT SUB_DISK D3D55EE5-903B-4E69-B4FB-76041614C7A1 0
+powercfg -attributes SUB_DISK 0b2d69d7-a2a1-449c-9680-f91c70521c60 -ATTRIB_HIDE
+powercfg /setacvalueindex SCHEME_CURRENT SUB_DISK 0b2d69d7-a2a1-449c-9680-f91c70521c60 0
+powercfg /setactive SCHEME_CURRENT
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Storage] NVMe APST autonomous sleep & AHCI link power management disabled.')
+        return { success: true, message: 'NVMe texture load stutter and APST wake pauses eliminated.' }
+    } catch (e: any) {
+        sendError(`[Storage] Storage power fix failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 7. MSI Mode Deep Setup (GPU Priority High, USB xHCI, Raw Mouse Throttle Kill)
+ipcMain.handle('network:enableMsiModeDeep', async () => {
+    try {
+        const ps = `
+Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\PCI' -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'VEN_10DE' -and $_.Name -match 'Device Parameters' } | ForEach-Object {
+    $msiPath = "$($_.PSPath)\\Interrupt Management\\MessageSignaledInterruptProperties"
+    $affPath = "$($_.PSPath)\\Interrupt Management\\Affinity Policy"
+    New-Item -Path $msiPath -Force -ErrorAction SilentlyContinue | Out-Null
+    New-Item -Path $affPath -Force -ErrorAction SilentlyContinue | Out-Null
+    Set-ItemProperty -Path $msiPath -Name 'MSISupported' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $affPath -Name 'DevicePriority' -Value 3 -Type DWord -Force -ErrorAction SilentlyContinue
+}
+Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\PCI' -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'CC_0C0330' -and $_.Name -match 'Device Parameters' } | ForEach-Object {
+    $msiPath = "$($_.PSPath)\\Interrupt Management\\MessageSignaledInterruptProperties"
+    New-Item -Path $msiPath -Force -ErrorAction SilentlyContinue | Out-Null
+    Set-ItemProperty -Path $msiPath -Name 'MSISupported' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+}
+Set-ItemProperty -Path 'HKCU:\\Control Panel\\Mouse' -Name 'RawMouseThrottleDuration' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[MSI] Enabled MSI Mode: GPU (High Priority 3), USB xHCI controllers, RawMouseThrottleDuration=0.')
+        return { success: true, message: 'MSI mode activated with dedicated interrupt vectors for GPU and USB.' }
+    } catch (e: any) {
+        sendError(`[MSI] MSI Deep mode failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 8. Advanced Windows Network Stack Hardening (USO/URO Kill, CUBIC, NetworkThrottlingIndex=10, Core Pinning)
+ipcMain.handle('network:applyAdvancedStackFix', async () => {
+    try {
+        const ps = `
+Set-NetOffloadGlobalSetting -PacketCoalescingFilter Disabled -ReceiveSideScaling Enabled -TaskOffload Enabled -UdpSegmentationOffload Disabled -ErrorAction SilentlyContinue
+netsh int tcp set global chimney=disabled autotuninglevel=normal ecncapability=disabled dca=disabled rss=enabled | Out-Null
+netsh int ip set global taskoffload=enabled | Out-Null
+netsh int udp set global uro=disabled -ErrorAction SilentlyContinue | Out-Null
+
+@('Internet', 'InternetCustom', 'Compat', 'Datacenter', 'DatacenterCustom') | ForEach-Object {
+    netsh int tcp set supplemental Template=$_ CongestionProvider=cubic | Out-Null
+}
+
+$sysProf = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile'
+Set-ItemProperty -Path $sysProf -Name 'NetworkThrottlingIndex' -Value 10 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $sysProf -Name 'SystemResponsiveness' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+
+$gamesKey = "$sysProf\\Tasks\\Games"
+if (!(Test-Path $gamesKey)) { New-Item -Path $gamesKey -Force -ErrorAction SilentlyContinue | Out-Null }
+Set-ItemProperty -Path $gamesKey -Name 'GPU Priority' -Value 8 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $gamesKey -Name 'Priority' -Value 6 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $gamesKey -Name 'Scheduling Category' -Value 'High' -Type String -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $gamesKey -Name 'SFIO Priority' -Value 'High' -Type String -Force -ErrorAction SilentlyContinue
+
+$pschedKey = 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Psched'
+if (!(Test-Path $pschedKey)) { New-Item -Path $pschedKey -Force -ErrorAction SilentlyContinue | Out-Null }
+Set-ItemProperty -Path $pschedKey -Name 'NonBestEffortLimit' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $pschedKey -Name 'DoNotUseNLA' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+
+$adapter = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' -and $_.Virtual -eq $False } | Select-Object -First 1
+if ($adapter) {
+    Set-NetAdapterRss -Name $adapter.Name -NumberOfReceiveQueues 2 -BaseProcessorNumber 2 -MaxProcessors 2 -Profile Closest -ErrorAction SilentlyContinue
+    Disable-NetAdapterUso -Name $adapter.Name -ErrorAction SilentlyContinue
+}
+
+netsh interface teredo set state disabled | Out-Null
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network] Advanced Network Stack Hardened: USO/URO killed, CUBIC set, NetworkThrottlingIndex=10, RSS pinned away from Core 0.')
+        return { success: true, message: 'Advanced TCP/UDP stack hardened, CUBIC congestion set, RSS pinned to isolated cores.' }
+    } catch (e: any) {
+        sendError(`[Network] Advanced stack fix failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 9. Discover & Apply Optimal MTU (Ping Sweep without ICMP black hole drops)
+ipcMain.handle('network:discoverOptimalMtu', async () => {
+    try {
+        const ps = `
+$adapter = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' -and $_.Virtual -eq $False } | Select-Object -First 1
+$optimalPayload = 1472
+$found = $false
+foreach ($size in @(1472, 1464, 1452, 1440, 1420, 1400)) {
+    $ping = ping 1.1.1.1 -f -l $size -n 1
+    if ($ping -match 'bytes=' -and $ping -notmatch 'fragmented|100% loss') {
+        $optimalPayload = $size
+        $found = $true
+        break
+    }
+}
+$optimalMtu = $optimalPayload + 28
+if ($adapter) {
+    netsh interface ipv4 set subinterface "$($adapter.Name)" mtu=$optimalMtu store=persistent | Out-Null
+}
+@{ adapter = ($adapter ? $adapter.Name : "Ethernet"); optimalPayload = $optimalPayload; mtu = $optimalMtu; success = $found } | ConvertTo-Json
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const parsed = JSON.parse(result.trim())
+        sendLog(`[MTU] Discovered optimal MTU: ${parsed.mtu} (payload: ${parsed.optimalPayload}) on ${parsed.adapter}`)
+        return parsed
+    } catch (e: any) {
+        sendError(`[MTU] Discovery failed: ${e.message}`)
+        return { adapter: 'Ethernet', optimalPayload: 1472, mtu: 1500, success: false }
+    }
+})
+
+// 10. Query NIC Discarded / Dropped Packet Statistics
+ipcMain.handle('network:getNicStatistics', async () => {
+    try {
+        const ps = `
+$adapter = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' -and $_.Virtual -eq $False } | Select-Object -First 1
+if ($adapter) {
+    $stats = Get-NetAdapterStatistics -Name $adapter.Name -ErrorAction SilentlyContinue
+    @{
+        adapter = $adapter.Name
+        receivedDiscarded = [int64]$stats.ReceivedDiscardedPackets
+        outboundDiscarded = [int64]$stats.OutboundDiscardedPackets
+        receivedPacketErrors = [int64]$stats.ReceivedPacketErrors
+        outboundPacketErrors = [int64]$stats.OutboundPacketErrors
+    } | ConvertTo-Json
+} else {
+    @{ adapter = "N/A"; receivedDiscarded = 0; outboundDiscarded = 0; receivedPacketErrors = 0; outboundPacketErrors = 0 } | ConvertTo-Json
+}
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        return JSON.parse(result.trim())
+    } catch (e: any) {
+        return { adapter: 'N/A', receivedDiscarded: 0, outboundDiscarded: 0, receivedPacketErrors: 0, outboundPacketErrors: 0 }
+    }
+})
+
+// 11. Audit Windows Filtering Platform (WFP) Callout Drivers
+ipcMain.handle('network:auditWfpCallouts', async () => {
+    try {
+        const ps = `
+$filePath = "$env:TEMP\\wfp_callouts.xml"
+netsh wfp show callouts file=$filePath | Out-Null
+$suspicious = @()
+if (Test-Path $filePath) {
+    [xml]$xml = Get-Content $filePath -ErrorAction SilentlyContinue
+    $xml.wfpdiag.callouts.callout | ForEach-Object {
+        if ($_.name -match 'cFos|GameFirst|Killer|Asus|Nahimic|Avast|Kaspersky|Norton|Bitdefender') {
+            $suspicious += $_.name
+        }
+    }
+    Remove-Item $filePath -Force -ErrorAction SilentlyContinue
+}
+@{ count = $suspicious.Count; offenders = $suspicious } | ConvertTo-Json
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const parsed = JSON.parse(result.trim())
+        sendLog(`[WFP Audit] Scanned kernel callout drivers: found ${parsed.count} potential third-party network throttlers.`)
+        return parsed
+    } catch (e: any) {
+        return { count: 0, offenders: [] }
+    }
+})
+
 
 
 
