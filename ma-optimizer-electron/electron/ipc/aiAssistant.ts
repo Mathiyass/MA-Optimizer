@@ -265,7 +265,7 @@ async function callAIHordeProxy(
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer 0000000000',
-                'Client-Agent': 'MA-Optimizer:11.1.0:github.com/Mathiyass/MA-Optimizer',
+                'Client-Agent': 'MA-Optimizer:11.5.0:github.com/Mathiyass/MA-Optimizer',
             },
             body: JSON.stringify({
                 model: 'meta-llama/llama-3.3-70b-instruct',
