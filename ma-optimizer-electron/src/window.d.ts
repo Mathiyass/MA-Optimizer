@@ -65,6 +65,12 @@ export interface WindowApi {
         exportTcpConfig: () => Promise<string | null>
         importTcpConfig: (settings: any) => Promise<boolean>
         benchmarkDns: () => Promise<Array<{ name: string; primary: string; secondary: string; latency: number }>>
+        getNicAdvancedProps: (adapter?: string) => Promise<Array<{ DisplayName: string; DisplayValue: string; RegistryKeyword?: string; RegistryValue?: any }>>
+        setNicAdvancedProp: (adapter: string, name: string, value: string) => Promise<boolean>
+        applyTcpNoDelayToAllInterfaces: () => Promise<{ applied: number; success: boolean }>
+        getQosPolicies: () => Promise<Array<{ name: string; appName: string; dscp: number; priority: number }>>
+        addQosPolicy: (name: string, exeName: string) => Promise<boolean>
+        removeQosPolicy: (name: string) => Promise<boolean>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>
@@ -168,6 +174,7 @@ export interface WindowApi {
         boostGame: (gameId: string) => Promise<boolean>
         stopBoost: () => Promise<boolean>
         boostDownloads: () => Promise<boolean>
+        addCustomGame: (name: string, exe: string) => Promise<any>
     }
     hone: {
         enableMsiMode: () => Promise<boolean>

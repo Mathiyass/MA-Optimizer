@@ -118,11 +118,14 @@ ipcMain.handle('network:detectMtu', async () => {
         let high = 1500
         let mtu = 1500
 
+        // Test targets: Cloudflare (1.1.1.1) and Google (8.8.8.8)
+        const target = '1.1.1.1'
+
         while (low <= high) {
             const mid = Math.floor((low + high) / 2)
-            const result = await runCmd('ping', ['-f', '-l', String(mid - 28), '-n', '1', '8.8.8.8'], 5000)
+            const result = await runCmd('ping', ['-f', '-l', String(mid - 28), '-n', '1', target], 4000)
 
-            if (!result.toLowerCase().includes('fragmented') && !result.toLowerCase().includes('too large')) {
+            if (!result.toLowerCase().includes('fragmented') && !result.toLowerCase().includes('too large') && !result.toLowerCase().includes('timed out')) {
                 mtu = mid
                 low = mid + 1
             } else {
@@ -136,6 +139,7 @@ ipcMain.handle('network:detectMtu', async () => {
         return 1500
     }
 })
+
 
 ipcMain.handle('network:setMtu', async (_, adapter: string, size: number) => {
     try {
@@ -256,5 +260,108 @@ ipcMain.handle('network:benchmarkDns', async () => {
     }
     return results.sort((a, b) => a.latency - b.latency)
 })
+
+// NIC Hardware Advanced Properties (Interrupt Moderation, Flow Control, EEE, Selective Suspend)
+ipcMain.handle('network:getNicAdvancedProps', async (_, adapterName: string) => {
+    try {
+        const safeAdapter = escapePS(adapterName || 'Ethernet')
+        const ps = `Get-NetAdapterAdvancedProperty -Name '${safeAdapter}' -ErrorAction SilentlyContinue | Select-Object DisplayName,DisplayValue,RegistryKeyword,RegistryValue | ConvertTo-Json`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        if (!result) return []
+        const parsed = JSON.parse(result)
+        return Array.isArray(parsed) ? parsed : [parsed]
+    } catch {
+        return []
+    }
+})
+
+ipcMain.handle('network:setNicAdvancedProp', async (_, adapterName: string, propName: string, propValue: string) => {
+    try {
+        const safeAdapter = escapePS(adapterName || 'Ethernet')
+        const safeProp = escapePS(propName)
+        const safeVal = escapePS(propValue)
+        const ps = `Set-NetAdapterAdvancedProperty -Name '${safeAdapter}' -DisplayName '${safeProp}' -DisplayValue '${safeVal}' -ErrorAction Stop`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network] Configured NIC hardware setting: ${propName} = ${propValue} on ${adapterName}`)
+        return true
+    } catch (e: any) {
+        sendError(`[Network] Failed to set NIC property ${propName}: ${e.message}`)
+        return false
+    }
+})
+
+// True per-interface Nagle Killer (TcpNoDelay & TcpAckFrequency across active interface GUIDs)
+ipcMain.handle('network:applyTcpNoDelayToAllInterfaces', async () => {
+    try {
+        const ps = `
+$count = 0
+$interfaces = Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\\*'
+foreach ($iface in $interfaces) {
+    if ($iface.DhcpIPAddress -or $iface.IPAddress) {
+        $path = $iface.PSPath
+        Set-ItemProperty -Path $path -Name 'TcpNoDelay' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $path -Name 'TcpAckFrequency' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $path -Name 'TCPDelAckTicks' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+        $count++
+    }
+}
+$count
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const appliedCount = parseInt(result.trim()) || 0
+        sendLog(`[Network] Injected True Nagle Killer (TcpNoDelay=1, TcpAckFrequency=1) across ${appliedCount} network adapter interfaces.`)
+        return { applied: appliedCount, success: true }
+    } catch (e: any) {
+        sendError(`[Network] Failed to inject per-interface TCPNoDelay: ${e.message}`)
+        return { applied: 0, success: false }
+    }
+})
+
+// Windows QoS Game Policy Management
+ipcMain.handle('network:getQosPolicies', async () => {
+    try {
+        const ps = `Get-NetQosPolicy -ErrorAction SilentlyContinue | Select-Object Name,AppPathName,DSCPValue,PriorityValue | ConvertTo-Json`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        if (!result) return []
+        const parsed = JSON.parse(result)
+        const list = Array.isArray(parsed) ? parsed : [parsed]
+        return list.map((p: any) => ({
+            name: p.Name || '',
+            appName: p.AppPathName || '',
+            dscp: p.DSCPValue || 0,
+            priority: p.PriorityValue || 0
+        }))
+    } catch {
+        return []
+    }
+})
+
+ipcMain.handle('network:addQosPolicy', async (_, policyName: string, exeName: string) => {
+    try {
+        const safeName = escapePS(policyName)
+        const safeExe = escapePS(exeName)
+        const ps = `New-NetQosPolicy -Name '${safeName}' -AppPathName '${safeExe}' -DSCPAction 46 -PriorityValue 7 -NetworkProfile All -ErrorAction SilentlyContinue`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network] Created Windows QoS DSCP 46 high-priority routing policy: ${policyName} for ${exeName}`)
+        return true
+    } catch (e: any) {
+        sendError(`[Network] Failed to create QoS policy: ${e.message}`)
+        return false
+    }
+})
+
+ipcMain.handle('network:removeQosPolicy', async (_, policyName: string) => {
+    try {
+        const safeName = escapePS(policyName)
+        const ps = `Remove-NetQosPolicy -Name '${safeName}' -Confirm:$false -ErrorAction SilentlyContinue`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network] Removed Windows QoS policy: ${policyName}`)
+        return true
+    } catch (e: any) {
+        sendError(`[Network] Failed to remove QoS policy: ${e.message}`)
+        return false
+    }
+})
+
 
 

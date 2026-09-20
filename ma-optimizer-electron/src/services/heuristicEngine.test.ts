@@ -79,6 +79,18 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(dpcB, 'Should detect severe DPC latency spike')
             assert.strictEqual(dpcB?.actionId, 'OPTIMIZE_DPC_LATENCY')
         })
+
+        it('should detect hit registration desync risk during gaming with high latency or DPC', () => {
+            const bottlenecks = classifyBottlenecks(40, [40, 40], 50, 8, 5, 5, 75, true, 450)
+            const hitregB = bottlenecks.find(b => b.actionId === 'OPTIMIZE_NIC_ESPORTS')
+            assert.ok(hitregB, 'Should detect hit registration desync risk')
+            assert.strictEqual(hitregB?.severity, 'warning')
+
+            // Critical if ping > 100
+            const criticalB = classifyBottlenecks(40, [40, 40], 50, 8, 5, 5, 110, true, 450)
+            const critHitreg = criticalB.find(b => b.actionId === 'OPTIMIZE_NIC_ESPORTS')
+            assert.strictEqual(critHitreg?.severity, 'critical')
+        })
     })
 
     describe('classifyFuzzySystemState', () => {
@@ -114,11 +126,18 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 25, `Should evaluate >= 25 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 34, `Should evaluate >= 34 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
+
+            // Verify Rules 31-34 recommendations exist
+            const recIds = report.recommendations.map(r => r.id)
+            assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
+            assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
+            assert.ok(recIds.includes('rec_shader_cache_clean'), 'Should include Shader Cache Clean rule')
+            assert.ok(recIds.includes('rec_mtu_calibration'), 'Should include MTU calibration rule')
         })
 
-        it('should detect active game and set gaming activity state', () => {
+        it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {
             const mockInfo = { cpu: { brand: 'Intel Core i7-14700K' }, disks: [] }
             const mockStats = {
                 cpu: { currentLoad: 50, cpus: [50, 50] },
@@ -126,10 +145,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
                 disk: { readBytesPerSec: 0, writeBytesPerSec: 0 },
                 network: { pingMs: 25 },
             }
-            const procs = [{ name: 'cs2.exe', cpu: 45, mem: 20 }]
+            const procs = [{ name: 'DeltaForceClient-Win64-Shipping.exe', cpu: 45, mem: 20 }]
             const report = evaluateSystemHealth(mockInfo, mockStats, procs)
             assert.strictEqual(report.activity, 'gaming')
-            assert.strictEqual(report.activeGame, 'Counter-Strike 2')
+            assert.strictEqual(report.activeGame, 'Delta Force')
         })
 
         it('should penalize health score and generate recommendations under heavy load', () => {

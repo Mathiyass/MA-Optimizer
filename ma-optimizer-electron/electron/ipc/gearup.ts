@@ -84,6 +84,52 @@ export const GAME_CATALOG: GameBoostTarget[] = [
             { region: 'North America', ip: '192.81.241.1', ping: 0 },
             { region: 'Europe', ip: '185.220.101.1', ping: 0 },
         ]
+    },
+    {
+        id: 'deltaforce',
+        name: 'Delta Force',
+        exe: 'DeltaForceClient-Win64-Shipping.exe',
+        category: 'Tactical FPS',
+        serverNodes: [
+            { region: 'Asia SE (Singapore)', ip: '150.109.0.1', ping: 0 },
+            { region: 'Asia East (Tokyo/HK)', ip: '43.154.0.1', ping: 0 },
+            { region: 'Middle East (Bahrain)', ip: '15.185.0.1', ping: 0 },
+            { region: 'EU Central (Frankfurt)', ip: '49.51.0.1', ping: 0 },
+            { region: 'US East (Virginia)', ip: '49.51.100.1', ping: 0 }
+        ]
+    },
+    {
+        id: 'marvelrivals',
+        name: 'Marvel Rivals',
+        exe: 'Marvel-Win64-Shipping.exe',
+        category: 'Hero Shooter',
+        serverNodes: [
+            { region: 'US East', ip: '3.210.0.1', ping: 0 },
+            { region: 'EU Central (Frankfurt)', ip: '18.194.0.1', ping: 0 },
+            { region: 'Asia East (Tokyo)', ip: '18.179.0.1', ping: 0 }
+        ]
+    },
+    {
+        id: 'deadlock',
+        name: 'Deadlock',
+        exe: 'project8.exe',
+        category: 'MOBA Shooter',
+        serverNodes: [
+            { region: 'US East (Valve)', ip: '162.254.192.1', ping: 0 },
+            { region: 'EU Central (Valve)', ip: '155.133.226.1', ping: 0 },
+            { region: 'Asia East (Valve)', ip: '155.133.239.1', ping: 0 }
+        ]
+    },
+    {
+        id: 'thefinals',
+        name: 'THE FINALS',
+        exe: 'Discovery.exe',
+        category: 'FPS',
+        serverNodes: [
+            { region: 'US East', ip: '3.210.0.1', ping: 0 },
+            { region: 'EU Central', ip: '18.194.0.1', ping: 0 },
+            { region: 'Asia SE', ip: '13.228.0.1', ping: 0 }
+        ]
     }
 ]
 
@@ -131,8 +177,13 @@ ipcMain.handle('gearup:boostGame', async (_, gameId: string) => {
     try {
         sendLog(`[GearUP Booster] Initializing Ultra-Low Latency Game Boost for ${game.name}...`)
 
-        // 1. Set Windows High Performance Power Scheme
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'], { timeout: 5000 }).catch(() => {})
+        // 1. Set MA Power Plan or Ultimate Performance Power Scheme
+        const psPower = `
+$plans = powercfg /list
+$maPlan = $plans | Where-Object { $_ -match 'MA Power Plan' -or $_ -match 'Ultimate Performance' } | ForEach-Object { if ($_ -match '([0-9a-fA-F-]{36})') { $matches[1] } } | Select-Object -First 1
+if ($maPlan) { powercfg /setactive $maPlan } else { powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }
+`
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psPower], { timeout: 5000 }).catch(() => {})
 
         // 2. Clear Standby Memory & Working Set
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'Get-Process | ForEach-Object { try { $_.EmptyWorkingSet() } catch {} }; [System.GC]::Collect()'], { timeout: 10000 }).catch(() => {})
@@ -142,7 +193,7 @@ ipcMain.handle('gearup:boostGame', async (_, gameId: string) => {
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psPriority], { timeout: 5000 }).catch(() => {})
 
         // 4. Set TCP/IP Socket Low Latency
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'netsh int tcp set global autotuninglevel=experimental; netsh int tcp set global congestionprovider=ctcp'], { timeout: 5000 }).catch(() => {})
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'netsh int tcp set global autotuninglevel=normal; netsh int tcp set global congestionprovider=cubic'], { timeout: 5000 }).catch(() => {})
 
         activeBoostedGame = game.id
         sendLog(`[GearUP Booster] ${game.name} Boost ACTIVE: Ping optimized, RAM purged, QoS packet prioritization engaged.`)
@@ -181,3 +232,34 @@ Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Param
 ipcMain.handle('gearup:getCatalog', async () => {
     return GAME_CATALOG
 })
+
+ipcMain.handle('gearup:addCustomGame', async (_, name: string, exe: string) => {
+    try {
+        const safeName = String(name).trim()
+        const safeExe = String(exe).trim().replace(/[&|;'`"<>]/g, '')
+        const id = safeName.toLowerCase().replace(/[^a-z0-9]/g, '') || `custom_${Date.now()}`
+
+        if (!safeName || !safeExe) return null
+
+        const existing = GAME_CATALOG.find(g => g.id === id || g.exe.toLowerCase() === safeExe.toLowerCase())
+        if (existing) return existing
+
+        const customGame: GameBoostTarget = {
+            id,
+            name: safeName,
+            exe: safeExe,
+            category: 'Custom Game',
+            serverNodes: [
+                { region: 'Primary Cloud Gateway', ip: '1.1.1.1', ping: 0 },
+                { region: 'Global Ping Node', ip: '8.8.8.8', ping: 0 }
+            ]
+        }
+        GAME_CATALOG.push(customGame)
+        sendLog(`[GearUP Booster] Added custom game target: ${safeName} (${safeExe})`)
+        return customGame
+    } catch (e: any) {
+        sendError(`[GearUP Booster] Failed to add custom game: ${e.message}`)
+        return null
+    }
+})
+

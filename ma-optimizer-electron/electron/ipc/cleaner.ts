@@ -26,7 +26,16 @@ const categories: CleanerCategory[] = [
     { id: 'wintemp', name: 'Windows Temp', paths: ['C:\\Windows\\Temp'] },
     { id: 'prefetch', name: 'Prefetch', paths: ['C:\\Windows\\Prefetch'] },
     { id: 'wupdate', name: 'Windows Update Cache', paths: ['C:\\Windows\\SoftwareDistribution\\Download'] },
-    { id: 'shader', name: 'DirectX Shader Cache', paths: [path.join(getEnv('LOCALAPPDATA'), 'D3DSCache'), path.join(getEnv('LOCALAPPDATA'), 'NVIDIA', 'GLCache')] },
+    {
+        id: 'shader',
+        name: 'DirectX & NVIDIA Shader Cache',
+        paths: [
+            path.join(getEnv('LOCALAPPDATA'), 'D3DSCache'),
+            path.join(getEnv('LOCALAPPDATA'), 'NVIDIA', 'GLCache'),
+            path.join(getEnv('LOCALAPPDATA'), 'NVIDIA', 'DXCache'),
+            path.join(getEnv('LOCALAPPDATA'), 'Temp', 'NVIDIA Corporation', 'NV_Cache')
+        ]
+    },
     { id: 'wer', name: 'Windows Error Reports', paths: ['C:\\ProgramData\\Microsoft\\Windows\\WER'] },
     { id: 'dumps', name: 'Crash Dumps', paths: ['C:\\Windows\\Minidump', path.join(getEnv('LOCALAPPDATA'), 'CrashDumps')] },
     { id: 'logs', name: 'System Log Files', paths: ['C:\\Windows\\Logs'] },
@@ -34,11 +43,26 @@ const categories: CleanerCategory[] = [
     { id: 'fontcache', name: 'Font Cache', paths: ['C:\\Windows\\ServiceProfiles\\LocalService\\AppData\\Local\\FontCache'] },
     { id: 'actioncenter', name: 'Action Center Backup', paths: [path.join(getEnv('LOCALAPPDATA'), 'Microsoft', 'Windows', 'ActionCenterCache')] },
     { id: 'windefender', name: 'Windows Defender History', paths: ['C:\\ProgramData\\Microsoft\\Windows Defender\\Scans\\History\\Results'] },
-    // Applications (Third Party)
+    // Applications (Third Party & Dev)
     { id: 'discord', name: 'Discord Cache', paths: [path.join(getEnv('APPDATA'), 'discord', 'Cache'), path.join(getEnv('APPDATA'), 'discord', 'Code Cache'), path.join(getEnv('APPDATA'), 'discord', 'GPUCache')] },
     { id: 'vscode', name: 'VS Code Cache', paths: [path.join(getEnv('APPDATA'), 'Code', 'Cache'), path.join(getEnv('APPDATA'), 'Code', 'CachedData'), path.join(getEnv('APPDATA'), 'Code', 'Code Cache')] },
     { id: 'slack', name: 'Slack Cache', paths: [path.join(getEnv('APPDATA'), 'Slack', 'Cache'), path.join(getEnv('APPDATA'), 'Slack', 'GPUCache')] },
     { id: 'spotify', name: 'Spotify Cache', paths: [path.join(getEnv('LOCALAPPDATA'), 'Spotify', 'Storage')] },
+    {
+        id: 'npmcache',
+        name: 'Node.js / NPM Global Cache',
+        paths: [path.join(getEnv('APPDATA'), 'npm-cache')]
+    },
+    {
+        id: 'gamewebcache',
+        name: 'Game & Launcher Web Caches',
+        paths: [
+            path.join(getEnv('LOCALAPPDATA'), 'EpicGamesLauncher', 'Saved', 'webcache'),
+            path.join(getEnv('LOCALAPPDATA'), 'Steam', 'htmlcache'),
+            path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'steamapps', 'common', 'Delta Force', 'Game', 'DeltaForce', 'Saved', 'webcache_4692'),
+            path.join(getEnv('PROGRAMFILES(X86)') || 'C:\\Program Files (x86)', 'Steam', 'steamapps', 'common', 'Delta Force', 'Game', 'DeltaForce', 'Saved', 'ElectraCache')
+        ]
+    },
     {
         id: 'steam',
         name: 'Steam Caches',

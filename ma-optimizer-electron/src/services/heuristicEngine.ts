@@ -55,6 +55,10 @@ export const KNOWN_GAME_PROCESSES: Record<string, string> = {
     'csgo.exe': 'Counter-Strike: Global Offensive',
     'valorant.exe': 'Valorant',
     'riotclientux.exe': 'Riot Client',
+    'deltaforceclient-win64-shipping.exe': 'Delta Force',
+    'marvel-win64-shipping.exe': 'Marvel Rivals',
+    'project8.exe': 'Deadlock',
+    'discovery.exe': 'THE FINALS',
     'fortniteclient-win64-shipping.exe': 'Fortnite',
     'cyberpunk2077.exe': 'Cyberpunk 2077',
     'gta5.exe': 'Grand Theft Auto V',
@@ -216,6 +220,18 @@ export function classifyBottlenecks(
         })
     }
 
+    // 7. Hit Registration Desync / Packet Batching Risk
+    if (isGaming && (networkLatencyMs > 60 || dpcLatencyUs > 400)) {
+        bottlenecks.push({
+            component: 'network',
+            severity: networkLatencyMs > 100 ? 'critical' : 'warning',
+            title: 'Hit Registration & Desync Risk',
+            description: `Elevated network latency (${networkLatencyMs}ms) or driver DPC jitter (${dpcLatencyUs}µs) during gameplay triggers packet batching and bullet hitreg desync.`,
+            metric: `${networkLatencyMs}ms / ${dpcLatencyUs}µs`,
+            actionId: 'OPTIMIZE_NIC_ESPORTS',
+        })
+    }
+
     return bottlenecks
 }
 
@@ -304,8 +320,8 @@ export function evaluateSystemHealth(
         (d.type || '').toLowerCase().includes('nvme') || (d.interfaceType || '').toLowerCase().includes('pcie')
     )
 
-    // 2. Classify Resource Bottlenecks (Rules 1-6)
-    evaluatedRulesCount += 6
+    // 2. Classify Resource Bottlenecks (Rules 1-7)
+    evaluatedRulesCount += 7
     const bottlenecks = classifyBottlenecks(
         cpuLoad,
         cpus,
@@ -612,6 +628,50 @@ export function evaluateSystemHealth(
         category: 'network',
         impact: 'medium',
         actionId: 'ENABLE_TCP_NODELAY',
+    })
+
+    // Rule 31: eSports NIC Interrupt Moderation & Flow Control Calibration
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nic_esports',
+        title: 'Calibrate eSports NIC Interrupt Moderation & Flow Control',
+        description: 'Disabling Interrupt Moderation, Flow Control, and Large Send Offload (LSO) on network adapters forces immediate packet processing, eliminating packet batching jitter in competitive titles.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'OPTIMIZE_NIC_ESPORTS',
+    })
+
+    // Rule 32: True Per-Interface Nagle Elimination
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_true_nagle_killer',
+        title: 'True Per-Interface Nagle Algorithm Killer',
+        description: 'Ensure TcpNoDelay and TcpAckFrequency are explicitly injected into every active interface GUID under Tcpip\\Parameters\\Interfaces to prevent silent packet buffering.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'APPLY_TRUE_NAGLE_KILLER',
+    })
+
+    // Rule 33: DirectX 12 & Unreal Engine Shader Cache Stutter / Bloat
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_shader_cache_clean',
+        title: 'DirectX 12 & Unreal Engine Shader Cache Maintenance',
+        description: 'Pruning corrupted or bloated NVIDIA DXCache, NV_Cache, and Unreal Engine ElectraCache removes micro-stutters and hitching during in-game asset streaming.',
+        category: 'gaming',
+        impact: 'medium',
+        actionId: 'CLEAN_SHADER_CACHE',
+    })
+
+    // Rule 34: Resilient MTU Calibration & Packet Fragmentation Prevention
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_mtu_calibration',
+        title: 'Calibrate Optimal MTU without ICMP Black Hole Drops',
+        description: 'Test and lock network interface MTU against resilient low-latency gateways to prevent silent packet fragmentation and rubberbanding.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'CALIBRATE_MTU',
     })
 
     // Clamp score

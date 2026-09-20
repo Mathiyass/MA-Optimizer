@@ -10,6 +10,7 @@ import { useLogStore } from '../store/logStore'
 
 const tabs = [
     { id: 'bandwidth', label: 'SpeedGuide TCP Tuner' },
+    { id: 'esports', label: 'eSports NIC & Latency' },
     { id: 'basic', label: 'Basic Network' },
     { id: 'advanced', label: 'Advanced TCP' },
     { id: 'dns', label: 'DNS & Routing' },
@@ -85,13 +86,12 @@ function TcpOptimizerTab() {
             await window.api?.network.runNetsh(`int tcp set global rss=${rss ? 'enabled' : 'disabled'}`)
             await window.api?.network.runNetsh(`int tcp set global rsc=${rsc ? 'enabled' : 'disabled'}`)
             
-            // Gaming & low-latency registry tweaks
+            // Gaming & low-latency registry tweaks across system and active interfaces
             await window.api?.registry.set('HKLM', 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile', 'NetworkThrottlingIndex', 4294967295, 'DWord')
             await window.api?.registry.set('HKLM', 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile', 'SystemResponsiveness', 0, 'DWord')
-            await window.api?.registry.set('HKLM', 'SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters', 'TcpNoDelay', 1, 'DWord')
-            await window.api?.registry.set('HKLM', 'SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters', 'TcpAckFrequency', 1, 'DWord')
+            await window.api?.network.applyTcpNoDelayToAllInterfaces()
 
-            addLog(`[SG-TCP] Applied SpeedGuide.net optimal profile for ${bandwidth} Mbps`)
+            addLog(`[SG-TCP] Applied SpeedGuide.net optimal profile for ${bandwidth} Mbps with True Per-Interface Nagle Killer`)
             addNotification('success', `Optimal TCP profile applied for ${bandwidth} Mbps!`)
         } catch (e: any) {
             addNotification('error', `Failed to apply TCP settings: ${e.message}`)
@@ -482,6 +482,298 @@ function DnsTab() {
     )
 }
 
+function EsportsNicTab() {
+    const [adapters, setAdapters] = useState<any[]>([])
+    const [selectedAdapter, setSelectedAdapter] = useState('Ethernet')
+    const [props, setProps] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
+    const [applyingNagle, setApplyingNagle] = useState(false)
+    const [qosPolicies, setQosPolicies] = useState<any[]>([])
+    const [newQosName, setNewQosName] = useState('DeltaForce_QoS')
+    const [newQosExe, setNewQosExe] = useState('DeltaForceClient-Win64-Shipping.exe')
+    const addNotification = useAppStore(s => s.addNotification)
+    const addLog = useLogStore(s => s.addLine)
+
+    const loadNicProps = useCallback(async (adapterName: string) => {
+        setLoading(true)
+        try {
+            const res = await window.api?.network.getNicAdvancedProps(adapterName)
+            setProps(res || [])
+            const policies = await window.api?.network.getQosPolicies()
+            setQosPolicies(policies || [])
+        } catch { }
+        setLoading(false)
+    }, [])
+
+    useEffect(() => {
+        window.api?.network.getAdapters().then((list: any[]) => {
+            setAdapters(list || [])
+            if (list?.length) {
+                const defaultName = list[0].Name || 'Ethernet'
+                setSelectedAdapter(defaultName)
+                loadNicProps(defaultName)
+            }
+        }).catch(() => {})
+    }, [loadNicProps])
+
+    const toggleProp = async (displayName: string, _currentVal: string, targetVal: string) => {
+        setLoading(true)
+        try {
+            const ok = await window.api?.network.setNicAdvancedProp(selectedAdapter, displayName, targetVal)
+            if (ok) {
+                addNotification('success', `Set ${displayName} to ${targetVal}`)
+                addLog(`[NIC] ${displayName} set to ${targetVal} on ${selectedAdapter}`)
+                await loadNicProps(selectedAdapter)
+            } else {
+                addNotification('error', `Failed to set ${displayName}`)
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+        setLoading(false)
+    }
+
+    const handleApplyTrueNagle = async () => {
+        setApplyingNagle(true)
+        try {
+            const res = await window.api?.network.applyTcpNoDelayToAllInterfaces()
+            if (res?.success) {
+                addNotification('success', `True Nagle Killer applied across ${res.applied} interfaces!`)
+                addLog(`[Network] True Nagle Killer injected into ${res.applied} adapter GUIDs`)
+            } else {
+                addNotification('error', 'Failed to apply per-interface Nagle Killer')
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+        setApplyingNagle(false)
+    }
+
+    const handleAddQos = async () => {
+        if (!newQosName || !newQosExe) return
+        try {
+            const ok = await window.api?.network.addQosPolicy(newQosName, newQosExe)
+            if (ok) {
+                addNotification('success', `QoS DSCP 46 Policy created for ${newQosExe}`)
+                const policies = await window.api?.network.getQosPolicies()
+                setQosPolicies(policies || [])
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+    }
+
+    const handleRemoveQos = async (name: string) => {
+        try {
+            const ok = await window.api?.network.removeQosPolicy(name)
+            if (ok) {
+                addNotification('info', `Removed QoS policy ${name}`)
+                const policies = await window.api?.network.getQosPolicies()
+                setQosPolicies(policies || [])
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+    }
+
+    const interruptMod = props.find(p => p.DisplayName === 'Interrupt Moderation')
+    const flowControl = props.find(p => p.DisplayName === 'Flow Control')
+    const lso = props.find(p => p.DisplayName?.includes('Large Send Offload'))
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-[var(--accent-cyan)]" /> eSports NIC Hardware Latency & QoS Engine
+                    </h3>
+                    <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">
+                        Hardware-level interrupt mitigation, 0-queue packet delivery, and Windows QoS DSCP 46 tagging.
+                    </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <select
+                        value={selectedAdapter}
+                        onChange={e => { setSelectedAdapter(e.target.value); loadNicProps(e.target.value) }}
+                        className="px-4 py-2.5 bg-[rgba(255,255,255,0.03)] border border-white/10 rounded-xl text-xs text-white font-medium outline-none cursor-pointer"
+                    >
+                        {adapters.map((a: any) => (
+                            <option key={a.Name || a.name} value={a.Name || a.name}>{a.Name || a.name}</option>
+                        ))}
+                    </select>
+                    <button
+                        onClick={() => loadNicProps(selectedAdapter)}
+                        disabled={loading}
+                        className="p-2.5 bg-[rgba(255,255,255,0.03)] border border-white/10 rounded-xl hover:border-[var(--accent-cyan)] text-white cursor-pointer"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Hardware NIC Properties Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Interrupt Moderation */}
+                <div className="p-6 glass-shell rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Interrupt Moderation</span>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${interruptMod?.DisplayValue === 'Disabled' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/15 border-amber-500/30 text-amber-400'}`}>
+                            {interruptMod?.DisplayValue || 'Unknown'}
+                        </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        Disabling eliminates packet batching. CPU services incoming bullet & position packets the microsecond they hit the ring buffer.
+                    </p>
+                    <button
+                        onClick={() => toggleProp('Interrupt Moderation', interruptMod?.DisplayValue, interruptMod?.DisplayValue === 'Disabled' ? 'Enabled' : 'Disabled')}
+                        disabled={loading}
+                        className={`w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${interruptMod?.DisplayValue === 'Disabled' ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10' : 'bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/40 text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/25'}`}
+                    >
+                        {interruptMod?.DisplayValue === 'Disabled' ? 'Enable Batching (Normal)' : 'Disable (0-Delay eSports)'}
+                    </button>
+                </div>
+
+                {/* Flow Control */}
+                <div className="p-6 glass-shell rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Flow Control</span>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${flowControl?.DisplayValue === 'Disabled' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/15 border-amber-500/30 text-amber-400'}`}>
+                            {flowControl?.DisplayValue || 'Unknown'}
+                        </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        Disabling Flow Control prevents the network adapter from emitting pause frames during heavy bursts, preventing game micro-freezes.
+                    </p>
+                    <button
+                        onClick={() => toggleProp('Flow Control', flowControl?.DisplayValue, flowControl?.DisplayValue === 'Disabled' ? 'Rx & Tx Enabled' : 'Disabled')}
+                        disabled={loading}
+                        className={`w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${flowControl?.DisplayValue === 'Disabled' ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10' : 'bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/40 text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/25'}`}
+                    >
+                        {flowControl?.DisplayValue === 'Disabled' ? 'Enable Flow Control' : 'Disable (Fast UDP)'}
+                    </button>
+                </div>
+
+                {/* Large Send Offload */}
+                <div className="p-6 glass-shell rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Large Send Offload (LSO)</span>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${lso?.DisplayValue === 'Disabled' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/15 border-amber-500/30 text-amber-400'}`}>
+                            {lso?.DisplayValue || 'Unknown'}
+                        </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        Disables hardware packet segmentation on NIC, eliminating packet desynchronization in real-time UDP game netcode.
+                    </p>
+                    <button
+                        onClick={() => toggleProp('Large Send Offload V2 (IPv4)', lso?.DisplayValue, lso?.DisplayValue === 'Disabled' ? 'Enabled' : 'Disabled')}
+                        disabled={loading}
+                        className={`w-full py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${lso?.DisplayValue === 'Disabled' ? 'bg-white/5 border border-white/10 text-white hover:bg-white/10' : 'bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/40 text-[var(--accent-cyan)] hover:bg-[var(--accent-cyan)]/25'}`}
+                    >
+                        {lso?.DisplayValue === 'Disabled' ? 'Enable LSO' : 'Disable LSO (Anti-Desync)'}
+                    </button>
+                </div>
+            </div>
+
+            {/* True Per-Interface Nagle Killer */}
+            <div className="p-6 bg-gradient-to-r from-[rgba(0,255,222,0.05)] to-[rgba(168,85,247,0.05)] rounded-2xl border border-[var(--accent-cyan)]/30 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        <h4 className="text-white text-sm font-black uppercase tracking-wider">True Per-Interface Nagle Killer</h4>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/40">Zero ACK Lag</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] max-w-xl">
+                        Windows enforces <code className="text-[var(--accent-cyan)]">TcpNoDelay</code> and <code className="text-[var(--accent-cyan)]">TcpAckFrequency</code> on individual interface GUID subkeys. This injects it directly into every active network adapter.
+                    </p>
+                </div>
+                <button
+                    onClick={handleApplyTrueNagle}
+                    disabled={applyingNagle}
+                    className="px-6 py-3.5 bg-[var(--accent-cyan)] hover:bg-[#00e6c8] text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(0,255,222,0.3)] whitespace-nowrap cursor-pointer disabled:opacity-40"
+                >
+                    {applyingNagle ? 'Injecting...' : 'Kill Nagle on All NICs'}
+                </button>
+            </div>
+
+            {/* Windows QoS Policy Manager */}
+            <div className="p-6 glass-shell rounded-2xl border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h4 className="text-white text-sm font-black uppercase tracking-wider flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-emerald-400" /> Active Windows QoS Game Policies
+                        </h4>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                            Packets tagged with DSCP 46 (Expedited Forwarding) and 802.1p Priority 7 are transmitted before background traffic.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <input
+                        type="text"
+                        placeholder="Policy Name (e.g. DeltaForce_QoS)"
+                        value={newQosName}
+                        onChange={e => setNewQosName(e.target.value)}
+                        className="flex-1 px-4 py-3 bg-[rgba(0,0,0,0.3)] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-[var(--accent-cyan)] w-full"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Target Process (e.g. DeltaForceClient-Win64-Shipping.exe)"
+                        value={newQosExe}
+                        onChange={e => setNewQosExe(e.target.value)}
+                        className="flex-1 px-4 py-3 bg-[rgba(0,0,0,0.3)] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-[var(--accent-cyan)] w-full"
+                    />
+                    <button
+                        onClick={handleAddQos}
+                        className="px-6 py-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 text-xs font-black uppercase tracking-wider rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                    >
+                        Add QoS Policy
+                    </button>
+                </div>
+
+                <div className="overflow-x-auto mt-4">
+                    <table className="w-full text-left text-xs">
+                        <thead>
+                            <tr className="border-b border-white/10 text-[var(--text-muted)] uppercase tracking-wider">
+                                <th className="pb-3">Policy Name</th>
+                                <th className="pb-3">Target Process</th>
+                                <th className="pb-3">DSCP</th>
+                                <th className="pb-3">Priority</th>
+                                <th className="pb-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {qosPolicies.map((p, idx) => (
+                                <tr key={idx} className="hover:bg-white/[0.02]">
+                                    <td className="py-3 text-white font-bold">{p.name}</td>
+                                    <td className="py-3 text-[var(--accent-cyan)] font-mono">{p.appName || 'All Traffic'}</td>
+                                    <td className="py-3 text-emerald-400 font-bold">{p.dscp} (EF)</td>
+                                    <td className="py-3 text-purple-400 font-bold">{p.priority} (Max)</td>
+                                    <td className="py-3 text-right">
+                                        <button
+                                            onClick={() => handleRemoveQos(p.name)}
+                                            className="px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/25 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {qosPolicies.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="py-6 text-center text-[var(--text-muted)] font-medium">
+                                        No active QoS game policies found. Add one above or boost a game in the Gaming tab.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 function DiagnosticsTab() {
     const [pings, setPings] = useState<Record<string, { ms: number; status: string }>>({})
     const [testing, setTesting] = useState(false)
@@ -548,6 +840,7 @@ export function Network() {
         { label: '🔄 Flush DNS', fn: () => window.api?.network.flushDns() },
         { label: '🔌 Reset Winsock', fn: () => window.api?.network.resetWinsock() },
         { label: '🌐 Reset TCP/IP', fn: () => window.api?.network.resetTcpIp() },
+        { label: '⚡ True Nagle Killer', fn: () => window.api?.network.applyTcpNoDelayToAllInterfaces() },
     ]
 
     return (
@@ -625,6 +918,10 @@ export function Network() {
             {tab === 'bandwidth' ? (
                 <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6 border">
                     <TcpOptimizerTab />
+                </div>
+            ) : tab === 'esports' ? (
+                <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6 border">
+                    <EsportsNicTab />
                 </div>
             ) : tab === 'mtu' ? (
                 <div className="rounded-[2.5rem] p-8 border-white/5 bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl mt-6 border">

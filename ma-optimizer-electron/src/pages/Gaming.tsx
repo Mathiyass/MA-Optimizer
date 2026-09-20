@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi, Plus, X } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -28,6 +28,9 @@ function GearUpBoosterTab() {
     const [pinging, setPinging] = useState(false)
     const [boosting, setBoosting] = useState(false)
     const [boostActive, setBoostActive] = useState(false)
+    const [showAddModal, setShowAddModal] = useState(false)
+    const [customName, setCustomName] = useState('')
+    const [customExe, setCustomExe] = useState('')
     const addNotification = useAppStore(s => s.addNotification)
 
     useEffect(() => {
@@ -83,6 +86,30 @@ function GearUpBoosterTab() {
         }
     }
 
+    const handleAddCustomGame = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!customName.trim() || !customExe.trim()) {
+            addNotification('warning', 'Please provide game title and executable name')
+            return
+        }
+        try {
+            const added = await window.api?.gearup.addCustomGame(customName.trim(), customExe.trim())
+            if (added) {
+                const updatedList = await window.api?.gearup.getCatalog()
+                setCatalog(updatedList || [])
+                setSelectedGame(added.id)
+                setShowAddModal(false)
+                setCustomName('')
+                setCustomExe('')
+                addNotification('success', `Added "${added.name}" to game booster catalog!`)
+            } else {
+                addNotification('error', 'Failed to register custom game')
+            }
+        } catch {
+            addNotification('error', 'Error adding custom game')
+        }
+    }
+
     const currentGame = catalog.find(g => g.id === selectedGame)
 
     return (
@@ -95,13 +122,85 @@ function GearUpBoosterTab() {
                     <p className="text-[var(--text-muted)] text-xs mt-1">Direct game server routing, packet loss prevention, and QoS DSCP 46 prioritization.</p>
                 </div>
 
-                <button
-                    onClick={handleDownloadBoost}
-                    className="px-6 py-3 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] font-black uppercase text-xs tracking-widest hover:bg-[#00FFDE]/20 transition-all rounded-2xl border flex items-center gap-2"
-                >
-                    <Download className="w-4 h-4" /> Accelerate Launcher Downloads
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="px-5 py-3 glass-shell border border-white/10 text-white font-black uppercase text-xs tracking-widest hover:border-[var(--accent-cyan)] hover:text-[var(--accent-cyan)] transition-all rounded-2xl flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" /> Add Custom Game
+                    </button>
+                    <button
+                        onClick={handleDownloadBoost}
+                        className="px-6 py-3 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] font-black uppercase text-xs tracking-widest hover:bg-[#00FFDE]/20 transition-all rounded-2xl border flex items-center gap-2"
+                    >
+                        <Download className="w-4 h-4" /> Accelerate Launcher Downloads
+                    </button>
+                </div>
             </div>
+
+            {/* Add Custom Game Modal */}
+            <AnimatePresence>
+                {showAddModal && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="p-6 rounded-[2rem] border border-[var(--accent-cyan)]/30 bg-[#0c121e]/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] relative"
+                    >
+                        <button
+                            onClick={() => setShowAddModal(false)}
+                            className="absolute top-6 right-6 text-white/50 hover:text-white"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h4 className="text-white text-base font-black uppercase tracking-wider mb-2">Add Custom Game Target</h4>
+                        <p className="text-[var(--text-muted)] text-xs mb-6">
+                            Specify the game name and process executable. MA-Optimizer will apply direct DSCP 46 QoS routing, dynamic affinity, and eSports network bypass.
+                        </p>
+                        <form onSubmit={handleAddCustomGame} className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-[var(--accent-cyan)] uppercase tracking-wider mb-2">Game Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Delta Force, Warzone, Valorant"
+                                        value={customName}
+                                        onChange={e => setCustomName(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white text-sm focus:border-[var(--accent-cyan)] outline-none"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[var(--accent-cyan)] uppercase tracking-wider mb-2">Executable Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. DeltaForceClient-Win64-Shipping.exe"
+                                        value={customExe}
+                                        onChange={e => setCustomExe(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white text-sm font-mono focus:border-[var(--accent-cyan)] outline-none"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddModal(false)}
+                                    className="px-5 py-2.5 rounded-xl border border-white/10 text-white/70 hover:text-white text-xs font-bold"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2.5 rounded-xl bg-[var(--accent-cyan)] text-black font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,222,0.3)] hover:opacity-90 transition-opacity"
+                                >
+                                    Register & Boost
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Game Selector Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
