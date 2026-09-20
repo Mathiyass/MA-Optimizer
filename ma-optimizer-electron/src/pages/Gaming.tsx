@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi, Plus, X } from 'lucide-react'
+import { Gamepad2, Zap, Loader2, Download, ShieldCheck, Activity, Globe, Wifi, Plus, X, Monitor, Shield, Trash2 } from 'lucide-react'
 import { TweakCard } from '../components/ui/TweakCard'
 import { TabGroup } from '../components/ui/TabGroup'
 import { useTweak } from '../hooks/useTweak'
@@ -28,10 +28,13 @@ function GearUpBoosterTab() {
     const [pinging, setPinging] = useState(false)
     const [boosting, setBoosting] = useState(false)
     const [boostActive, setBoostActive] = useState(false)
+    const [safeMode, setSafeMode] = useState(true)
+    const [syncingFps, setSyncingFps] = useState(false)
     const [showAddModal, setShowAddModal] = useState(false)
     const [customName, setCustomName] = useState('')
     const [customExe, setCustomExe] = useState('')
     const addNotification = useAppStore(s => s.addNotification)
+    const addLog = useLogStore(s => s.addLine)
 
     useEffect(() => {
         window.api?.gearup.getCatalog().then((list: any[]) => {
@@ -58,12 +61,13 @@ function GearUpBoosterTab() {
         try {
             const target = catalog.find(g => g.id === selectedGame)
             if (target) {
-                await window.api?.gearup.enableQosRouting(target.exe)
+                await window.api?.gearup.enableQosRouting(target.exe, safeMode)
             }
-            const ok = await window.api?.gearup.boostGame(selectedGame)
+            const ok = await window.api?.gearup.boostGame(selectedGame, safeMode)
             if (ok) {
                 setBoostActive(true)
-                addNotification('success', `Game Boost engaged for ${target?.name || 'game'}! Ping & RAM optimized.`)
+                addNotification('success', `Game Boost engaged for ${target?.name || 'game'}! (${safeMode ? 'ONT-Safe Mode' : 'Aggressive DSCP 46'})`)
+                addLog(`[GearUp] Boost engaged for ${target?.name || 'game'} (safeMode=${safeMode})`)
             }
         } catch {
             addNotification('error', 'Game boost failed')
@@ -83,6 +87,36 @@ function GearUpBoosterTab() {
             addNotification('success', 'Steam / Epic Games download acceleration enabled!')
         } catch {
             addNotification('error', 'Download booster failed')
+        }
+    }
+
+    const handleSyncFps = async () => {
+        setSyncingFps(true)
+        try {
+            const res = await window.api?.gearup.syncDisplayRefreshRate()
+            if (res?.success) {
+                addNotification('success', `Synchronized Unreal FPS cap to ${res.refreshRate} Hz monitor refresh rate!`)
+                addLog(`[Display] Unreal Engine GameUserSettings FrameRateLimit set to ${res.refreshRate}`)
+            } else {
+                addNotification('warning', 'Could not locate Unreal Engine GameUserSettings.ini')
+            }
+        } catch (e: any) {
+            addNotification('error', `FPS sync failed: ${e.message}`)
+        }
+        setSyncingFps(false)
+    }
+
+    const handlePurgeQos = async () => {
+        try {
+            const ok = await window.api?.gearup.purgeAllQosPolicies()
+            if (ok) {
+                addNotification('success', 'Purged all NetQosPolicy rules — ISP/ONT drop protection cleared!')
+                addLog('[GearUp] NetQosPolicy rules purged successfully')
+            } else {
+                addNotification('error', 'Failed to purge QoS policies')
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
         }
     }
 
@@ -119,10 +153,18 @@ function GearUpBoosterTab() {
                     <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
                         <Globe className="w-5 h-5 text-[var(--accent-cyan)]" /> Multi-Path Network & FPS Booster
                     </h3>
-                    <p className="text-[var(--text-muted)] text-xs mt-1">Direct game server routing, packet loss prevention, and QoS DSCP 46 prioritization.</p>
+                    <p className="text-[var(--text-muted)] text-xs mt-1">Direct game server routing, packet loss prevention, and ONT-safe low latency prioritization.</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={handleSyncFps}
+                        disabled={syncingFps}
+                        className="px-5 py-3 glass-shell border border-white/10 text-white font-black uppercase text-xs tracking-widest hover:border-purple-400 hover:text-purple-300 transition-all rounded-2xl flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                    >
+                        {syncingFps ? <Loader2 className="w-4 h-4 animate-spin" /> : <Monitor className="w-4 h-4 text-purple-400" />}
+                        Sync FPS to Monitor Hz
+                    </button>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="px-5 py-3 glass-shell border border-white/10 text-white font-black uppercase text-xs tracking-widest hover:border-[var(--accent-cyan)] hover:text-[var(--accent-cyan)] transition-all rounded-2xl flex items-center gap-2"
@@ -133,7 +175,7 @@ function GearUpBoosterTab() {
                         onClick={handleDownloadBoost}
                         className="px-6 py-3 bg-[#00FFDE]/10 border-[#00FFDE]/30 text-[#00FFDE] font-black uppercase text-xs tracking-widest hover:bg-[#00FFDE]/20 transition-all rounded-2xl border flex items-center gap-2"
                     >
-                        <Download className="w-4 h-4" /> Accelerate Launcher Downloads
+                        <Download className="w-4 h-4" /> Accelerate Downloads
                     </button>
                 </div>
             </div>
@@ -225,11 +267,31 @@ function GearUpBoosterTab() {
                             <div className="text-2xl font-black text-white">{currentGame.name}</div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-bold text-white hover:border-[var(--accent-cyan)]/50 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={safeMode}
+                                    onChange={e => setSafeMode(e.target.checked)}
+                                    className="w-4 h-4 rounded border-white/20 checked:bg-[var(--accent-cyan)]"
+                                />
+                                <span className={safeMode ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+                                    {safeMode ? 'ONT-Safe Mode (No DSCP Drop)' : 'Raw DSCP 46 Tagging'}
+                                </span>
+                            </label>
+
+                            <button
+                                onClick={handlePurgeQos}
+                                className="px-3 py-2 glass-shell text-xs text-red-400 border border-red-500/20 hover:border-red-500/50 font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer"
+                                title="Purge QoS if your ISP/ONT drops tagged packets"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" /> Purge QoS
+                            </button>
+
                             <button
                                 onClick={() => testPingNodes(selectedGame)}
                                 disabled={pinging}
-                                className="px-4 py-2.5 glass-shell text-xs text-white font-bold rounded-xl flex items-center gap-2 hover:bg-white/10"
+                                className="px-4 py-2.5 glass-shell text-xs text-white font-bold rounded-xl flex items-center gap-2 hover:bg-white/10 cursor-pointer"
                             >
                                 <Activity className={`w-4 h-4 ${pinging ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} /> Re-ping
                             </button>

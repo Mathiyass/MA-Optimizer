@@ -126,15 +126,18 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 34, `Should evaluate >= 34 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 37, `Should evaluate >= 37 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-34 recommendations exist
+            // Verify Rules 31-37 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
             assert.ok(recIds.includes('rec_shader_cache_clean'), 'Should include Shader Cache Clean rule')
             assert.ok(recIds.includes('rec_mtu_calibration'), 'Should include MTU calibration rule')
+            assert.ok(recIds.includes('rec_hitreg_afd'), 'Should include Hitreg AFD buffer rule')
+            assert.ok(recIds.includes('rec_game_firewall'), 'Should include Game Firewall Whitelist rule')
+            assert.ok(recIds.includes('rec_ont_safe_qos'), 'Should include ONT-Safe QoS rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

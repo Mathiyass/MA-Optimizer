@@ -549,6 +549,60 @@ function EsportsNicTab() {
         setApplyingNagle(false)
     }
 
+    const [applyingHitreg, setApplyingHitreg] = useState(false)
+    const [healingFirewall, setHealingFirewall] = useState(false)
+    const [purgingQos, setPurgingQos] = useState(false)
+
+    const handleApplyHitreg = async () => {
+        setApplyingHitreg(true)
+        try {
+            const res = await window.api?.network.applyHitregOptimization()
+            if (res?.success) {
+                addNotification('success', 'eSports Hitreg & AFD 256KB UDP Buffers applied!')
+                addLog(`[HitReg] AFD UDP Buffers (256KB) + NIC Idle Restriction configured`)
+            } else {
+                addNotification('error', 'Failed to apply hitreg optimization')
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+        setApplyingHitreg(false)
+    }
+
+    const handleHealFirewall = async () => {
+        setHealingFirewall(true)
+        try {
+            const res = await window.api?.network.healGameFirewall()
+            if (res?.success) {
+                addNotification('success', 'Game, CEF & AntiCheatExpert firewall rules healed!')
+                addLog(`[Firewall] Removed block rules and unblocked ACE / CEF processes`)
+            } else {
+                addNotification('error', 'Failed to heal firewall rules')
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+        setHealingFirewall(false)
+    }
+
+    const handlePurgeAllQos = async () => {
+        setPurgingQos(true)
+        try {
+            const ok = await window.api?.network.purgeAllQosPolicies()
+            if (ok) {
+                addNotification('success', 'Purged all NetQosPolicy rules — ONT fiber connection unblocked!')
+                addLog(`[QoS] All NetQosPolicy rules purged`)
+                const policies = await window.api?.network.getQosPolicies()
+                setQosPolicies(policies || [])
+            } else {
+                addNotification('error', 'Failed to purge QoS policies')
+            }
+        } catch (e: any) {
+            addNotification('error', e.message)
+        }
+        setPurgingQos(false)
+    }
+
     const handleAddQos = async () => {
         if (!newQosName || !newQosExe) return
         try {
@@ -608,6 +662,56 @@ function EsportsNicTab() {
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[var(--accent-cyan)]' : ''}`} />
                     </button>
+                </div>
+            </div>
+
+            {/* eSports Hit Registration & Rubberbanding Elimination Suite */}
+            <div className="p-6 bg-gradient-to-br from-[rgba(0,255,222,0.08)] via-[rgba(168,85,247,0.05)] to-transparent rounded-2xl border border-[var(--accent-cyan)]/30 space-y-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-[var(--accent-cyan)]" />
+                            <h4 className="text-white text-base font-black uppercase tracking-wider">eSports Hit Registration & Anti-Rubberband Suite</h4>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/40">v11.3 Pro</span>
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-2xl leading-relaxed">
+                            Fixes ghost bullets and position rollbacks caused by Winsock UDP buffer overflows and NIC micro-sleeps. Expands AFD datagram windows to 256KB, locks NIC out of idle sleep, disables packet batching RSC, and unblocks Unreal CEF / Anti-Cheat traffic.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            onClick={handleHealFirewall}
+                            disabled={healingFirewall}
+                            className="px-5 py-3 glass-shell border border-white/10 hover:border-emerald-500/50 text-emerald-400 font-black text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                        >
+                            {healingFirewall ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                            Heal Firewall & Anti-Cheat
+                        </button>
+                        <button
+                            onClick={handleApplyHitreg}
+                            disabled={applyingHitreg}
+                            className="px-6 py-3 bg-[var(--accent-cyan)] hover:bg-[#00e6c8] text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_25px_rgba(0,255,222,0.4)] flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                        >
+                            {applyingHitreg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                            Apply Hitreg & AFD 256KB
+                        </button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)]">Winsock AFD Buffer</div>
+                        <div className="text-white font-mono font-bold mt-0.5">256 KB FastSend (Zero Drop)</div>
+                    </div>
+                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)]">NIC Idle Restriction</div>
+                        <div className="text-white font-mono font-bold mt-0.5">PnPCapabilities=24 (Always Awake)</div>
+                    </div>
+                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                        <div className="text-[10px] uppercase font-black tracking-widest text-[var(--text-muted)]">Anti-Cheat Port Guard</div>
+                        <div className="text-white font-mono font-bold mt-0.5">ACE & CEF In/Out Allowed</div>
+                    </div>
                 </div>
             </div>
 
@@ -697,15 +801,24 @@ function EsportsNicTab() {
 
             {/* Windows QoS Policy Manager */}
             <div className="p-6 glass-shell rounded-2xl border border-white/5 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                         <h4 className="text-white text-sm font-black uppercase tracking-wider flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-emerald-400" /> Active Windows QoS Game Policies
+                            <Shield className="w-4 h-4 text-emerald-400" /> Windows QoS Game Policies
                         </h4>
                         <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                            Packets tagged with DSCP 46 (Expedited Forwarding) and 802.1p Priority 7 are transmitted before background traffic.
+                            QoS prioritization tags game packets. If your ISP/ONT drops DSCP 46 packets, use Purge All to unblock your connection.
                         </p>
                     </div>
+
+                    <button
+                        onClick={handlePurgeAllQos}
+                        disabled={purgingQos}
+                        className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/25 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                    >
+                        {purgingQos ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        Purge All QoS Policies (Fix ONT Drop)
+                    </button>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3">

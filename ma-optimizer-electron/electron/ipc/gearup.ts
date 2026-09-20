@@ -155,27 +155,79 @@ ipcMain.handle('gearup:pingGameNodes', async (_, gameId: string) => {
     return updatedNodes
 })
 
-// Enable Windows Network QoS (Quality of Service) DSCP 46 Expedited Forwarding for low gaming ping
-ipcMain.handle('gearup:enableQosRouting', async (_, gameExe: string) => {
+// Enable Windows Network QoS - Supports ONT-Safe (Untagged) and Enterprise (DSCP 46)
+ipcMain.handle('gearup:enableQosRouting', async (_, gameExe: string, safeMode: boolean = true) => {
     try {
         const safeExe = gameExe.replace(/[^a-zA-Z0-9._-]/g, '')
-        const ps = `New-NetQosPolicy -Name 'GearUP_GameQoS_${safeExe}' -AppPathNameMatchCondition '${safeExe}' -DSCPAction 46 -PriorityValue 7 -ErrorAction SilentlyContinue`
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 }).catch(() => {})
-        sendLog(`[GearUP Booster] Enabled Router QoS DSCP 46 packet prioritization for ${gameExe}`)
-        return true
+        if (safeMode) {
+            // In Safe Mode, we deliberately avoid DSCP 46 / 802.1p 7 tagging because consumer fiber GPON ONTs drop tagged packets
+            const psRemove = `Remove-NetQosPolicy -Name 'GearUP_GameQoS_${safeExe}' -Confirm:$false -ErrorAction SilentlyContinue; Remove-NetQosPolicy -Name 'MA_Multipath_${safeExe}' -Confirm:$false -ErrorAction SilentlyContinue`
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psRemove], { timeout: 5000 }).catch(() => {})
+            sendLog(`[GearUP Booster] Enabled ONT-Safe routing for ${gameExe} (Untagged clean transport; protects against fiber ONT packet drops)`)
+            return true
+        } else {
+            // Enterprise LAN mode: applies DSCP 46 Expedited Forwarding
+            const ps = `New-NetQosPolicy -Name 'GearUP_GameQoS_${safeExe}' -AppPathNameMatchCondition '${safeExe}' -DSCPAction 46 -PriorityValue 7 -ErrorAction SilentlyContinue`
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 }).catch(() => {})
+            sendLog(`[GearUP Booster] Enabled Enterprise Router QoS DSCP 46 packet prioritization for ${gameExe}`)
+            return true
+        }
     } catch (e: any) {
-        sendError(`[GearUP Booster] QoS policy failed: ${e.message}`)
+        sendError(`[GearUP Booster] QoS policy configuration failed: ${e.message}`)
         return false
     }
 })
 
-// One-click Game Boost (Purge RAM, set process priority, apply QoS, stop telemetry services)
-ipcMain.handle('gearup:boostGame', async (_, gameId: string) => {
+// Purge all orphaned or conflicting NetQosPolicy rules
+ipcMain.handle('gearup:purgeAllQosPolicies', async () => {
+    try {
+        const ps = `Get-NetQosPolicy -ErrorAction SilentlyContinue | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue`
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 }).catch(() => {})
+        sendLog('[GearUP Booster] Successfully purged all active Windows QoS policies to eliminate ONT packet drop traps.')
+        return true
+    } catch (e: any) {
+        sendError(`[GearUP Booster] Failed to purge QoS policies: ${e.message}`)
+        return false
+    }
+})
+
+// Synchronize in-game Frame Rate Limit with physical display refresh rate
+ipcMain.handle('gearup:syncDisplayRefreshRate', async () => {
+    try {
+        const ps = `
+$res = Get-CimInstance Win32_VideoController -ErrorAction SilentlyContinue | Select-Object -ExpandProperty CurrentRefreshRate -First 1
+if (-not $res -or $res -le 30) { $res = 200 } # default competitive baseline
+
+# Scan common Unreal Engine config paths (Delta Force, etc.)
+$dfConfig = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Delta Force\\Game\\DeltaForce\\Saved\\Config\\WindowsClient\\GameUserSettings.ini"
+$updated = 0
+if (Test-Path $dfConfig) {
+    $content = Get-Content $dfConfig -Raw
+    if ($content -match 'FrameRateLimit=') {
+        $content = $content -replace 'FrameRateLimit=[0-9.]+', "FrameRateLimit=$res.000000"
+        Set-Content -Path $dfConfig -Value $content -NoNewline
+        $updated++
+    }
+}
+@{ RefreshRate = $res; UpdatedConfigs = $updated } | ConvertTo-Json
+`
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 })
+        const parsed = JSON.parse(stdout.trim())
+        sendLog(`[GearUP Booster] Synchronized game engine frame cap to ${parsed.RefreshRate} Hz display (updated ${parsed.UpdatedConfigs} titles).`)
+        return { success: true, refreshRate: parsed.RefreshRate, updatedConfigs: parsed.UpdatedConfigs }
+    } catch (e: any) {
+        sendError(`[GearUP Booster] Failed to sync display refresh rate: ${e.message}`)
+        return { success: false, refreshRate: 200, updatedConfigs: 0 }
+    }
+})
+
+// One-click Game Boost (Purge RAM, set process priority, apply safe routing, stop telemetry services)
+ipcMain.handle('gearup:boostGame', async (_, gameId: string, safeMode: boolean = true) => {
     const game = GAME_CATALOG.find(g => g.id === gameId)
     if (!game) return false
 
     try {
-        sendLog(`[GearUP Booster] Initializing Ultra-Low Latency Game Boost for ${game.name}...`)
+        sendLog(`[GearUP Booster] Initializing Ultra-Low Latency Game Boost for ${game.name} (${safeMode ? 'ONT-Safe Mode' : 'Enterprise LAN Mode'})...`)
 
         // 1. Set MA Power Plan or Ultimate Performance Power Scheme
         const psPower = `
@@ -192,11 +244,17 @@ if ($maPlan) { powercfg /setactive $maPlan } else { powercfg /setactive 8c5e7fda
         const psPriority = `Get-Process -Name '${game.exe.replace('.exe', '')}' -ErrorAction SilentlyContinue | ForEach-Object { $_.PriorityClass = 'High' }`
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psPriority], { timeout: 5000 }).catch(() => {})
 
-        // 4. Set TCP/IP Socket Low Latency
-        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'netsh int tcp set global autotuninglevel=normal; netsh int tcp set global congestionprovider=cubic'], { timeout: 5000 }).catch(() => {})
+        // 4. Set TCP/IP Socket Low Latency & Ensure RSC is Disabled
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', 'netsh int tcp set global autotuninglevel=normal; netsh int tcp set global congestionprovider=cubic; netsh int tcp set global rsc=disabled'], { timeout: 5000 }).catch(() => {})
+
+        // 5. Apply Safe QoS Routing (protects against ONT packet dropping)
+        if (safeMode) {
+            const psRemove = `Remove-NetQosPolicy -Name 'GearUP_GameQoS_${game.exe}' -Confirm:$false -ErrorAction SilentlyContinue; Remove-NetQosPolicy -Name 'MA_Multipath_${game.exe}' -Confirm:$false -ErrorAction SilentlyContinue`
+            await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', psRemove], { timeout: 5000 }).catch(() => {})
+        }
 
         activeBoostedGame = game.id
-        sendLog(`[GearUP Booster] ${game.name} Boost ACTIVE: Ping optimized, RAM purged, QoS packet prioritization engaged.`)
+        sendLog(`[GearUP Booster] ${game.name} Boost ACTIVE: Ping optimized, RAM purged, zero-drop packet transport engaged.`)
         return true
     } catch (e: any) {
         sendError(`[GearUP Booster] Failed to boost ${game.name}: ${e.message}`)
@@ -217,7 +275,7 @@ ipcMain.handle('gearup:boostDownloads', async () => {
         const ps = `
 netsh int tcp set global autotuninglevel=normal
 netsh int tcp set global rss=enabled
-netsh int tcp set global rsc=enabled
+netsh int tcp set global rsc=disabled
 Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters' -Name 'GlobalMaxTcpWindowSize' -Value 65535 -Type DWord -ErrorAction SilentlyContinue
 `
         await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 8000 })

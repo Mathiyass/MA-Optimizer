@@ -106,12 +106,12 @@
   </tr>
   <tr>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #00FFDE;">⚡ eSports Low-Latency NIC Driver Engine</h3>
-      <p>Direct NIC driver hardware toggle: disables <em>Interrupt Moderation</em>, <em>Flow Control</em>, and <em>Large Send Offload (LSO)</em> to eliminate packet batching and bullet hitreg desync in competitive shooters.</p>
+      <h3 style="color: #00FFDE;">⚡ eSports Hitreg & Winsock AFD Buffer Suite</h3>
+      <p>Eliminates ghost bullets and rubberbanding desync in competitive shooters (Delta Force, Apex, Warzone, CS2). Configures 256KB AFD UDP socket queues, locks NIC out of low-power sleep (PnPCapabilities=24), disables RSC, and auto-heals Anti-Cheat (ACE, EAC, Vanguard) firewall rules.</p>
     </td>
     <td width="50%" valign="top" style="padding: 20px;">
-      <h3 style="color: #00ffff;">🎯 True Per-Interface Nagle Killer &amp; 2026 Game Profiles</h3>
-      <p>Injects <code>TcpNoDelay</code> and <code>TcpAckFrequency</code> into active network interface GUIDs. Includes zero-ping server routing for <strong>Delta Force</strong>, <strong>Marvel Rivals</strong>, <strong>Deadlock</strong>, and <strong>THE FINALS</strong> plus DX12/NV_Cache shader cleaning.</p>
+      <h3 style="color: #00ffff;">🎯 ONT-Safe Game Booster & Display Hz Sync</h3>
+      <p>Protects consumer fiber connections (GPON ONTs / CGNAT) from packet dropping caused by rogue DSCP 46 tagging. Automatically queries monitor refresh rate (e.g. 200 Hz) and synchronizes Unreal Engine GameUserSettings FrameRateLimit for zero tearing.</p>
     </td>
   </tr>
 </table>
@@ -225,8 +225,8 @@ irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" 
 ### 📦 Manual Install
 
 If you prefer to install things manually:
-1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases/tag/v11.2.0) page.
-2. Download `v11.2.MA-Optimizer.Installer.Setup.exe` (Installer) or `v11.2.MA-Optimizer.Portable.exe` (Portable).
+1. Navigate to the [Releases](https://github.com/Mathiyass/MA-Optimizer/releases/tag/v11.3.0) page.
+2. Download `v11.3.MA-Optimizer.Installer.Setup.exe` (Installer) or `v11.3.MA-Optimizer.Portable.exe` (Portable).
 3. Run the application (Administrator privileges are required for system tweaks to take effect).
 
 ---

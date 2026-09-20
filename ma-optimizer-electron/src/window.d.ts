@@ -71,6 +71,9 @@ export interface WindowApi {
         getQosPolicies: () => Promise<Array<{ name: string; appName: string; dscp: number; priority: number }>>
         addQosPolicy: (name: string, exeName: string) => Promise<boolean>
         removeQosPolicy: (name: string) => Promise<boolean>
+        applyHitregOptimization: () => Promise<{ success: boolean; message: string }>
+        healGameFirewall: () => Promise<{ success: boolean; removedBlocks: number }>
+        purgeAllQosPolicies: () => Promise<boolean>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>
@@ -170,11 +173,13 @@ export interface WindowApi {
     gearup: {
         getCatalog: () => Promise<any[]>
         pingGameNodes: (gameId: string) => Promise<any[]>
-        enableQosRouting: (gameExe: string) => Promise<boolean>
-        boostGame: (gameId: string) => Promise<boolean>
+        enableQosRouting: (gameExe: string, safeMode?: boolean) => Promise<boolean>
+        boostGame: (gameId: string, safeMode?: boolean) => Promise<boolean>
         stopBoost: () => Promise<boolean>
         boostDownloads: () => Promise<boolean>
         addCustomGame: (name: string, exe: string) => Promise<any>
+        purgeAllQosPolicies: () => Promise<boolean>
+        syncDisplayRefreshRate: () => Promise<{ success: boolean; refreshRate: number; updatedConfigs: number }>
     }
     hone: {
         enableMsiMode: () => Promise<boolean>

@@ -193,9 +193,9 @@ export function classifyBottlenecks(
             component: 'network',
             severity: isGaming ? 'critical' : 'warning',
             title: 'High Network Latency',
-            description: `Measured ping is ${networkLatencyMs}ms. Recommended to apply QoS DSCP packet prioritization.`,
+            description: `Measured ping is ${networkLatencyMs}ms. Recommended to apply ONT-Safe Game Boost and Winsock datagram buffer expansion.`,
             metric: `${networkLatencyMs}ms Ping`,
-            actionId: 'ENABLE_QOS_DSCP',
+            actionId: 'APPLY_HITREG_GUARDIAN',
         })
     }
 
@@ -672,6 +672,39 @@ export function evaluateSystemHealth(
         category: 'network',
         impact: 'medium',
         actionId: 'CALIBRATE_MTU',
+    })
+
+    // Rule 35: eSports Hit Registration & Winsock AFD Datagram Queue Expansion
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_hitreg_afd',
+        title: 'eSports Hit Registration & Winsock UDP Queue Expansion',
+        description: 'Enforce NIC power down restriction (*IdleRestriction=1, PnPCapabilities=24), strip 802.1p VLAN tags, disable global TCP RSC, and expand Winsock AFD datagram queues to 256 KB to eliminate bullet registration desync.',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'APPLY_HITREG_GUARDIAN',
+    })
+
+    // Rule 36: Game Firewall & Anti-Cheat Subprocess Guardian
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_game_firewall',
+        title: 'Game Firewall & Anti-Cheat Whitelist Audit',
+        description: 'Scan Windows Firewall for silent block rules targeting game executables, UnrealCEFSubProcess, and anti-cheats (ACE, EAC, BattlEye, Vanguard), ensuring clean token exchange and connection.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'HEAL_GAME_FIREWALL',
+    })
+
+    // Rule 37: ONT-Safe QoS Routing & Orphan Policy Elimination
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_ont_safe_qos',
+        title: 'ONT-Safe Game Routing & QoS Policy Cleaner',
+        description: 'Ensure game routing avoids DSCP 46 / 802.1p Priority 7 headers on consumer fiber GPON ONTs (which drop tagged packets), and purge orphaned NetQosPolicy rules.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'PURGE_STALE_QOS',
     })
 
     // Clamp score

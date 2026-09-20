@@ -363,5 +363,86 @@ ipcMain.handle('network:removeQosPolicy', async (_, policyName: string) => {
     }
 })
 
+// eSports Hit Registration, NIC Sleep Kill & Winsock Kernel AFD Datagram Buffering
+ipcMain.handle('network:applyHitregOptimization', async () => {
+    try {
+        const ps = `
+Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | ForEach-Object {
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Packet Priority & VLAN' -DisplayValue 'Packet Priority & VLAN Disabled' -ErrorAction SilentlyContinue
+    Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Idle power down restriction' -DisplayValue 'Enabled' -ErrorAction SilentlyContinue
+}
+
+$adaptersKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e972-e325-11ce-bfc1-08002be10318}'
+Get-ChildItem $adaptersKey -ErrorAction SilentlyContinue | ForEach-Object {
+    $props = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+    if ($props.DriverDesc) {
+        Set-ItemProperty -Path $_.PSPath -Name 'PnPCapabilities' -Value 24 -Type DWord -Force -ErrorAction SilentlyContinue
+    }
+}
+
+netsh int tcp set global rsc=disabled | Out-Null
+
+$afdKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Afd\\Parameters'
+New-Item -Path $afdKey -Force -ErrorAction SilentlyContinue | Out-Null
+Set-ItemProperty -Path $afdKey -Name 'FastSendDatagramThreshold' -Value 1024 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $afdKey -Name 'DefaultReceiveWindow' -Value 262144 -Type DWord -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $afdKey -Name 'DefaultSendWindow' -Value 262144 -Type DWord -Force -ErrorAction SilentlyContinue
+
+Clear-DnsClientCache -ErrorAction SilentlyContinue
+`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network] eSports Hit Registration & UDP Buffer optimization applied successfully.')
+        return { success: true, message: 'Hit registration, NIC sleep kill, and Winsock buffers successfully optimized.' }
+    } catch (e: any) {
+        sendError(`[Network] Hitreg optimization failed: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// Game Firewall & Anti-Cheat Healer
+ipcMain.handle('network:healGameFirewall', async () => {
+    try {
+        const ps = `
+$blockedRules = Get-NetFirewallRule -Action Block -Enabled True -ErrorAction SilentlyContinue | Where-Object {
+    $_.DisplayName -match 'DeltaForce|UnrealCEF|Steam|Epic|AntiCheat|ACE|SGuard|EasyAntiCheat|BattlEye|Riot|Vanguard' -or
+    (Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $_ -ErrorAction SilentlyContinue).Program -match 'DeltaForce|UnrealCEF|SGuard|ACE-Service|EasyAntiCheat|BEService'
+}
+$removed = 0
+foreach ($r in $blockedRules) {
+    Remove-NetFirewallRule -Name $r.Name -ErrorAction SilentlyContinue
+    $removed++
+}
+
+$acePath = 'C:\\Program Files\\AntiCheatExpert'
+if (Test-Path $acePath) {
+    Get-ChildItem -Path $acePath -Filter '*.exe' -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+        New-NetFirewallRule -DisplayName "MA_Allow_$($_.BaseName)" -Direction Inbound -Program $_.FullName -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
+        New-NetFirewallRule -DisplayName "MA_Allow_$($_.BaseName)_Out" -Direction Outbound -Program $_.FullName -Action Allow -Profile Any -ErrorAction SilentlyContinue | Out-Null
+    }
+}
+$removed
+`
+        const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const removedCount = parseInt(result.trim()) || 0
+        sendLog(`[Firewall] Scanned and purged ${removedCount} blocking firewall rules; whitelisted anti-cheat services.`)
+        return { success: true, removedBlocks: removedCount }
+    } catch (e: any) {
+        sendError(`[Firewall] Failed to heal firewall: ${e.message}`)
+        return { success: false, removedBlocks: 0 }
+    }
+})
+
+ipcMain.handle('network:purgeAllQosPolicies', async () => {
+    try {
+        const ps = `Get-NetQosPolicy -ErrorAction SilentlyContinue | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network] Purged all active Windows NetQosPolicy rules to eliminate ONT packet-dropping traps.')
+        return true
+    } catch (e: any) {
+        sendError(`[Network] Failed to purge QoS policies: ${e.message}`)
+        return false
+    }
+})
+
 
 
