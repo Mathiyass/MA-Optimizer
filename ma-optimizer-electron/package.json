@@ -1,6 +1,6 @@
 {
   "name": "ma-optimizer",
-  "version": "11.6.0",
+  "version": "12.0.0",
   "description": "MA-Optimizer — The Ultimate Windows System Optimizer",
   "author": "Mathisha Angirasa",
   "homepage": "https://maportfolio.mathiya.workers.dev",
@@ -76,11 +76,11 @@
       "allowToChangeInstallationDirectory": true,
       "runAfterFinish": true,
       "warningsAsErrors": false,
-      "artifactName": "v11.6.MA-Optimizer.Installer.Setup.${ext}"
+      "artifactName": "v12.0.MA-Optimizer.Installer.Setup.${ext}"
     },
     "portable": {
       "requestExecutionLevel": "admin",
-      "artifactName": "v11.6.MA-Optimizer.Portable.${ext}"
+      "artifactName": "v12.0.MA-Optimizer.Portable.${ext}"
     }
   },
   "allowScripts": {

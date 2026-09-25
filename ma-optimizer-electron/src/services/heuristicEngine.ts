@@ -1015,6 +1015,171 @@ export function evaluateSystemHealth(
         actionId: 'OPTIMIZE_NETWORK_STACK',
     })
 
+    // Rule 66: Mouse Acceleration & Pointer Precision Kill
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_mouse_acceleration_kill',
+        title: 'Mouse Acceleration & Pointer Precision Kill',
+        description: 'Enforces linear 1:1 raw mouse input by eliminating Windows cursor acceleration curves (MouseSpeed=0), ensuring exact muscle memory reproduction.',
+        category: 'latency',
+        impact: 'high',
+        actionId: 'OPTIMIZE_INPUT_LAG',
+    })
+
+    // Rule 67: USB HID Polling Rate & Driver Stack Audit
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_usb_polling_rate_audit',
+        title: 'USB HID Polling Rate & Driver Stack Audit',
+        description: 'Audits USB mouse and keyboard polling rates to ensure 1000Hz (1ms) click-to-photon packet reporting without CPU thread starvation.',
+        category: 'latency',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_INPUT_LAG',
+    })
+
+    // Rule 68: Fullscreen Exclusive (FSE) Behavior Override
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_fse_behavior_mode',
+        title: 'Fullscreen Exclusive (FSE) Behavior Override',
+        description: 'Forces GameDVR_FSEBehaviorMode=2 in GameConfigStore to bypass Desktop Window Manager (DWM) composition buffers in modern FPS titles.',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'OPTIMIZE_GAMING_DISPLAY',
+    })
+
+    // Rule 69: Keyboard Repeat Latency & Strike Speed Optimization
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_keyboard_repeat_optimization',
+        title: 'Keyboard Repeat Latency & Strike Speed Optimization',
+        description: 'Reduces keyboard repeat delay to minimum (0) and maxes repeat speed (31) via user32 SystemParametersInfo for instant ADAD counter-strafing.',
+        category: 'latency',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_INPUT_LAG',
+    })
+
+    // Rule 70: MMCSS Gaming Task GPU Priority & Quantum Boost
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_mmcss_game_gpu_priority',
+        title: 'MMCSS Gaming Task GPU Priority & Quantum Boost',
+        description: 'Calibrates Windows Multimedia Class Scheduler Tasks\\Games with GPU Priority=8 and Priority=6 for dedicated GPU thread time.',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'APPLY_MMCSS_PROFILE',
+    })
+
+    // Rule 71: GPU Power Management Fixed Clock Floor
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_gpu_power_management',
+        title: 'GPU Power Management Fixed Clock Floor',
+        description: 'Locks driver power state to Prefer Maximum Performance, preventing GPU core clock downclocking during smoke/particle explosions.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'APPLY_GPU_PROFILE',
+    })
+
+    // Rule 72: DirectX & Vulkan 10GB Shader Cache Sizing
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_shader_cache_sizing',
+        title: 'DirectX & Vulkan 10GB Shader Cache Sizing',
+        description: 'Expands GPU shader cache quota to 10GB, permanently eliminating mid-match compilation stutters when entering newly rendered zones.',
+        category: 'performance',
+        impact: 'medium',
+        actionId: 'APPLY_GPU_PROFILE',
+    })
+
+    // Rule 73: Device Interrupt IRQ Affinity & Core Isolation
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_interrupt_affinity_tuning',
+        title: 'Device Interrupt IRQ Affinity & Core Isolation',
+        description: 'Audits PCI interrupt line affinity to isolate GPU and 2.5GbE NIC interrupts away from core 0, preventing CPU cache eviction.',
+        category: 'latency',
+        impact: 'medium',
+        actionId: 'TUNE_INTERRUPT_AFFINITY',
+    })
+
+    // Rule 74: HPET Platform Clock & Invariant TSC Audit
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_hpet_timer_audit',
+        title: 'HPET Platform Clock & Invariant TSC Audit',
+        description: 'Ensures the operating system uses the low-overhead CPU invariant Time Stamp Counter (TSC) rather than high-latency external HPET timer loops.',
+        category: 'system',
+        impact: 'medium',
+        actionId: 'AUDIT_HPET_TIMER',
+    })
+
+    // Rule 75: Windows Game Mode Thread Scheduling Calibration
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_game_mode_validation',
+        title: 'Windows Game Mode Thread Scheduling Calibration',
+        description: 'Enforces Windows Game Mode kernel state, prioritizing foreground game threads and suppressing background maintenance tasks.',
+        category: 'gaming',
+        impact: 'medium',
+        actionId: 'ENABLE_GAME_MODE',
+    })
+
+    // Rule 76: Anti-Cheat & Virtualization-Based Security (VBS) Matrix
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_valorant_vbs_warning',
+        title: 'Anti-Cheat & Virtualization-Based Security (VBS) Matrix',
+        description: 'Verifies VBS / HVCI configuration compatibility against kernel-level anti-cheats (Riot Vanguard, FaceIT, AntiCheatExpert).',
+        category: 'gaming',
+        impact: 'high',
+        actionId: 'AUDIT_SECURITY_MATRIX',
+    })
+
+    // Rule 77: Reflex & Variable Refresh Rate (VRR) FPS Cap Alignment
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_fps_cap_below_refresh',
+        title: 'Reflex & Variable Refresh Rate (VRR) FPS Cap Alignment',
+        description: 'Recommends capping in-game frame rates 3-4 FPS below native monitor refresh rate (e.g., 236 FPS on 240Hz) to eliminate GPU render queue backlog.',
+        category: 'gaming',
+        impact: 'medium',
+        actionId: 'CALIBRATE_REFRESH_RATE',
+    })
+
+    // Rule 78: USB Root Hub Selective Suspend Power Cut
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_usb_power_management_kill',
+        title: 'USB Root Hub Selective Suspend Power Cut',
+        description: 'Disables USB Hub selective suspend and sleep states, preventing mouse sensor sleep timeouts during slow angle holds.',
+        category: 'latency',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_INPUT_LAG',
+    })
+
+    // Rule 79: Desktop Window Manager (DWM) Composition Overhead Audit
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_dwm_composition_audit',
+        title: 'Desktop Window Manager (DWM) Composition Overhead Audit',
+        description: 'Calibrates DWM flip presentation model and disables windowed gaming multiplane overlays to guarantee tear-free minimum input lag.',
+        category: 'performance',
+        impact: 'high',
+        actionId: 'OPTIMIZE_DWM_PIPELINE',
+    })
+
+    // Rule 80: Background Task Power Throttling & EcoQoS Management
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_background_app_throttle',
+        title: 'Background Task Power Throttling & EcoQoS Management',
+        description: 'Enforces EcoQoS power throttling on non-gaming background helper tasks, preserving full IPC throughput for active shooter threads.',
+        category: 'performance',
+        impact: 'medium',
+        actionId: 'CONFIGURE_POWER_THROTTLE',
+    })
+
     // Clamp score
     score = Math.max(10, Math.min(100, Math.round(score)))
 

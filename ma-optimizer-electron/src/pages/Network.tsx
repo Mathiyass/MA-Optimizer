@@ -935,7 +935,7 @@ function EsportsNicTab() {
                     <div className="flex items-center gap-2">
                         <Crosshair className="w-5 h-5 text-[var(--accent-cyan)]" />
                         <h4 className="text-white text-base font-black uppercase tracking-wider">Master Hitreg & DPC Ultra Cure</h4>
-                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/25 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50">v11.6 Apex</span>
+                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/25 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50">v12.0 Apex</span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] max-w-2xl leading-relaxed">
                         Cures ghost bullets, desync, and rubberbanding across Delta Force, CS2, and competitive shooters. Automatically executes all 12 kernel, hardware priority VLAN, Windows throttling kill, DNS fallback, GPU, audio, and network stack optimizations in one pass.

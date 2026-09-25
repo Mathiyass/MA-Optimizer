@@ -241,6 +241,23 @@ export interface WindowApi {
         disableFullscreenOptimizations: () => Promise<{ success: boolean; message: string }>
         killGameDvr: () => Promise<{ success: boolean; message: string }>
         getGpuInfo: () => Promise<{ success: boolean; gpus: Array<{ name: string; vram: string; driverVersion: string; driverDate: string }> }>
+        getMmcssGameProfile: () => Promise<{ success: boolean; gpuPriority: number; priority: number; schedulingCategory: string; sfioPriority: string; isOptimal: boolean }>
+        setMmcssGameProfile: () => Promise<{ success: boolean; message: string }>
+    }
+    inputLag: {
+        getMouseSettings: () => Promise<{ mouseSpeed: string; mouseThreshold1: string; mouseThreshold2: string; accelerationKilled: boolean }>
+        killMouseAcceleration: () => Promise<boolean>
+        getKeyboardRepeat: () => Promise<{ keyboardDelay: string; keyboardSpeed: string; isOptimal: boolean }>
+        optimizeKeyboard: () => Promise<boolean>
+        applyFseBehavior: () => Promise<boolean>
+        getUsbDevices: () => Promise<Array<{ name: string; deviceID: string; status: string; service: string }>>
+        applyMasterInputLagFix: () => Promise<{ success: boolean; message: string }>
+    }
+    gpuProfile: {
+        detectVendor: () => Promise<{ vendor: 'nvidia' | 'amd' | 'intel' | 'unknown'; name: string; driverVersion: string; adapterRam: number }>
+        getProfileSettings: () => Promise<{ preferMaxPerformance: boolean; shaderCacheGb: number; lowLatencyMode: boolean }>
+        applyNvidiaProfile: () => Promise<{ success: boolean; message: string }>
+        setShaderCacheSize: (sizeGb: number) => Promise<boolean>
     }
     security: {
         getVbsStatus: () => Promise<{ success: boolean; enabled: boolean; hypervisorType: string }>

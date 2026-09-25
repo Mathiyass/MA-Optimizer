@@ -41,6 +41,8 @@ require('./ipc/performance')
 require('./ipc/security')
 require('./ipc/memory')
 require('./ipc/monitor')
+require('./ipc/inputLag')
+require('./ipc/gpuProfile')
 
 
 
@@ -408,7 +410,7 @@ app.whenReady().then(async () => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
-                'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' data:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:* ws://localhost:* https:"]
+                'Content-Security-Policy': ["default-src 'self' data:; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' data: blob:; connect-src 'self' http://localhost:* ws://localhost:* https:;"]
             }
         })
     })

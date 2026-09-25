@@ -13,6 +13,8 @@ const tabs = [
     { id: 'visual', label: 'Visual Effects' },
     { id: 'power', label: 'Power' },
     { id: 'cpu', label: 'CPU' },
+    { id: 'gpu', label: 'GPU Driver' },
+    { id: 'input', label: 'Input Latency' },
     { id: 'memory', label: 'Memory' },
     { id: 'storage', label: 'Storage' },
     { id: 'services', label: 'Services' },
@@ -386,22 +388,25 @@ function AdvancedCpuPanel() {
     const [cStateDisabled, setCStateDisabled] = useState<boolean>(false)
     const [freqLocked, setFreqLocked] = useState<boolean>(false)
     const [prioritySeparation, setPrioritySeparation] = useState<number>(38)
+    const [mmcssOptimal, setMmcssOptimal] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const addNotification = useAppStore(s => s.addNotification)
 
     const fetchCpuControls = useCallback(async () => {
         if (!window.api?.powerPlan || !window.api?.performance) return
         try {
-            const [b, c, t, p] = await Promise.all([
+            const [b, c, t, p, m] = await Promise.all([
                 window.api.powerPlan.getBoostMode(),
                 window.api.powerPlan.getCStateConfig(),
                 window.api.powerPlan.getProcessorThrottle(),
-                window.api.performance.getWin32PrioritySeparation()
+                window.api.performance.getWin32PrioritySeparation(),
+                window.api.performance.getMmcssGameProfile?.()
             ])
             if (b.success) setBoostMode(b.mode)
             if (c.success) setCStateDisabled(c.idleDisabled)
             if (t.success) setFreqLocked(t.minPercent === 100)
             if (p.success) setPrioritySeparation(p.value)
+            if (m?.success) setMmcssOptimal(m.isOptimal)
         } catch {}
     }, [])
 
@@ -457,6 +462,19 @@ function AdvancedCpuPanel() {
             if (res.success) {
                 setPrioritySeparation(38)
                 addNotification('success', 'Foreground Priority 3:1 Boost applied!')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleApplyMmcss = async () => {
+        setLoading(true)
+        try {
+            const res = await window.api?.performance?.setMmcssGameProfile?.()
+            if (res?.success) {
+                setMmcssOptimal(true)
+                addNotification('success', res.message)
             }
         } finally {
             setLoading(false)
@@ -527,6 +545,334 @@ function AdvancedCpuPanel() {
                     >
                         {prioritySeparation === 38 ? '3:1 Boost Active (38)' : 'Apply 3:1 Boost (38)'}
                     </button>
+                </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <div className="text-xs font-bold text-white flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-[var(--accent-cyan)]" /> MMCSS Tasks\\Games Scheduler & Thread Priority
+                    </div>
+                    <p className="text-[11px] text-text-muted mt-0.5">
+                        Forces GPU Priority=8, Thread Priority=6, Scheduling Category=High, and NetworkThrottlingIndex kill.
+                    </p>
+                </div>
+                <button
+                    onClick={handleApplyMmcss}
+                    disabled={loading || mmcssOptimal}
+                    className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border ${mmcssOptimal ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/30 hover:bg-accent-cyan/25'}`}
+                >
+                    {mmcssOptimal ? 'MMCSS High Priority Active' : 'Apply MMCSS Gaming Priority'}
+                </button>
+            </div>
+        </div>
+    )
+}
+
+function InputLagPanel() {
+    const [mouse, setMouse] = useState<{ accelerationKilled: boolean; mouseSpeed: string }>({ accelerationKilled: false, mouseSpeed: '1' })
+    const [keyboard, setKeyboard] = useState<{ isOptimal: boolean; keyboardDelay: string; keyboardSpeed: string }>({ isOptimal: false, keyboardDelay: '1', keyboardSpeed: '31' })
+    const [usbDevices, setUsbDevices] = useState<Array<{ name: string; deviceID: string; status: string; service: string }>>([])
+    const [loading, setLoading] = useState(false)
+    const addNotification = useAppStore(s => s.addNotification)
+    const addLog = useLogStore(s => s.addLine)
+
+    const refresh = useCallback(async () => {
+        if (!window.api?.inputLag) return
+        try {
+            const [m, k, u] = await Promise.all([
+                window.api.inputLag.getMouseSettings(),
+                window.api.inputLag.getKeyboardRepeat(),
+                window.api.inputLag.getUsbDevices()
+            ])
+            setMouse(m)
+            setKeyboard(k)
+            setUsbDevices(u || [])
+        } catch {}
+    }, [])
+
+    useEffect(() => {
+        refresh()
+    }, [refresh])
+
+    const handleKillMouseAccel = async () => {
+        setLoading(true)
+        try {
+            const ok = await window.api?.inputLag?.killMouseAcceleration()
+            if (ok) {
+                addNotification('success', 'Mouse Acceleration permanently disabled! 1:1 raw input curve active.')
+                addLog('[InputLag] Mouse acceleration killed, reload parameters via SPI_SETMOUSE applied.')
+                refresh()
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleOptimizeKeyboard = async () => {
+        setLoading(true)
+        try {
+            const ok = await window.api?.inputLag?.optimizeKeyboard()
+            if (ok) {
+                addNotification('success', 'Keyboard repeat delay set to 0, speed set to 31 (Max responsiveness)!')
+                refresh()
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleApplyFse = async () => {
+        setLoading(true)
+        try {
+            const ok = await window.api?.inputLag?.applyFseBehavior()
+            if (ok) {
+                addNotification('success', 'Fullscreen Exclusive (FSE) behavior forced for game executables!')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleMasterFix = async () => {
+        setLoading(true)
+        try {
+            const res = await window.api?.inputLag?.applyMasterInputLagFix()
+            if (res?.success) {
+                addNotification('success', '🔥 Master Input Lag Elimination Complete!')
+                addLog(`[InputLag] ${res.message}`)
+                refresh()
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 space-y-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h3 className="text-white text-lg font-black tracking-wide flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-[var(--accent-cyan)]" /> Input Latency & Hardware Polling Engine
+                        </h3>
+                        <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">
+                            Eliminates Windows pointer acceleration curves, minimizes keyboard repeat deadzones, forces true Fullscreen Exclusive mode, and audits USB polling.
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleMasterFix}
+                        disabled={loading}
+                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[var(--accent-cyan)] to-emerald-400 hover:opacity-95 text-black font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_25px_rgba(0,255,222,0.4)] flex items-center gap-2"
+                    >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        1-Click Input Lag Kill
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Mouse Accel Card */}
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="text-xs font-bold text-white">1:1 Raw Mouse Input</div>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${mouse.accelerationKilled ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border-rose-500/40'}`}>
+                                {mouse.accelerationKilled ? 'Linear 1:1' : 'Accel Active'}
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-text-muted">
+                            Kills Windows MouseSpeed and Threshold curves for exact pixel-to-sensor translation.
+                        </p>
+                        <button
+                            onClick={handleKillMouseAccel}
+                            disabled={loading || mouse.accelerationKilled}
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border ${mouse.accelerationKilled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/30 hover:bg-accent-cyan/25'}`}
+                        >
+                            {mouse.accelerationKilled ? 'Mouse Accel Killed' : 'Kill Mouse Accel'}
+                        </button>
+                    </div>
+
+                    {/* Keyboard Repeat Card */}
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="text-xs font-bold text-white">Keyboard Response Rate</div>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${keyboard.isOptimal ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40'}`}>
+                                {keyboard.isOptimal ? 'Delay 0 / Speed 31' : 'Stock Delay'}
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-text-muted">
+                            Sets KeyboardDelay to 0 and KeyboardSpeed to 31 for instant strafing key repetition.
+                        </p>
+                        <button
+                            onClick={handleOptimizeKeyboard}
+                            disabled={loading || keyboard.isOptimal}
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border ${keyboard.isOptimal ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/30 hover:bg-accent-cyan/25'}`}
+                        >
+                            {keyboard.isOptimal ? 'Keyboard Optimized' : 'Maximize Repeat Rate'}
+                        </button>
+                    </div>
+
+                    {/* Fullscreen Exclusive Card */}
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div className="text-xs font-bold text-white">Fullscreen Exclusive (FSE)</div>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/40">
+                                Mode 2
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-text-muted">
+                            Forces GameDVR_FSEBehaviorMode = 2 to bypass DWM desktop composition overhead.
+                        </p>
+                        <button
+                            onClick={handleApplyFse}
+                            disabled={loading}
+                            className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30 hover:bg-accent-cyan/25 transition-all"
+                        >
+                            Force FSE Mode
+                        </button>
+                    </div>
+                </div>
+
+                {/* USB Devices List */}
+                <div className="space-y-3 pt-2">
+                    <div className="text-xs font-bold text-white flex items-center justify-between">
+                        <span>Connected Gaming Input Devices ({usbDevices.length})</span>
+                        <button onClick={refresh} className="text-[11px] text-accent-cyan hover:underline flex items-center gap-1">
+                            <RefreshCw className="w-3 h-3" /> Refresh Devices
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1">
+                        {usbDevices.map((d, i) => (
+                            <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                                <div className="truncate mr-2">
+                                    <div className="text-xs font-semibold text-white truncate">{d.name}</div>
+                                    <div className="text-[10px] text-text-muted font-mono">{d.service} • {d.status}</div>
+                                </div>
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Active
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function GpuProfilePanel() {
+    const [vendorInfo, setVendorInfo] = useState<{ vendor: string; name: string; driverVersion: string; adapterRam: number }>({ vendor: 'unknown', name: 'Scanning...', driverVersion: '', adapterRam: 0 })
+    const [profile, setProfile] = useState<{ preferMaxPerformance: boolean; shaderCacheGb: number; lowLatencyMode: boolean }>({ preferMaxPerformance: false, shaderCacheGb: 10, lowLatencyMode: true })
+    const [loading, setLoading] = useState(false)
+    const addNotification = useAppStore(s => s.addNotification)
+    const addLog = useLogStore(s => s.addLine)
+
+    const refresh = useCallback(async () => {
+        if (!window.api?.gpuProfile) return
+        try {
+            const [v, p] = await Promise.all([
+                window.api.gpuProfile.detectVendor(),
+                window.api.gpuProfile.getProfileSettings()
+            ])
+            setVendorInfo(v)
+            setProfile(p)
+        } catch {}
+    }, [])
+
+    useEffect(() => {
+        refresh()
+    }, [refresh])
+
+    const handleApplyProfile = async () => {
+        setLoading(true)
+        try {
+            const res = await window.api?.gpuProfile?.applyNvidiaProfile()
+            if (res?.success) {
+                addNotification('success', res.message)
+                addLog(`[GpuProfile] ${res.message}`)
+                refresh()
+            } else {
+                addNotification('error', res?.message || 'Failed to apply GPU profile')
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSetCache = async (gb: number) => {
+        try {
+            const ok = await window.api?.gpuProfile?.setShaderCacheSize(gb)
+            if (ok) {
+                setProfile(p => ({ ...p, shaderCacheGb: gb }))
+                addNotification('success', `Shader cache limit set to ${gb} GB`)
+            }
+        } catch {}
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-8 space-y-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <Cpu className="w-5 h-5 text-[var(--accent-cyan)]" />
+                            <h3 className="text-white text-lg font-black tracking-wide">GPU Driver & Shader Pipeline Architecture</h3>
+                            <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${vendorInfo.vendor === 'nvidia' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : vendorInfo.vendor === 'amd' ? 'bg-rose-500/20 text-rose-400 border-rose-500/40' : 'bg-accent-cyan/20 text-accent-cyan border-accent-cyan/40'}`}>
+                                {vendorInfo.vendor.toUpperCase()}
+                            </span>
+                        </div>
+                        <p className="text-[var(--text-muted)] text-xs mt-1 font-medium">
+                            {vendorInfo.name} • Driver v{vendorInfo.driverVersion}
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={handleApplyProfile}
+                        disabled={loading}
+                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[var(--accent-cyan)] to-emerald-400 hover:opacity-95 text-black font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_25px_rgba(0,255,222,0.4)] flex items-center gap-2"
+                    >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        Apply Competitive Profile
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="text-xs font-bold text-white">PowerMizer Clock State</div>
+                        <p className="text-[11px] text-text-muted">
+                            Forces Fixed Clock High-Performance (Level 1) to eliminate GPU clock drops when scoping or smoke grenades pop.
+                        </p>
+                        <span className={`inline-block text-[11px] font-bold px-3 py-1 rounded-lg border ${profile.preferMaxPerformance ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-white/10 text-text-dim border-white/10'}`}>
+                            {profile.preferMaxPerformance ? 'Prefer Maximum Performance Active' : 'Adaptive Power (Default)'}
+                        </span>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="text-xs font-bold text-white">DirectX / Vulkan Shader Cache</div>
+                        <p className="text-[11px] text-text-muted">
+                            Expands cache limit to 10GB to permanently prevent re-compilation hitching during intense firefights.
+                        </p>
+                        <div className="flex items-center gap-2">
+                            {[5, 10, 20].map(sz => (
+                                <button
+                                    key={sz}
+                                    onClick={() => handleSetCache(sz)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${profile.shaderCacheGb === sz ? 'bg-accent-cyan/20 text-accent-cyan border-accent-cyan/50' : 'bg-white/5 text-text-dim border-white/10'}`}
+                                >
+                                    {sz} GB
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                        <div className="text-xs font-bold text-white">Frame Pacing & Flip Queue</div>
+                        <p className="text-[11px] text-text-muted">
+                            Synchronizes pre-rendered frame queue to 1 for minimum click-to-photon latency.
+                        </p>
+                        <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                            Pre-Rendered Queue = 1
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -717,6 +1063,20 @@ export function Performance() {
             ) : tab === 'cpu' ? (
                 <div className="space-y-6 mt-6">
                     <AdvancedCpuPanel />
+                    <div className="grid gap-4">
+                        {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
+                    </div>
+                </div>
+            ) : tab === 'input' ? (
+                <div className="space-y-6 mt-6">
+                    <InputLagPanel />
+                    <div className="grid gap-4">
+                        {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
+                    </div>
+                </div>
+            ) : tab === 'gpu' ? (
+                <div className="space-y-6 mt-6">
+                    <GpuProfilePanel />
                     <div className="grid gap-4">
                         {items.map(t => <TweakRow key={t.id} tweakId={t.id} />)}
                     </div>

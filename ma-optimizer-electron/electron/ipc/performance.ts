@@ -201,6 +201,81 @@ Get-CimInstance Win32_VideoController | Select-Object Name, @{N='VRAM';E={[math]
     }
 }
 
+export async function getMmcssGameProfile(): Promise<{
+    success: boolean
+    gpuPriority: number
+    priority: number
+    schedulingCategory: string
+    sfioPriority: string
+    isOptimal: boolean
+}> {
+    try {
+        const ps = `
+$path = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games'
+$gpu = (Get-ItemProperty -Path $path -Name 'GPU Priority' -ErrorAction SilentlyContinue).'GPU Priority'
+$prio = (Get-ItemProperty -Path $path -Name 'Priority' -ErrorAction SilentlyContinue).Priority
+$sched = (Get-ItemProperty -Path $path -Name 'Scheduling Category' -ErrorAction SilentlyContinue).'Scheduling Category'
+$sfio = (Get-ItemProperty -Path $path -Name 'SFIO Priority' -ErrorAction SilentlyContinue).'SFIO Priority'
+[PSCustomObject]@{
+    GpuPriority = if ($gpu -ne $null) { [int]$gpu } else { 8 }
+    Priority = if ($prio -ne $null) { [int]$prio } else { 2 }
+    SchedulingCategory = if ($sched) { [string]$sched } else { 'Medium' }
+    SfioPriority = if ($sfio) { [string]$sfio } else { 'Normal' }
+} | ConvertTo-Json -Compress
+`
+        const { stdout } = await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 5000 })
+        const data = JSON.parse(stdout.trim() || '{}')
+        const gpuPriority = Number(data.GpuPriority ?? 8)
+        const priority = Number(data.Priority ?? 2)
+        const schedulingCategory = String(data.SchedulingCategory || 'Medium')
+        const sfioPriority = String(data.SfioPriority || 'Normal')
+        const isOptimal = gpuPriority >= 8 && priority >= 6 && schedulingCategory.toLowerCase() === 'high'
+
+        return {
+            success: true,
+            gpuPriority,
+            priority,
+            schedulingCategory,
+            sfioPriority,
+            isOptimal,
+        }
+    } catch {
+        return {
+            success: false,
+            gpuPriority: 8,
+            priority: 2,
+            schedulingCategory: 'Medium',
+            sfioPriority: 'Normal',
+            isOptimal: false,
+        }
+    }
+}
+
+export async function setMmcssGameProfile(): Promise<{ success: boolean; message: string }> {
+    try {
+        const ps = `
+$path = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games'
+if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+Set-ItemProperty -Path $path -Name 'GPU Priority' -Value 8 -Type DWord -Force
+Set-ItemProperty -Path $path -Name 'Priority' -Value 6 -Type DWord -Force
+Set-ItemProperty -Path $path -Name 'Scheduling Category' -Value 'High' -Type String -Force
+Set-ItemProperty -Path $path -Name 'SFIO Priority' -Value 'High' -Type String -Force
+Set-ItemProperty -Path $path -Name 'Background Only' -Value 'False' -Type String -Force
+Set-ItemProperty -Path $path -Name 'Clock Rate' -Value 10000 -Type DWord -Force
+
+$sysProf = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile'
+Set-ItemProperty -Path $sysProf -Name 'SystemResponsiveness' -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $sysProf -Name 'NetworkThrottlingIndex' -Value 4294967295 -Type DWord -Force
+`
+        await spawnPromise('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps], { timeout: 6000 })
+        sendLog('[MMCSS] Applied Maximum Gaming Task Priority: GPU Priority=8, Thread Priority=6, Scheduling Category=High, SystemResponsiveness=0')
+        return { success: true, message: 'MMCSS Gaming Priority Profile Applied (GPU=8, Priority=6, Scheduling=High)' }
+    } catch (e: any) {
+        sendError(`[MMCSS] Failed to apply profile: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+}
+
 // Register IPC Handlers
 ipcMain.handle('performance:getWin32PrioritySeparation', () => getWin32PrioritySeparation())
 ipcMain.handle('performance:setWin32PrioritySeparation', (_e, val: number) => setWin32PrioritySeparation(val))
@@ -215,3 +290,6 @@ ipcMain.handle('performance:enableMpo', () => enableMpo())
 ipcMain.handle('performance:disableFullscreenOptimizations', () => disableFullscreenOptimizations())
 ipcMain.handle('performance:killGameDvr', () => killGameDvr())
 ipcMain.handle('performance:getGpuInfo', () => getGpuInfo())
+
+ipcMain.handle('performance:getMmcssGameProfile', () => getMmcssGameProfile())
+ipcMain.handle('performance:setMmcssGameProfile', () => setMmcssGameProfile())

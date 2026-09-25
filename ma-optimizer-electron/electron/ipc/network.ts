@@ -22,7 +22,8 @@ ipcMain.handle('network:getTcpParams', async () => {
         const ps = "Get-NetTCPSetting | Select-Object SettingName,AutoTuningLevelLocal,ScalingHeuristics,CongestionProvider,EcnCapability,InitialRto,MinRto | ConvertTo-Json"
         const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
         return JSON.parse(result)
-    } catch {
+    } catch (e: any) {
+        sendError(`[Network] getTcpParams failed: ${e.message}`)
         return null
     }
 })
@@ -87,7 +88,8 @@ ipcMain.handle('network:getAdapters', async () => {
         const result = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
         const parsed = JSON.parse(result)
         return Array.isArray(parsed) ? parsed : [parsed]
-    } catch {
+    } catch (e: any) {
+        sendError(`[Network] getAdapters failed: ${e.message}`)
         return []
     }
 })
@@ -107,7 +109,8 @@ ipcMain.handle('network:ping', async (_, host: string) => {
             max: times.length ? Math.max(...times) : 0,
             loss: Math.round(((4 - times.length) / 4) * 100),
         }
-    } catch {
+    } catch (e: any) {
+        sendError(`[Network] ping failed for ${host}: ${e.message}`)
         return { host, min: 0, avg: 0, max: 0, loss: 100 }
     }
 })

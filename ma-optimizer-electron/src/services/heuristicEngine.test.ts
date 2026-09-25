@@ -126,10 +126,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 65, `Should evaluate >= 65 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 80, `Should evaluate >= 80 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-65 recommendations exist
+            // Verify Rules 31-80 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
@@ -166,6 +166,21 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(recIds.includes('rec_dns_single_point_of_failure'), 'Should include DNS single point of failure rule')
             assert.ok(recIds.includes('rec_router_bufferbloat_mitigation'), 'Should include Router bufferbloat mitigation rule')
             assert.ok(recIds.includes('rec_gpon_sntp_clock_sync'), 'Should include GPON SNTP clock sync rule')
+            assert.ok(recIds.includes('rec_mouse_acceleration_kill'), 'Should include Mouse acceleration kill rule')
+            assert.ok(recIds.includes('rec_usb_polling_rate_audit'), 'Should include USB polling rate audit rule')
+            assert.ok(recIds.includes('rec_fse_behavior_mode'), 'Should include FSE behavior mode rule')
+            assert.ok(recIds.includes('rec_keyboard_repeat_optimization'), 'Should include Keyboard repeat optimization rule')
+            assert.ok(recIds.includes('rec_mmcss_game_gpu_priority'), 'Should include MMCSS game GPU priority rule')
+            assert.ok(recIds.includes('rec_gpu_power_management'), 'Should include GPU power management rule')
+            assert.ok(recIds.includes('rec_shader_cache_sizing'), 'Should include Shader cache sizing rule')
+            assert.ok(recIds.includes('rec_interrupt_affinity_tuning'), 'Should include Interrupt affinity tuning rule')
+            assert.ok(recIds.includes('rec_hpet_timer_audit'), 'Should include HPET timer audit rule')
+            assert.ok(recIds.includes('rec_game_mode_validation'), 'Should include Game mode validation rule')
+            assert.ok(recIds.includes('rec_valorant_vbs_warning'), 'Should include Valorant VBS warning rule')
+            assert.ok(recIds.includes('rec_fps_cap_below_refresh'), 'Should include FPS cap below refresh rule')
+            assert.ok(recIds.includes('rec_usb_power_management_kill'), 'Should include USB power management kill rule')
+            assert.ok(recIds.includes('rec_dwm_composition_audit'), 'Should include DWM composition audit rule')
+            assert.ok(recIds.includes('rec_background_app_throttle'), 'Should include Background app throttle rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

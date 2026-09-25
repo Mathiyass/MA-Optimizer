@@ -493,6 +493,26 @@ contextBridge.exposeInMainWorld('api', {
         disableFullscreenOptimizations: () => ipcRenderer.invoke('performance:disableFullscreenOptimizations'),
         killGameDvr: () => ipcRenderer.invoke('performance:killGameDvr'),
         getGpuInfo: () => ipcRenderer.invoke('performance:getGpuInfo'),
+        getMmcssGameProfile: () => ipcRenderer.invoke('performance:getMmcssGameProfile'),
+        setMmcssGameProfile: () => ipcRenderer.invoke('performance:setMmcssGameProfile'),
+    },
+    inputLag: {
+        getMouseSettings: () => ipcRenderer.invoke('input:getMouseSettings'),
+        killMouseAcceleration: () => ipcRenderer.invoke('input:killMouseAcceleration'),
+        getKeyboardRepeat: () => ipcRenderer.invoke('input:getKeyboardRepeat'),
+        optimizeKeyboard: () => ipcRenderer.invoke('input:optimizeKeyboard'),
+        applyFseBehavior: () => ipcRenderer.invoke('input:applyFseBehavior'),
+        getUsbDevices: () => ipcRenderer.invoke('input:getUsbDevices'),
+        applyMasterInputLagFix: () => ipcRenderer.invoke('input:applyMasterInputLagFix'),
+    },
+    gpuProfile: {
+        detectVendor: () => ipcRenderer.invoke('gpu:detectVendor'),
+        getProfileSettings: () => ipcRenderer.invoke('gpu:getProfileSettings'),
+        applyNvidiaProfile: () => ipcRenderer.invoke('gpu:applyNvidiaProfile'),
+        setShaderCacheSize: (sizeGb: number) => {
+            validate([sizeGb], ['number'])
+            return ipcRenderer.invoke('gpu:setShaderCacheSize', sizeGb)
+        },
     },
     security: {
         getVbsStatus: () => ipcRenderer.invoke('security:getVbsStatus'),
