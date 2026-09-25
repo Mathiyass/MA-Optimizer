@@ -126,10 +126,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 60, `Should evaluate >= 60 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 65, `Should evaluate >= 65 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-60 recommendations exist
+            // Verify Rules 31-65 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
@@ -161,6 +161,11 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(recIds.includes('rec_doh_encryption'), 'Should include DNS-over-HTTPS rule')
             assert.ok(recIds.includes('rec_cpu_boost_mode_lock'), 'Should include CPU boost mode rule')
             assert.ok(recIds.includes('rec_cstate_idle_mitigation'), 'Should include C-state idle latency rule')
+            assert.ok(recIds.includes('rec_nic_hardware_priority_vlan'), 'Should include Hardware Priority & VLAN rule')
+            assert.ok(recIds.includes('rec_network_throttling_index_kill'), 'Should include NetworkThrottlingIndex kill rule')
+            assert.ok(recIds.includes('rec_dns_single_point_of_failure'), 'Should include DNS single point of failure rule')
+            assert.ok(recIds.includes('rec_router_bufferbloat_mitigation'), 'Should include Router bufferbloat mitigation rule')
+            assert.ok(recIds.includes('rec_gpon_sntp_clock_sync'), 'Should include GPON SNTP clock sync rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

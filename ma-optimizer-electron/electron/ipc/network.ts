@@ -983,3 +983,79 @@ ipcMain.handle('network:setCongestionProvider', async (_e, provider: 'CUBIC' | '
         return { success: false, message: e.message }
     }
 })
+
+// 16. Hardware 802.1p Packet Priority & VLAN Tagging
+ipcMain.handle('network:applyHardwarePriorityVlan', async () => {
+    try {
+        const ps = `Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notlike '*Virtual*' } | ForEach-Object { Set-NetAdapterAdvancedProperty -Name $_.Name -DisplayName 'Packet Priority & VLAN' -DisplayValue 'Packet Priority & VLAN Enabled' -ErrorAction SilentlyContinue }`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network Engine] Hardware 802.1p Packet Priority & VLAN Tagging enabled across active NICs')
+        return { success: true, message: 'Hardware Packet Priority & VLAN enabled' }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to enable Hardware Priority VLAN: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 17. Windows Multimedia Network Throttling Elimination
+ipcMain.handle('network:applyNetworkThrottlingKill', async () => {
+    try {
+        const ps = `Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name 'NetworkThrottlingIndex' -Value 0xffffffff -Type DWord -Force; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile' -Name 'SystemResponsiveness' -Value 0 -Type DWord -Force`
+        await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog('[Network Engine] Windows Multimedia Network Throttling eliminated (NetworkThrottlingIndex=0xFFFFFFFF, SystemResponsiveness=0)')
+        return { success: true, message: 'Network throttling eliminated (unlimited packet burst)' }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to eliminate Network Throttling: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+
+// 18. Gateway & DNS Topology Audit
+ipcMain.handle('network:auditGatewayAndDns', async () => {
+    try {
+        const ps = `
+            $gw = (Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -ne $null } | Select-Object -First 1).IPv4DefaultGateway.NextHop
+            $dns = (Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses.Count -gt 0 } | Select-Object -First 1).ServerAddresses
+            $hasSecondary = ($dns.Count -gt 1)
+            [PSCustomObject]@{
+                Gateway = $gw
+                DnsServers = ($dns -join ', ')
+                HasSecondaryDns = $hasSecondary
+                DnsCount = $dns.Count
+            } | ConvertTo-Json -Compress
+        `
+        const out = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        const parsed = JSON.parse(out.trim())
+        return { success: true, data: parsed }
+    } catch (e: any) {
+        return { success: false, message: e.message, data: { Gateway: 'Unknown', DnsServers: '', HasSecondaryDns: false, DnsCount: 0 } }
+    }
+})
+
+// 19. Apply Secondary DNS Fallback
+ipcMain.handle('network:applySecondaryDnsFallback', async () => {
+    try {
+        const ps = `
+            $adapter = (Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notlike '*Virtual*' } | Select-Object -First 1).Name
+            if ($adapter) {
+                $current = (Get-DnsClientServerAddress -InterfaceAlias $adapter -AddressFamily IPv4).ServerAddresses
+                if ($current.Count -eq 1 -and $current[0] -ne '1.1.1.1') {
+                    Set-DnsClientServerAddress -InterfaceAlias $adapter -ServerAddresses @($current[0], '1.1.1.1')
+                    Write-Output "Added 1.1.1.1 secondary fallback to $adapter"
+                } elseif ($current.Count -eq 0) {
+                    Set-DnsClientServerAddress -InterfaceAlias $adapter -ServerAddresses @('1.1.1.1', '8.8.8.8')
+                    Write-Output "Set Cloudflare/Google DNS on $adapter"
+                } else {
+                    Write-Output "Secondary DNS already configured on $adapter"
+                }
+            }
+        `
+        const out = await runCmd('powershell', ['-NonInteractive', '-NoProfile', '-Command', ps])
+        sendLog(`[Network Engine] Secondary DNS Fallback: ${out.trim()}`)
+        return { success: true, message: out.trim() }
+    } catch (e: any) {
+        sendError(`[Network Engine] Failed to apply secondary DNS fallback: ${e.message}`)
+        return { success: false, message: e.message }
+    }
+})
+

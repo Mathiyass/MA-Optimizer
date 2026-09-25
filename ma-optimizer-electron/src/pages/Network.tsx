@@ -837,9 +837,12 @@ function EsportsNicTab() {
     // 1-Click Master Ultra Fix: Executes all hitreg & DPC cures sequentially
     const handleApplyUltraFix = async () => {
         setApplyingUltraFix(true)
-        addLog('[ULTRA HITREG] Initializing Master Hitreg & DPC Elimination Sequence...')
+        addLog('[ULTRA HITREG] Initializing Master Hitreg, Router & DPC Elimination Sequence...')
         try {
             await window.api?.network.applyDeepNicFix()
+            await window.api?.network.applyHardwarePriorityVlan?.()
+            await window.api?.network.applyNetworkThrottlingKill?.()
+            await window.api?.network.applySecondaryDnsFallback?.()
             await window.api?.network.applyTimerFixes()
             await window.api?.network.applyGpuDpcFix()
             await window.api?.network.applyAudioDpcFix()
@@ -849,8 +852,8 @@ function EsportsNicTab() {
             await window.api?.network.applyHitregOptimization()
             await window.api?.network.healGameFirewall()
             await window.api?.network.discoverOptimalMtu?.()
-            addNotification('success', '🔥 MASTER HITREG & DPC ULTRA FIX COMPLETE! All 9 optimizations applied.')
-            addLog('[ULTRA HITREG] All hardware, kernel timer, GPU DPC, audio DAC, and network stack optimizations active.')
+            addNotification('success', '🔥 MASTER HITREG & DPC ULTRA FIX COMPLETE! All 12 hardware, router & stack optimizations applied.')
+            addLog('[ULTRA HITREG] All hardware priority VLAN, throttling bypass, DNS fallback, kernel timer, GPU DPC, audio DAC, and network stack optimizations active.')
             const updated = await window.api?.network.identifyNicStepping?.()
             if (updated) setNicStepping(updated)
             const stats = await window.api?.network.getNicStatistics?.()
@@ -932,13 +935,16 @@ function EsportsNicTab() {
                     <div className="flex items-center gap-2">
                         <Crosshair className="w-5 h-5 text-[var(--accent-cyan)]" />
                         <h4 className="text-white text-base font-black uppercase tracking-wider">Master Hitreg & DPC Ultra Cure</h4>
-                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/25 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50">v11.5 Apex</span>
+                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[var(--accent-cyan)]/25 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/50">v11.6 Apex</span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-                        Cures ghost bullets, desync, and rubberbanding across Delta Force, CS2, and competitive shooters. Automatically executes all 9 kernel, hardware, GPU, audio, and network stack optimizations in one pass.
+                        Cures ghost bullets, desync, and rubberbanding across Delta Force, CS2, and competitive shooters. Automatically executes all 12 kernel, hardware priority VLAN, Windows throttling kill, DNS fallback, GPU, audio, and network stack optimizations in one pass.
                     </p>
                     <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-mono text-[var(--accent-cyan)]">
                         <span>• 1.0G Duplex Lock</span>
+                        <span>• Hardware VLAN/Priority Tag</span>
+                        <span>• ThrottlingIndex Kill</span>
+                        <span>• DNS Fallback Resilience</span>
                         <span>• EEE Kill</span>
                         <span>• 1024 Descriptors</span>
                         <span>• 0.5ms Global Timer</span>
@@ -955,7 +961,7 @@ function EsportsNicTab() {
                     className="px-8 py-4 bg-gradient-to-r from-[var(--accent-cyan)] to-emerald-400 hover:opacity-95 text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-[0_0_30px_rgba(0,255,222,0.5)] whitespace-nowrap cursor-pointer disabled:opacity-40 flex items-center gap-2.5"
                 >
                     {applyingUltraFix ? <Loader2 className="w-5 h-5 animate-spin" /> : <Crosshair className="w-5 h-5" />}
-                    {applyingUltraFix ? 'Applying 9 Cures...' : '🔥 One-Click Hitreg Ultra Fix'}
+                    {applyingUltraFix ? 'Applying 12 Cures...' : '🔥 One-Click Hitreg Ultra Fix'}
                 </button>
             </div>
 

@@ -98,6 +98,10 @@ export interface WindowApi {
         getConnectionQuality: (host?: string, count?: number) => Promise<{ success: boolean; quality: { host: string; sent: number; received: number; lossPercent: number; minMs: number; maxMs: number; avgMs: number; jitterMs: number; samples: number[] } }>
         getCongestionProvider: () => Promise<{ success: boolean; provider: string }>
         setCongestionProvider: (provider: 'CUBIC' | 'CTCP' | 'NewReno') => Promise<{ success: boolean; message: string }>
+        applyHardwarePriorityVlan: () => Promise<{ success: boolean; message: string }>
+        applyNetworkThrottlingKill: () => Promise<{ success: boolean; message: string }>
+        auditGatewayAndDns: () => Promise<{ success: boolean; data: { Gateway: string; DnsServers: string; HasSecondaryDns: boolean; DnsCount: number } }>
+        applySecondaryDnsFallback: () => Promise<{ success: boolean; message: string }>
     }
     cleaner: {
         scan: (categories: string[]) => Promise<{ categories: Array<{ id: string; name: string; size: number }> }>

@@ -960,6 +960,61 @@ export function evaluateSystemHealth(
         actionId: 'APPLY_POWER_BOOST',
     })
 
+    // Rule 61: Network Adapter 802.1p Hardware Packet Priority & VLAN Tagging
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nic_hardware_priority_vlan',
+        title: 'Hardware 802.1p Packet Priority & VLAN Tagging',
+        description: 'Enables *PriorityVLANTag on physical NICs so hardware queues respect Windows QoS DSCP 46 / 802.1p Priority 7 game packets rather than discarding them.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 62: Windows Multimedia Network Throttling Elimination
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_network_throttling_index_kill',
+        title: 'Windows Multimedia Network Throttling Elimination',
+        description: 'Sets NetworkThrottlingIndex to 0xFFFFFFFF, eliminating the default 10-packet/ms cap that induces artificial packet loss during intense multiplayer firefights.',
+        category: 'latency',
+        impact: 'high',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 63: Redundant Secondary DNS Failover
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_dns_single_point_of_failure',
+        title: 'Redundant Low-Latency Secondary DNS Failover',
+        description: 'Configures 1.1.1.1 or 8.8.8.8 as secondary DNS fallback alongside local AdGuard Home/Pi-hole, eliminating 300ms+ cold query stalls when local resolver queues.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 64: Router & Gateway Bufferbloat UDP Desync Mitigation
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_router_bufferbloat_mitigation',
+        title: 'Router Stateful Firewall & Bufferbloat UDP Desync Cure',
+        description: 'Audits GPON ONT / router stateful inspection levels to prevent router CPU flood defenses from dropping high tick rate (60-128Hz) UDP shooter packets.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
+    // Rule 65: Router SNTP Clock Sync & Session Drift Shield
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_gpon_sntp_clock_sync',
+        title: 'Router SNTP Clock Synchronization & Session Drift Shield',
+        description: 'Enforces pool.ntp.org/time.google.com synchronization on residential gateways, curing 1970 clock freezes that corrupt NAT state tables and SSL handshakes.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'OPTIMIZE_NETWORK_STACK',
+    })
+
     // Clamp score
     score = Math.max(10, Math.min(100, Math.round(score)))
 

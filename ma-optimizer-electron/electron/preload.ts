@@ -218,6 +218,10 @@ contextBridge.exposeInMainWorld('api', {
             validate([provider], ['string'])
             return ipcRenderer.invoke('network:setCongestionProvider', provider)
         },
+        applyHardwarePriorityVlan: () => ipcRenderer.invoke('network:applyHardwarePriorityVlan'),
+        applyNetworkThrottlingKill: () => ipcRenderer.invoke('network:applyNetworkThrottlingKill'),
+        auditGatewayAndDns: () => ipcRenderer.invoke('network:auditGatewayAndDns'),
+        applySecondaryDnsFallback: () => ipcRenderer.invoke('network:applySecondaryDnsFallback'),
     },
     cleaner: {
         scan: (categories: string[]) => {

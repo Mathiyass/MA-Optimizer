@@ -1,5 +1,5 @@
 # ==============================================================================
-# MA-Optimizer One-Line PowerShell Web Installer (v11.5.0)
+# MA-Optimizer One-Line PowerShell Web Installer (v11.6.0)
 # Usage: irm "https://raw.githubusercontent.com/Mathiyass/MA-Optimizer/main/install.ps1" | iex
 
 $ErrorActionPreference = 'Stop'
@@ -12,12 +12,12 @@ Write-Host "  | |\/| | / /\ \| |  | | '_ \| __| | '_ ` _ \| |_  / _ \ '__|    " 
 Write-Host "  | |  | |/ ____ \ |__| | |_) | |_| | | | | | | |/ /  __/ |       " -ForegroundColor Cyan
 Write-Host "  |_|  |_/_/    \_\____/| .__/ \__|_|_| |_| |_|_/___\___|_|       " -ForegroundColor Cyan
 Write-Host "                       | |                                        " -ForegroundColor Cyan
-Write-Host "                       |_|             v11.5.0 Pro Edition       " -ForegroundColor DarkCyan
+Write-Host "                       |_|             v11.6.0 Pro Edition       " -ForegroundColor DarkCyan
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "[*] Fetching latest MA-Optimizer v11.5.0 release package..." -ForegroundColor Yellow
+Write-Host "[*] Fetching latest MA-Optimizer v11.6.0 release package..." -ForegroundColor Yellow
 
-$releaseUrl = 'https://github.com/Mathiyass/MA-Optimizer/releases/download/v11.5.0/v11.5.MA-Optimizer.Installer.Setup.exe'
-$tempInstaller = Join-Path $env:TEMP 'v11.5.MA-Optimizer.Installer.Setup.exe'
+$releaseUrl = 'https://github.com/Mathiyass/MA-Optimizer/releases/download/v11.6.0/v11.6.MA-Optimizer.Installer.Setup.exe'
+$tempInstaller = Join-Path $env:TEMP 'v11.6.MA-Optimizer.Installer.Setup.exe'
 
 Write-Host "[-] Initializing installation pipeline..." -ForegroundColor Yellow
 Write-Host "[-] Fetching binary package from GitHub Releases..." -ForegroundColor White
