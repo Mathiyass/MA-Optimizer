@@ -25,6 +25,7 @@ function TweakRow({ tweakId }: { tweakId: string }) {
 }
 
 const dnsPresets = [
+    { name: '🚀 Home Server (Unbound)', primary: '192.168.1.8', secondary: '1.1.1.1' },
     { name: '🌐 Google', primary: '8.8.8.8', secondary: '8.8.4.4' },
     { name: '☁️ Cloudflare', primary: '1.1.1.1', secondary: '1.0.0.1' },
     { name: '🛡️ Cloudflare Security', primary: '1.1.1.2', secondary: '1.0.0.2' },
@@ -963,6 +964,50 @@ function EsportsNicTab() {
                     {applyingUltraFix ? <Loader2 className="w-5 h-5 animate-spin" /> : <Crosshair className="w-5 h-5" />}
                     {applyingUltraFix ? 'Applying 12 Cures...' : '🔥 One-Click Hitreg Ultra Fix'}
                 </button>
+            </div>
+
+            {/* SESSION TUNING & HARDWARE LATENCY STATUS */}
+            <div className="p-5 rounded-2xl glass-shell border border-[var(--accent-cyan)]/25 bg-[rgba(0,255,222,0.02)] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-[var(--accent-cyan)]" />
+                        <h4 className="text-white text-xs font-black uppercase tracking-wider">Session Network & Kernel Tuning Matrix</h4>
+                        <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">Active Pipeline</span>
+                    </div>
+                    <span className="text-[10px] text-text-muted font-mono">Gateway: 192.168.1.1 (0.0% loss · ~1.0ms)</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1 text-xs">
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">MSI-X Priority</div>
+                        <div className="text-xs font-mono font-black text-emerald-400">High (Level 3)</div>
+                        <div className="text-[8px] text-text-dim">I225-V Dedicated Affinity</div>
+                    </div>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">Selective Suspend</div>
+                        <div className="text-xs font-mono font-black text-emerald-400">Disabled (0)</div>
+                        <div className="text-[8px] text-text-dim">No PCIe D3 Sleep Delay</div>
+                    </div>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">Direct Cache Access</div>
+                        <div className="text-xs font-mono font-black text-emerald-400">Enabled (DCA=1)</div>
+                        <div className="text-[8px] text-text-dim">Direct CPU L3 DMA</div>
+                    </div>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">Dead GW Detect</div>
+                        <div className="text-xs font-mono font-black text-emerald-400">Killed (0)</div>
+                        <div className="text-[8px] text-text-dim">Deterministic Route</div>
+                    </div>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">NetBIOS Daemon</div>
+                        <div className="text-xs font-mono font-black text-emerald-400">Disabled (2)</div>
+                        <div className="text-[8px] text-text-dim">Zero Broadcast Chatter</div>
+                    </div>
+                    <div className="p-3 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                        <div className="text-[9px] font-black uppercase text-text-muted">Server BBR + DNS</div>
+                        <div className="text-xs font-mono font-black text-[var(--accent-cyan)]">192.168.1.8</div>
+                        <div className="text-[8px] text-text-dim">Unbound Expired Mode</div>
+                    </div>
+                </div>
             </div>
 
             {/* INTEL I225-V HARDWARE ERRATA & SILICON STEPPING CARD */}

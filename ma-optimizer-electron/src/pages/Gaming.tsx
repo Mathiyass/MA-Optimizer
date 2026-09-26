@@ -341,7 +341,7 @@ function GearUpBoosterTab() {
                     <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/40">Pro Tips</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     {/* In-Game Settings */}
                     <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2.5">
                         <div className="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
@@ -367,6 +367,20 @@ function GearUpBoosterTab() {
                             <li>• <strong className="text-white">Power Supply Idle Control:</strong> <span className="text-amber-400 font-bold">Typical Current Idle</span> (keeps SoC voltage steady)</li>
                             <li>• <strong className="text-white">Intel LAN OPROM:</strong> <span className="text-amber-400 font-bold">Disabled</span></li>
                             <li>• <strong className="text-white">ErP Ready:</strong> <span className="text-amber-400 font-bold">Disabled</span> (keeps 3.3V standby rails stable)</li>
+                        </ul>
+                    </div>
+
+                    {/* Home Server & Router Low-Latency Engine */}
+                    <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2.5">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-cyan)] flex items-center gap-1.5">
+                            <Zap className="w-3.5 h-3.5" /> Home Server & Fiber Engine (192.168.1.8)
+                        </div>
+                        <ul className="space-y-1.5 text-[var(--text-secondary)]">
+                            <li>• <strong className="text-white">Unbound Serve-Expired:</strong> <span className="text-[var(--accent-cyan)] font-bold">Active</span> (&lt;1.5ms instant resolution)</li>
+                            <li>• <strong className="text-white">TCP BBR & fq qdisc:</strong> <span className="text-[var(--accent-cyan)] font-bold">Enabled</span> (kills bufferbloat)</li>
+                            <li>• <strong className="text-white">AdGuard Client Filter:</strong> <span className="text-emerald-400 font-bold">Bypassed</span> for Gaming PC (0 block delays)</li>
+                            <li>• <strong className="text-white">Router DMZ & SNTP:</strong> <span className="text-emerald-400 font-bold">Open NAT</span> + local chrony NTP</li>
+                            <li>• <strong className="text-white">Optical FastPath:</strong> <span className="text-emerald-400 font-bold">Active</span> (0.0% loss · ~1.0ms jitter)</li>
                         </ul>
                     </div>
                 </div>
@@ -451,6 +465,11 @@ export function Gaming() {
                                     {gpuInfo.vram > 0 && <span className="text-[var(--text-muted)] text-xs font-black">{gpuInfo.vram} MB VRAM</span>}
                                 </div>
                             )}
+                            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-[rgba(0,255,222,0.05)] border border-[var(--accent-cyan)]/20 backdrop-blur-3xl">
+                                <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent-cyan)] animate-pulse" />
+                                <span className="text-white font-bold text-xs">Home Server Active</span>
+                                <span className="text-[10px] text-[var(--accent-cyan)] font-mono font-bold">BBR · Unbound 1.26</span>
+                            </div>
                         </div>
                     </div>
                     

@@ -126,10 +126,10 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             const report = evaluateSystemHealth(mockInfo, mockStats, [])
             assert.ok(report.score >= 90, `Score should be >= 90, got ${report.score}`)
             assert.strictEqual(report.status, 'Optimal')
-            assert.ok(report.evaluatedRulesCount >= 80, `Should evaluate >= 80 rules, got ${report.evaluatedRulesCount}`)
+            assert.ok(report.evaluatedRulesCount >= 91, `Should evaluate >= 91 rules, got ${report.evaluatedRulesCount}`)
             assert.ok(report.hardwareTopology?.isAmdX3D, 'Should detect AMD 3D V-Cache')
 
-            // Verify Rules 31-80 recommendations exist
+            // Verify Rules 31-91 recommendations exist
             const recIds = report.recommendations.map(r => r.id)
             assert.ok(recIds.includes('rec_nic_esports'), 'Should include eSports NIC rule')
             assert.ok(recIds.includes('rec_true_nagle_killer'), 'Should include True Nagle Killer rule')
@@ -181,6 +181,17 @@ describe('Autonomous Heuristic Engine & Neural Models', () => {
             assert.ok(recIds.includes('rec_usb_power_management_kill'), 'Should include USB power management kill rule')
             assert.ok(recIds.includes('rec_dwm_composition_audit'), 'Should include DWM composition audit rule')
             assert.ok(recIds.includes('rec_background_app_throttle'), 'Should include Background app throttle rule')
+            assert.ok(recIds.includes('rec_nic_msix_device_priority'), 'Should include NIC MSI-X DevicePriority rule')
+            assert.ok(recIds.includes('rec_nic_selective_suspend_kill'), 'Should include NIC Selective Suspend kill rule')
+            assert.ok(recIds.includes('rec_dca_enablement'), 'Should include DCA enablement rule')
+            assert.ok(recIds.includes('rec_dead_gateway_detection_kill'), 'Should include Dead Gateway Detection kill rule')
+            assert.ok(recIds.includes('rec_icmp_redirect_disable'), 'Should include ICMP Redirect disable rule')
+            assert.ok(recIds.includes('rec_ttl_64_lock'), 'Should include DefaultTTL 64 lock rule')
+            assert.ok(recIds.includes('rec_netbios_disable'), 'Should include NetBIOS disable rule')
+            assert.ok(recIds.includes('rec_unused_wifi_disable'), 'Should include Unused Wi-Fi disable rule')
+            assert.ok(recIds.includes('rec_dns_cache_flush'), 'Should include DNS cache flush rule')
+            assert.ok(recIds.includes('rec_server_bbr_congestion'), 'Should include Server BBR congestion rule')
+            assert.ok(recIds.includes('rec_server_dns_serve_expired'), 'Should include Server DNS serve-expired rule')
         })
 
         it('should detect active game (including modern 2026 FPS titles like Delta Force) and set gaming activity state', () => {

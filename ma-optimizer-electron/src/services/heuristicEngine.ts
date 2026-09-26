@@ -1180,6 +1180,127 @@ export function evaluateSystemHealth(
         actionId: 'CONFIGURE_POWER_THROTTLE',
     })
 
+    // Rule 81: Intel I225-V MSI-X DevicePriority High (Affinity Policy)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nic_msix_device_priority',
+        title: 'Intel I225-V MSI-X DevicePriority High',
+        description: 'Elevates network interface controller interrupt priority to High (3) in Windows Affinity Policy, eliminating micro-jitter in frame delivery.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'CONFIGURE_NIC_MSIX_PRIORITY',
+    })
+
+    // Rule 82: NIC Selective Suspend & Power Down Kill
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_nic_selective_suspend_kill',
+        title: 'NIC Selective Suspend & Power Down Kill',
+        description: 'Locks adapter power state to active (SelectiveSuspend=0), eliminating PCIe Link Wake latency spikes and intermittent hitreg drop.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'DISABLE_NIC_SELECTIVE_SUSPEND',
+    })
+
+    // Rule 83: Direct Cache Access (DCA) Kernel Enablement
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_dca_enablement',
+        title: 'Direct Cache Access (DCA) Kernel Enablement',
+        description: 'Allows Intel I225-V NIC to pre-load received network packets directly into CPU L3 cache slices, skipping DRAM memory bus hops.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'ENABLE_DCA',
+    })
+
+    // Rule 84: Dead Gateway Detection Elimination
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_dead_gateway_detection_kill',
+        title: 'Dead Gateway Detection Elimination',
+        description: 'Prevents TCP stack from attempting failover renegotiation under momentary packet drops (DeadGWDetectDefault=0), preserving connection lock.',
+        category: 'network',
+        impact: 'low',
+        actionId: 'DISABLE_DEAD_GW_DETECT',
+    })
+
+    // Rule 85: ICMP Redirect Route Hijack Prevention
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_icmp_redirect_disable',
+        title: 'ICMP Redirect Route Hijack Prevention',
+        description: 'Blocks unverified local network route injection (EnableICMPRedirect=0) to guarantee packets follow the deterministic optical gateway path.',
+        category: 'network',
+        impact: 'low',
+        actionId: 'DISABLE_ICMP_REDIRECT',
+    })
+
+    // Rule 86: DefaultTTL Fingerprint Normalization (TTL=64)
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_ttl_64_lock',
+        title: 'DefaultTTL Fingerprint Normalization (TTL=64)',
+        description: 'Locks outbound IP packet time-to-live to 64 (DefaultTTL=64), matching native Linux/FreeBSD routing behavior and preventing ISP OS-fingerprint throttling.',
+        category: 'network',
+        impact: 'low',
+        actionId: 'LOCK_DEFAULT_TTL',
+    })
+
+    // Rule 87: NetBIOS over TCP/IP Daemon Teardown
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_netbios_disable',
+        title: 'NetBIOS over TCP/IP Daemon Teardown',
+        description: 'Disables NetBIOS name resolution broadcasting on gaming adapters (NetbiosOptions=2), eliminating background port 137/138 broadcast chatter.',
+        category: 'network',
+        impact: 'medium',
+        actionId: 'DISABLE_NETBIOS',
+    })
+
+    // Rule 88: Unused Wireless NIC Dormancy Audit
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_unused_wifi_disable',
+        title: 'Unused Wireless NIC Dormancy Audit',
+        description: 'Disables dormant secondary Wi-Fi and Bluetooth PAN adapters to stop continuous 2.4/5GHz beacon scanning loops that interrupt Ethernet DPC queues.',
+        category: 'network',
+        impact: 'low',
+        actionId: 'DISABLE_UNUSED_WIFI',
+    })
+
+    // Rule 89: Post-Optimization DNS Resolver Cache Flush
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_dns_cache_flush',
+        title: 'Post-Optimization DNS Resolver Cache Flush',
+        description: 'Purges Windows dnscache client table after network mutations to ensure instant resolution through low-latency local recursors.',
+        category: 'network',
+        impact: 'low',
+        actionId: 'FLUSH_DNS_CACHE',
+    })
+
+    // Rule 90: Linux Server BBR Bottleneck Bandwidth Congestion Control
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_server_bbr_congestion',
+        title: 'Linux Server BBR Congestion Control & fq Qdisc',
+        description: 'Ensures dedicated LAN upstream gateways and home servers operate with Google BBR congestion control and fq packet scheduler, eliminating queue buildup.',
+        category: 'network',
+        impact: 'high',
+        actionId: 'VERIFY_SERVER_BBR',
+    })
+
+    // Rule 91: Unbound Zero-Latency Recursive DNS Serve-Expired
+    evaluatedRulesCount++
+    recommendations.push({
+        id: 'rec_server_dns_serve_expired',
+        title: 'Unbound Zero-Latency DNS Serve-Expired Mode',
+        description: 'Configures upstream recursive Unbound DNS to serve expired cache records immediately while refreshing asynchronously in background (<1.5ms lookups).',
+        category: 'network',
+        impact: 'high',
+        actionId: 'VERIFY_UNBOUND_SERVE_EXPIRED',
+    })
+
     // Clamp score
     score = Math.max(10, Math.min(100, Math.round(score)))
 
