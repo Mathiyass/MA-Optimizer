@@ -76,11 +76,11 @@
       "allowToChangeInstallationDirectory": true,
       "runAfterFinish": true,
       "warningsAsErrors": false,
-      "artifactName": "v12.0.MA-Optimizer.Installer.Setup.${ext}"
+      "artifactName": "v12.1.MA-Optimizer.Installer.Setup.${ext}"
     },
     "portable": {
       "requestExecutionLevel": "admin",
-      "artifactName": "v12.0.MA-Optimizer.Portable.${ext}"
+      "artifactName": "v12.1.MA-Optimizer.Portable.${ext}"
     }
   },
   "allowScripts": {

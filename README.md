@@ -114,6 +114,16 @@
       <p>Protects consumer fiber connections (GPON ONTs / CGNAT) from packet dropping caused by rogue DSCP 46 tagging. Automatically queries monitor refresh rate (e.g. 200 Hz) and synchronizes Unreal Engine GameUserSettings FrameRateLimit for zero tearing.</p>
     </td>
   </tr>
+  <tr>
+    <td width="50%" valign="top" style="padding: 20px;">
+      <h3 style="color: #00ffff;">⚡ 91 Heuristic Rules &amp; Kernel Latency Matrix</h3>
+      <p>Harvested from live optical network &amp; competitive FPS profiling. Evaluates 91 deterministic rules including Intel I225-V MSI-X DevicePriority 3, Direct Cache Access (DCA=1), Dead Gateway Kill, DefaultTTL 64 lock, NetBIOS teardown, and unneeded Wi-Fi adapter sleep.</p>
+    </td>
+    <td width="50%" valign="top" style="padding: 20px;">
+      <h3 style="color: #00FFDE;">🌐 Optical FastPath &amp; Home Server Engine</h3>
+      <p>Real-time GPON optical gateway latency pulse monitoring (&lt;2ms), DNS failover verification, and upstream Linux server BBR congestion control + Unbound 1.26 zero-latency serve-expired recursive DNS resolver integration.</p>
+    </td>
+  </tr>
 </table>
 
 ---
